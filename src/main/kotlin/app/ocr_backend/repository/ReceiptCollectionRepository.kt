@@ -75,6 +75,7 @@ class ReceiptCollectionRepository {
         receipts.addAll(listOf(r1,r2,r3,r4))
     }
 
+    //TODO Disable Id Generation for Update
     private fun getNextReceiptId():Long
     {
         val receipt = receipts.maxBy {it.id?:0}
