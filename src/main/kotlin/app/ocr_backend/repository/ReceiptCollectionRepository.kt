@@ -13,6 +13,7 @@ class ReceiptCollectionRepository {
 
     fun saveReceipt(receipt: Receipt)
     {
+        receipt.id = getNextReceiptId()
         receipts.add(receipt)
     }
 
@@ -45,6 +46,7 @@ class ReceiptCollectionRepository {
     fun addItemToReceipt(receiptId:Long,item:Item)
     {
         val receipt = getReceiptById(receiptId).get()
+        item.id = getNextItemId(receipt)
         receipt.items.add(item)
     }
 
@@ -62,6 +64,26 @@ class ReceiptCollectionRepository {
             Date(),
             "Second Receipt",
             2)
-        receipts.addAll(listOf(r1,r2))
+        val r3 = Receipt(
+            Date(),
+            "Third Receipt",
+            3)
+        val r4 = Receipt(
+            Date(),
+            "Fourth Receipt",
+            4)
+        receipts.addAll(listOf(r1,r2,r3,r4))
+    }
+
+    private fun getNextReceiptId():Long
+    {
+        val receipt = receipts.maxBy {it.id?:0}
+        return receipt.id?.plus(1)?:0
+    }
+
+    fun getNextItemId(receipt: Receipt):Long
+    {
+        val item = receipt.items.maxBy { it.id?:0 }
+        return item.id?.plus(1) ?: 0
     }
 }
