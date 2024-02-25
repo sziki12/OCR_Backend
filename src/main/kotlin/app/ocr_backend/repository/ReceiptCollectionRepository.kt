@@ -14,6 +14,7 @@ class ReceiptCollectionRepository {
     fun saveReceipt(receipt: Receipt)
     {
         receipt.id = getNextReceiptId()
+        receipt.items = ArrayList()
         receipts.add(receipt)
     }
 

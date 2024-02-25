@@ -11,7 +11,7 @@ data class Receipt(
 ) {
 
    @OneToMany(mappedBy="id")
-   val items = ArrayList<Item>()
+   var items = ArrayList<Item>()
    val totalCost:Int
         get()
         {
