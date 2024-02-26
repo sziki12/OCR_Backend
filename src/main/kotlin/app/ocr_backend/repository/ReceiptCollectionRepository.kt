@@ -4,6 +4,7 @@ import app.ocr_backend.model.Item
 import app.ocr_backend.model.Receipt
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Repository
+import org.springframework.web.bind.annotation.PathVariable
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -27,6 +28,18 @@ class ReceiptCollectionRepository {
         toRemove.let {
             receipts.remove(it)
         }
+    }
+
+    fun deleteItemFromReceipt(receiptId: Long, itemId: Long)
+    {
+        val receipt = getReceiptById(receiptId).get()
+        val item = receipt.items.firstOrNull {
+            it.id == itemId
+        }
+        item?.let {
+            receipt.items.remove(it)
+        }
+
     }
 
     fun getReceiptById(receiptId:Long):Optional<Receipt>
@@ -80,12 +93,14 @@ class ReceiptCollectionRepository {
     private fun getNextReceiptId():Long
     {
         val receipt = receipts.maxBy {it.id?:0}
-        return receipt.id?.plus(1)?:0
+        val newId = receipt.id?.plus(1)?:0
+        return newId
     }
 
     fun getNextItemId(receipt: Receipt):Long
     {
-        val item = receipt.items.maxBy { it.id?:0 }
-        return item.id?.plus(1) ?: 0
+        val item = receipt.items.maxByOrNull { it.id?:0 }
+        val newId = item?.id?.plus(1) ?: 0
+        return newId
     }
 }

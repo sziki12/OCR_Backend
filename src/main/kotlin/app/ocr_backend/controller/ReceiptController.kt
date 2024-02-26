@@ -5,15 +5,7 @@ import app.ocr_backend.model.Receipt
 import app.ocr_backend.repository.ReceiptCollectionRepository
 import jakarta.annotation.PostConstruct
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 
 @RestController
@@ -21,12 +13,13 @@ import org.springframework.web.server.ResponseStatusException
 @CrossOrigin
 class ReceiptController(val repository:ReceiptCollectionRepository) {
 
+    //GET
     @GetMapping("")
     fun getAllReceipts() = repository.receipts
 
-    @GetMapping("/{id}")
-    fun getReceiptById(@PathVariable id: Long): Receipt = repository.getReceiptById(id).orElseThrow{
-        ResponseStatusException(HttpStatus.NOT_FOUND,"Receipt with the $id Id not exists")
+    @GetMapping("/{receiptId}")
+    fun getReceiptById(@PathVariable receiptId: Long): Receipt = repository.getReceiptById(receiptId).orElseThrow{
+        ResponseStatusException(HttpStatus.NOT_FOUND,"Receipt with the $receiptId Id not exists")
     }
 
     @GetMapping("/{receiptId}/item/{itemId}")
@@ -37,25 +30,47 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
         repository.getItemById(receiptId,itemId).orElseThrow{
         ResponseStatusException(HttpStatus.NOT_FOUND,"Item with the $itemId Id not exists int the Receipt with $receiptId Id")
     }
-
+    //CREATE
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
     fun createReceipt(@RequestBody receipt:Receipt)
     {
         repository.saveReceipt(receipt)
     }
 
-    @DeleteMapping("")
-    fun deleteReceipt(@RequestBody receiptId: Long)
-    {
-        repository.deleteReceipt(receiptId)
-    }
-
     //TODO Test addItemToReceipt /{receiptId}/item
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PostMapping("/{receiptId}/item")
     fun addItemToReceipt(@PathVariable receiptId:Long,@RequestBody item:Item)
     {
         repository.addItemToReceipt(receiptId,item)
     }
 
+    //DELETE
+    @ResponseStatus(HttpStatus.GONE)
+    @DeleteMapping("/{receiptId}")
+    fun deleteReceipt(@PathVariable receiptId: Long)
+    {
+        repository.deleteReceipt(receiptId)
+    }
+    @ResponseStatus(HttpStatus.GONE)
+    @DeleteMapping("/{receiptId}/item/{itemId}")
+    fun deleteItemFromReceipt(@PathVariable receiptId: Long, @PathVariable itemId: Long)
+    {
+        //TODO TEST
+        repository.deleteItemFromReceipt(receiptId,itemId)
+    }
 
+    //UPDATE
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PutMapping("/{receiptId}")
+    fun updateReceipt(@PathVariable receiptId: Long, @RequestBody receipt:Receipt)
+    {
+        //TODO is this a good solution???
+        repository.deleteReceipt(receiptId)
+        repository.saveReceipt(receipt)
+    }
+
+
+    //TODO Update Item
 }
