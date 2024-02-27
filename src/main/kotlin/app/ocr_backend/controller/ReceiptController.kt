@@ -38,7 +38,6 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
         repository.saveReceipt(receipt)
     }
 
-    //TODO Test addItemToReceipt /{receiptId}/item
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PostMapping("/{receiptId}/item")
     fun addItemToReceipt(@PathVariable receiptId:Long,@RequestBody item:Item)
@@ -47,17 +46,17 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
     }
 
     //DELETE
-    @ResponseStatus(HttpStatus.GONE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{receiptId}")
     fun deleteReceipt(@PathVariable receiptId: Long)
     {
         repository.deleteReceipt(receiptId)
     }
-    @ResponseStatus(HttpStatus.GONE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{receiptId}/item/{itemId}")
     fun deleteItemFromReceipt(@PathVariable receiptId: Long, @PathVariable itemId: Long)
     {
-        //TODO TEST
+        //TODO TEST DELETE
         repository.deleteItemFromReceipt(receiptId,itemId)
     }
 
@@ -66,9 +65,7 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
     @PutMapping("/{receiptId}")
     fun updateReceipt(@PathVariable receiptId: Long, @RequestBody receipt:Receipt)
     {
-        //TODO is this a good solution???
-        repository.deleteReceipt(receiptId)
-        repository.saveReceipt(receipt)
+       repository.updateReceipt(receiptId,receipt)
     }
 
 

@@ -19,6 +19,23 @@ class ReceiptCollectionRepository {
         receipts.add(receipt)
     }
 
+    fun updateReceipt(receiptId: Long,receipt: Receipt)
+    {
+        val toUpdate = getReceiptById(receiptId)
+        if(toUpdate.isPresent)
+        {
+            receipt.items?.let {
+                toUpdate.get().items = it
+            }
+            receipt.description?.let {
+                toUpdate.get().description = it
+            }
+            receipt.dateOfPurchase?.let {
+                toUpdate.get().dateOfPurchase = it
+            }
+        }
+    }
+
     fun deleteReceipt(receiptId:Long)
     {
         val toRemove = receipts.firstOrNull {
