@@ -6,12 +6,18 @@ import app.ocr_backend.repository.ReceiptCollectionRepository
 import jakarta.annotation.PostConstruct
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
+import java.awt.Image
+import javax.imageio.stream.ImageInputStream
+import javax.imageio.stream.ImageInputStreamImpl
 
 @RestController
 @RequestMapping("/api/receipt")
 @CrossOrigin
 class ReceiptController(val repository:ReceiptCollectionRepository) {
+
+    val modelController = ModelController()
 
     //GET
     @GetMapping("")
@@ -38,7 +44,7 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
         repository.saveReceipt(receipt)
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/{receiptId}/item")
     fun addItemToReceipt(@PathVariable receiptId:Long,@RequestBody item:Item)
     {
@@ -56,7 +62,6 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
     @DeleteMapping("/{receiptId}/item/{itemId}")
     fun deleteItemFromReceipt(@PathVariable receiptId: Long, @PathVariable itemId: Long)
     {
-        //TODO TEST DELETE
         repository.deleteItemFromReceipt(receiptId,itemId)
     }
 
@@ -70,4 +75,12 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
 
 
     //TODO Update Item
+
+
+    @PostMapping("/image")
+    fun uploadImage(@RequestParam("file") image: MultipartFile)
+    {
+        println("image: $image")
+        modelController.processImage()
+    }
 }
