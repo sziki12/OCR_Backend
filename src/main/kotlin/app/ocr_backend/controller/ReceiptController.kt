@@ -73,8 +73,12 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
        repository.updateReceipt(receiptId,receipt)
     }
 
-
-    //TODO Update Item
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PutMapping("/{receiptId}/item/{itemId}")
+    fun updateItem(@PathVariable receiptId: Long,@PathVariable itemId: Long, @RequestBody item:Item)
+    {
+        repository.updateItem(receiptId,itemId,item)
+    }
 
 
     @PostMapping("/image")

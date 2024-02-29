@@ -36,6 +36,22 @@ class ReceiptCollectionRepository {
         }
     }
 
+    fun updateItem(receiptId: Long,itemId:Long,item: Item)
+    {
+        val toUpdate = getItemById(receiptId,itemId)
+        if(toUpdate.isPresent) {
+            item.name?.let {
+                toUpdate.get().name = it
+            }
+            item.quantity?.let {
+                toUpdate.get().quantity = it
+            }
+            item.totalCost?.let {
+                toUpdate.get().totalCost = it
+            }
+        }
+    }
+
     fun deleteReceipt(receiptId:Long)
     {
         val toRemove = receipts.firstOrNull {
@@ -74,6 +90,20 @@ class ReceiptCollectionRepository {
         }.findFirst()
     }
 
+    private fun getNextReceiptId():Long
+    {
+        val receipt = receipts.maxBy {it.id?:0}
+        val newId = receipt.id?.plus(1)?:0
+        return newId
+    }
+
+    fun getNextItemId(receipt: Receipt):Long
+    {
+        val item = receipt.items.maxByOrNull { it.id?:0 }
+        val newId = item?.id?.plus(1) ?: 0
+        return newId
+    }
+
     fun addItemToReceipt(receiptId:Long,item:Item)
     {
         val receipt = getReceiptById(receiptId).get()
@@ -104,20 +134,5 @@ class ReceiptCollectionRepository {
             "Fourth Receipt",
             4)
         receipts.addAll(listOf(r1,r2,r3,r4))
-    }
-
-    //TODO Disable Id Generation for Update
-    private fun getNextReceiptId():Long
-    {
-        val receipt = receipts.maxBy {it.id?:0}
-        val newId = receipt.id?.plus(1)?:0
-        return newId
-    }
-
-    fun getNextItemId(receipt: Receipt):Long
-    {
-        val item = receipt.items.maxByOrNull { it.id?:0 }
-        val newId = item?.id?.plus(1) ?: 0
-        return newId
     }
 }
