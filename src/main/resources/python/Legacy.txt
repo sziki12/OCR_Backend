@@ -1,17 +1,4 @@
-from llama_cpp import Llama
-
-
-class ReceiptLlamaWrapper:
-    def __init__(self):
-        self.llm = Llama(
-            model_path="model/llama-2-7b-chat.Q5_K_M.gguf",
-            chat_format="chatml",
-            #n_gpu_layers=-1, # Uncomment to use GPU acceleration
-            # seed=1337, # Uncomment to set a specific seed
-             #n_ctx=2048, # Uncomment to increase the context window
-        )
-    
-    def textToReceiptJson(self,receiptText):
+def textToReceiptJson(self,receiptText):
         response = self.llm.create_chat_completion(
             messages=[
                 {
