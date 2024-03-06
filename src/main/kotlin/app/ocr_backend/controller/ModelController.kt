@@ -1,15 +1,18 @@
 package app.ocr_backend.controller
 
+import app.ocr_backend.utils.PathHandler
+import java.io.File
 import java.util.*
+import kotlin.io.path.pathString
 
 
 class ModelController {
-    private val execPath = "/Users/dr.sztanyiistvan/Documents/GitHub/OCR_Backend/src/main/resources/python/Runnable.py"
-    private val imagePath = "/Users/dr.sztanyiistvan/Documents/GitHub/OCR_Backend/src/main/resources/python/image"
+    private val execPath = PathHandler.getPythonDir().pathString+"${File.separator}Runnable.py"
+    private val imagePath = PathHandler.getImageDir().pathString
 
     fun processImage(params:String):String
     {
-        val processBuilder = ProcessBuilder("python3",execPath,"--image",params,"--path",imagePath)
+        val processBuilder = ProcessBuilder("python",execPath,"--image",params,"--path",imagePath)
         processBuilder.redirectErrorStream(true)
 
         val process = processBuilder.start()

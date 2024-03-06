@@ -3,6 +3,7 @@ package app.ocr_backend.controller
 import app.ocr_backend.model.Item
 import app.ocr_backend.model.Receipt
 import app.ocr_backend.repository.ReceiptCollectionRepository
+import app.ocr_backend.utils.PathHandler
 import jakarta.annotation.PostConstruct
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -10,8 +11,10 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
 import java.awt.Image
+import java.io.File
 import javax.imageio.stream.ImageInputStream
 import javax.imageio.stream.ImageInputStreamImpl
+import kotlin.io.path.pathString
 
 @RestController
 @RequestMapping("/api/receipt")
@@ -85,7 +88,10 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
     @PostMapping("/image")
     fun uploadImage(@RequestParam("file") image: MultipartFile): ResponseEntity<String> {
         //TODO receive and save image
-        val output = modelController.processImage("reserved01.jpg")
+        val altName = "file.jpg"
+        val file = File(PathHandler.getImageDir().pathString + File.separator + (image.originalFilename?:altName))
+        image.transferTo(file)
+        val output = modelController.processImage(image.originalFilename?:altName)
         return ResponseEntity.ok().body(output)
     }
 }

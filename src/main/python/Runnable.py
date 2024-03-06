@@ -1,7 +1,6 @@
 
 import argparse
 import re
-from Llama import ReceiptLlamaWrapper
 from TesseractOCR import ReceiptOCRWrapper
 
 ap = argparse.ArgumentParser()
