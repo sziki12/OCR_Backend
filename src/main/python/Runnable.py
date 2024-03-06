@@ -18,7 +18,7 @@ ocr = ReceiptOCRWrapper(args)
 
 receiptText = ocr.readReceipt()
 
-character = '[A-ZOÓÖŐUÚÜŰÍÉÁ:0-9]'
+character = '[A-ZOÓÖŐUÚÜŰÍÉÁ:0-9-()]'
 
 afa = '([A-Z][0-9][0-9]|[A-Z]OO)'
 currency = '(FT|HUF|EUR|\$|\€|'+afa+')'
@@ -47,8 +47,8 @@ for row in rows:
     if(len(row)<40):
         element = re.search(re.compile(pricePattern), row.upper())
         if element is not None and element.group() != "":
-                print(row)
-                print(element)
+                #print(row)
+                print(element.group())
                 print(itemSeparator)
                 
     i+=1

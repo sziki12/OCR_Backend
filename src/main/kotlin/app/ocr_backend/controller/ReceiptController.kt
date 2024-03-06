@@ -1,19 +1,17 @@
 package app.ocr_backend.controller
 
 import app.ocr_backend.model.Item
+import app.ocr_backend.model.OcrResponse
 import app.ocr_backend.model.Receipt
 import app.ocr_backend.repository.ReceiptCollectionRepository
 import app.ocr_backend.utils.PathHandler
-import jakarta.annotation.PostConstruct
+import com.google.gson.Gson
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
-import java.awt.Image
 import java.io.File
-import javax.imageio.stream.ImageInputStream
-import javax.imageio.stream.ImageInputStreamImpl
 import kotlin.io.path.pathString
 
 @RestController
@@ -22,6 +20,7 @@ import kotlin.io.path.pathString
 class ReceiptController(val repository:ReceiptCollectionRepository) {
 
     val modelController = ModelController()
+    val gson = Gson()
 
     //GET
     @GetMapping("")
@@ -90,7 +89,18 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
         val altName = "file.jpg"
         val file = File(PathHandler.getImageDir().pathString + File.separator + (image.originalFilename?:altName))
         image.transferTo(file)
-        val output = modelController.processImage(image.originalFilename?:altName)
-        return ResponseEntity.ok().body(output)
+
+        val separator = "======"
+        val itemSeparator = "------"
+        val output = modelController.processImage(image.originalFilename?:altName).split(separator)
+        val ocrOutput = OcrResponse(
+            plainText = output[1],
+            filteredReceipt = output[1],
+            extractedItems = output[2].split(itemSeparator)
+        )
+
+        val json: String = gson.toJson(ocrOutput)
+
+        return ResponseEntity.ok().body(json)
     }
 }

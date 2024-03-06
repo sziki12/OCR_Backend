@@ -35,6 +35,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
     implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.2.2")
 
+    implementation("com.google.code.gson:gson:2.10.1")
+
 }
 
 tasks.withType<KotlinCompile> {
