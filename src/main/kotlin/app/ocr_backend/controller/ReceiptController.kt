@@ -87,7 +87,6 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
 
     @PostMapping("/image")
     fun uploadImage(@RequestParam("file") image: MultipartFile): ResponseEntity<String> {
-        //TODO receive and save image
         val altName = "file.jpg"
         val file = File(PathHandler.getImageDir().pathString + File.separator + (image.originalFilename?:altName))
         image.transferTo(file)

@@ -1,6 +1,7 @@
 package app.ocr_backend.model
 
 import jakarta.persistence.*
+import java.io.File
 import java.util.Date
 
 @Entity
@@ -11,10 +12,10 @@ data class Receipt(
 ) {
 
    @OneToMany(mappedBy="id")
-   var items = ArrayList<Item>()
-   val totalCost:Int
-        get()
-        {
+    var items = ArrayList<Item>()
+    var receiptImage: File? = null
+    val totalCost:Int
+        get(){
             var cost = 0
             for(item in items)
             {
