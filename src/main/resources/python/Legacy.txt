@@ -1,4 +1,21 @@
+<<<<<<< Updated upstream:src/main/resources/python/Legacy.txt
 def textToReceiptJson(self,receiptText):
+=======
+from llama_cpp import Llama
+
+
+class ReceiptLlamaWrapper:
+    def __init__(self):
+        self.llm = Llama(
+            model_path="/Users/dr.sztanyiistvan/Documents/GitHub/OCR_Backend/src/main/resources/python/model/llama2_7b/llama-2-7b-chat.Q5_K_M.gguf",
+            chat_format="chatml",
+            #n_gpu_layers=-1, # Uncomment to use GPU acceleration
+            # seed=1337, # Uncomment to set a specific seed
+            n_ctx=2048, # Uncomment to increase the context window
+        )
+    
+    def textToReceiptJson(self,receiptText):
+>>>>>>> Stashed changes:src/main/resources/python/Llama.py
         response = self.llm.create_chat_completion(
             messages=[
                 {

@@ -5,6 +5,7 @@ import app.ocr_backend.model.Receipt
 import app.ocr_backend.repository.ReceiptCollectionRepository
 import jakarta.annotation.PostConstruct
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
@@ -82,9 +83,9 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
 
 
     @PostMapping("/image")
-    fun uploadImage(@RequestParam("file") image: MultipartFile)
-    {
-        println("image: $image")
-        modelController.processImage()
+    fun uploadImage(@RequestParam("file") image: MultipartFile): ResponseEntity<String> {
+        //TODO receive and save image
+        val output = modelController.processImage("reserved01.jpg")
+        return ResponseEntity.ok().body(output)
     }
 }

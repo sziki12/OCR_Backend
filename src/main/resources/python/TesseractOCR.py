@@ -9,9 +9,9 @@ import imutils
 class ReceiptOCRWrapper:
 	def __init__(self,args):
 		self.args = args
-		self.original = cv2.imread("image/"+args["image"])
+		self.original = cv2.imread(args["path"]+"/"+args["image"])
 		copy = self.original.copy()
-		self.resized = imutils.resize(copy, width=500)
+		self.resized = imutils.resize(copy, width=1000)
 		self.ratio = self.original.shape[1] / float(self.resized.shape[1])
 
 
@@ -74,8 +74,9 @@ class ReceiptOCRWrapper:
 
 	def fourPointTransform(self,receiptCnt):
 		receipt = four_point_transform(self.original, receiptCnt.reshape(4, 2) * self.ratio)
-		cv2.imshow("Receipt Transform", imutils.resize(receipt, width=500))
-		cv2.waitKey(0)
+		if self.args["debug"] > 0:
+			cv2.imshow("Receipt Transform", imutils.resize(receipt, width=500))
+			cv2.waitKey(0)
 
 		return receipt
 	

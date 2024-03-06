@@ -1,26 +1,22 @@
 package app.ocr_backend.controller
 
-import java.io.File
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
+import java.util.*
 
 
 class ModelController {
-    var builder = ProcessBuilder()
+    private val execPath = "/Users/dr.sztanyiistvan/Documents/GitHub/OCR_Backend/src/main/resources/python/Runnable.py"
+    private val imagePath = "/Users/dr.sztanyiistvan/Documents/GitHub/OCR_Backend/src/main/resources/python/image"
 
-    fun processImage()
+    fun processImage(params:String):String
     {
+        val processBuilder = ProcessBuilder("python3",execPath,"--image",params,"--path",imagePath)
+        processBuilder.redirectErrorStream(true)
 
-        builder.command("cmd.exe", "/c", "dir")
-
-        builder.directory(File(System.getProperty("user.home")))
-        val process = builder.start()
-        val streamGobbler = StreamHandler(process.inputStream, System.out::println)
-        //val future: Future<*> = executorService.submit(streamGobbler)
-
-        val exitCode = process.waitFor()
-
-        //assertDoesNotThrow { future[10, TimeUnit.SECONDS] }
-        //assertEquals(0, exitCode)
+        val process = processBuilder.start()
+        val outScanner = Scanner(process.inputStream)
+        var out = ""
+        while(outScanner.hasNextLine())
+            out += outScanner.nextLine()+"\n"
+        return out
     }
 }
