@@ -9,7 +9,7 @@ import kotlin.io.path.pathString
 class ModelController {
     private val execPath = PathHandler.getPythonDir().pathString+"${File.separator}Runnable.py"
     private val imagePath = PathHandler.getImageDir().pathString
-
+    //TODO Unreadable Characters maybe wrong charset?
     fun processImage(params:String):String
     {
         val processBuilder = ProcessBuilder("python",execPath,"--image",params,"--path",imagePath)

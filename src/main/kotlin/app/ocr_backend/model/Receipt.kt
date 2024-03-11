@@ -23,4 +23,6 @@ data class Receipt(
             }
             return cost
         }
+
+    constructor():this(Date(),"")
 }

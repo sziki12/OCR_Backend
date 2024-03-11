@@ -12,11 +12,11 @@ import kotlin.collections.ArrayList
 class ReceiptCollectionRepository {
     val receipts = ArrayList<Receipt>()
 
-    fun saveReceipt(receipt: Receipt)
-    {
+    fun saveReceipt(receipt: Receipt): Long {
         receipt.id = getNextReceiptId()
         receipt.items = ArrayList()
         receipts.add(receipt)
+        return receipt.id?:-1
     }
 
     fun updateReceipt(receiptId: Long,receipt: Receipt)
@@ -104,11 +104,11 @@ class ReceiptCollectionRepository {
         return newId
     }
 
-    fun addItemToReceipt(receiptId:Long,item:Item)
-    {
+    fun addItemToReceipt(receiptId:Long,item:Item): Long {
         val receipt = getReceiptById(receiptId).get()
         item.id = getNextItemId(receipt)
         receipt.items.add(item)
+        return item.id?:-1
     }
 
     @PostConstruct

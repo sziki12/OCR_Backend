@@ -84,23 +84,28 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
     }
 
 
+
     @PostMapping("/image")
     fun uploadImage(@RequestParam("file") image: MultipartFile): ResponseEntity<String> {
         val altName = "file.jpg"
         val file = File(PathHandler.getImageDir().pathString + File.separator + (image.originalFilename?:altName))
         image.transferTo(file)
 
+
+
         val separator = "======"
         val itemSeparator = "------"
         val output = modelController.processImage(image.originalFilename?:altName).split(separator)
+
+        val newReceiptId = repository.saveReceipt(Receipt())
         val ocrOutput = OcrResponse(
             plainText = output[1],
             filteredReceipt = output[1],
-            extractedItems = output[2].split(itemSeparator)
+            extractedItems = output[2].split(itemSeparator),
+            newReceiptId
         )
 
         val json: String = gson.toJson(ocrOutput)
-
         return ResponseEntity.ok().body(json)
     }
 }
