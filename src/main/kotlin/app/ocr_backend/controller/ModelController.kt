@@ -22,7 +22,6 @@ class ModelController {
         while(outScanner.hasNextLine())
             out += outScanner.nextLine()+"\n"
 
-        println(out)
         outScanner.close()
         return out
     }

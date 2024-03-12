@@ -111,6 +111,18 @@ class ReceiptCollectionRepository {
         return item.id?:-1
     }
 
+    fun createNewItem(receiptId:Long): Item {
+        val receipt = getReceiptById(receiptId).get()
+        val item = Item(
+            "",
+            1,
+            0,
+            getNextItemId(receipt),
+        )
+        receipt.items.add(item)
+        return item
+    }
+
     @PostConstruct
     fun init()
     {

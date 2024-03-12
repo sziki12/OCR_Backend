@@ -54,6 +54,13 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
         repository.addItemToReceipt(receiptId,item)
     }
 
+    @PostMapping("/{receiptId}/new/item")
+    fun addItemToReceipt(@PathVariable receiptId:Long): ResponseEntity<String> {
+        val newItem = repository.createNewItem(receiptId)
+        val json: String = gson.toJson(newItem)
+        return ResponseEntity.ok().body(json)
+    }
+
     //DELETE
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{receiptId}")
@@ -99,8 +106,8 @@ class ReceiptController(val repository:ReceiptCollectionRepository) {
 
         val newReceiptId = repository.saveReceipt(Receipt())
         val ocrOutput = OcrResponse(
-            plainText = output[1],
-            filteredReceipt = output[1],
+            plainText = output[1].split("\n"),
+            filteredReceipt = output[1].split("\n"),
             extractedItems = output[2].split(itemSeparator),
             newReceiptId
         )
