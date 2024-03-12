@@ -12,7 +12,7 @@ class ModelController {
     private val imagePath = PathHandler.getImageDir().pathString
     fun processImage(params:String):String
     {
-        val processBuilder = ProcessBuilder("python",execPath,"--image",params,"--path",imagePath)
+        val processBuilder = ProcessBuilder("python3",execPath,"--image",params,"--path",imagePath)
         processBuilder.redirectErrorStream(true)
         processBuilder.environment()["PYTHONIOENCODING"] = "utf-8"
 
