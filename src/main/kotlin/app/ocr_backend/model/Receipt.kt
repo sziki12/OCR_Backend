@@ -1,20 +1,21 @@
 package app.ocr_backend.model
 
-import com.sun.org.apache.xml.internal.security.c14n.helper.C14nHelper
 import jakarta.persistence.*
 import java.io.File
 import java.util.Date
 
 @Entity
-@Table(name = "receipt")
+@Table(name = "receipts")
 data class Receipt(
+    @Column(name="date_of_purchase")
     var dateOfPurchase:Date,
     var description:String,
+    @Column(name="receipt_id")
     @Id @GeneratedValue var id: Long? = null,
 ) {
 
-   @OneToMany(targetEntity = receipt)
-    var items = ArrayList<Item>()
+   @OneToMany(mappedBy = "receipt")
+   var items:MutableList<Item> = mutableListOf()
     var imageName: String? = null
     val totalCost:Int
         get(){

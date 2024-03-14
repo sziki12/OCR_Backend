@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import java.util.*
 import kotlin.collections.ArrayList
 
-@Repository
 class ReceiptCollectionRepository {
     val receipts = ArrayList<Receipt>()
 
