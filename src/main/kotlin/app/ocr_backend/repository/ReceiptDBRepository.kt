@@ -19,5 +19,5 @@ import java.util.*
 @Repository
 interface ReceiptDBRepository : JpaRepository<Receipt, Long>
 {
-
+    fun getReceiptById(receiptId:Long):Optional<Receipt>
 }

@@ -29,7 +29,7 @@ dependencies {
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     runtimeOnly("org.postgresql:postgresql")
 

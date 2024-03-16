@@ -1,14 +1,11 @@
 package app.ocr_backend.controller
 
-import app.ocr_backend.model.Item
-import app.ocr_backend.model.OcrResponse
+import app.ocr_backend.dto.OcrResponse
+import app.ocr_backend.dto.ReceiptDTO
 import app.ocr_backend.model.Receipt
-import app.ocr_backend.repository.ReceiptAndItemConnector
-import app.ocr_backend.repository.ReceiptCollectionRepository
-import app.ocr_backend.repository.ReceiptDBRepository
+import app.ocr_backend.service.ReceiptService
 import app.ocr_backend.utils.PathHandler
 import com.google.gson.Gson
-import org.springframework.data.jpa.repository.Query
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -20,26 +17,26 @@ import kotlin.io.path.pathString
 @RestController
 @RequestMapping("/api/receipt")
 @CrossOrigin
-class ReceiptController(val repository: ReceiptDBRepository, val connector:ReceiptAndItemConnector) {
+class ReceiptController(val service: ReceiptService) {
 
     val modelController = ModelController()
     val gson = Gson()
 
     //GET
     @GetMapping("")
-    fun getAllReceipts(): List<Receipt> = repository.findAll()
+    fun getAllReceipts(): List<Receipt> = service.getAllReceipt()
 
     @GetMapping("/{receiptId}")
-    fun getReceiptById(@PathVariable receiptId: Long): Receipt = repository.findById(receiptId).orElseThrow{
+    fun getReceiptById(@PathVariable receiptId: Long): Receipt = service.getReceipt(receiptId).orElseThrow{
         ResponseStatusException(HttpStatus.NOT_FOUND,"Receipt with the $receiptId Id not exists")
     }
 
     //CREATE
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    fun createReceipt(@RequestBody receipt:Receipt)
+    fun createReceipt(@RequestBody receiptData: ReceiptDTO)
     {
-        repository.save(receipt)
+        service.saveReceipt(Receipt(receiptData))
     }
 
     //DELETE
@@ -47,16 +44,16 @@ class ReceiptController(val repository: ReceiptDBRepository, val connector:Recei
     @DeleteMapping("/{receiptId}")
     fun deleteReceipt(@PathVariable receiptId: Long)
     {
-        repository.deleteById(receiptId)
+        service.deleteReceipt(receiptId)
     }
 
 
     //UPDATE
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{receiptId}")
-    fun updateReceipt(@PathVariable receiptId: Long, @RequestBody receipt: Receipt)
+    fun updateReceipt(@PathVariable receiptId: Long, @RequestBody receiptData: ReceiptDTO)
     {
-        connector.updateReceipt(receiptId,receipt)
+        service.updateReceipt(Receipt(receiptId,receiptData))
     }
 
     @PostMapping("/image")
@@ -70,7 +67,7 @@ class ReceiptController(val repository: ReceiptDBRepository, val connector:Recei
         val itemSeparator = "------"
         val output = modelController.processImage(image.originalFilename?:altName).split(separator)
 
-        val newReceiptId = repository.save(Receipt()).id
+        val newReceiptId = service.saveReceipt(Receipt()).id
         val ocrOutput = newReceiptId?.let {
             OcrResponse(
                 plainText = output[1].split("\n"),

@@ -1,9 +1,11 @@
 package app.ocr_backend.controller
 
+import app.ocr_backend.dto.ItemDTO
 import app.ocr_backend.model.Item
 import app.ocr_backend.model.Receipt
 import app.ocr_backend.repository.ItemDBRepository
 import app.ocr_backend.repository.ReceiptDBRepository
+import app.ocr_backend.service.DBService
 import com.google.gson.Gson
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -13,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 @RequestMapping("/api/receipt")
 @CrossOrigin
-class ItemController(val itemRepository: ItemDBRepository) {
+class ItemController(val service: DBService) {
 
     val gson = Gson()
     @GetMapping("/{receiptId}/item/{itemId}")
@@ -21,7 +23,7 @@ class ItemController(val itemRepository: ItemDBRepository) {
         @PathVariable receiptId:Long,
         @PathVariable itemId:Long
     ): Item =
-        itemRepository.getItemById(receiptId,itemId).orElseThrow{
+        service.getItem(itemId).orElseThrow{
             ResponseStatusException(HttpStatus.NOT_FOUND,"Item with the $itemId Id not exists int the Receipt with $receiptId Id")
         }
 
@@ -29,12 +31,12 @@ class ItemController(val itemRepository: ItemDBRepository) {
     @PostMapping("/{receiptId}/item")
     fun addItemToReceipt(@PathVariable receiptId:Long,@RequestBody item:Item)
     {
-        itemRepository.saveItem(receiptId,item)
+        service.saveItem(receiptId,item)
     }
 
     @PostMapping("/{receiptId}/new/item")
     fun addItemToReceipt(@PathVariable receiptId:Long): ResponseEntity<String> {
-        val newItem = itemRepository.createNewItem(receiptId)
+        val newItem = service.createNewItem(receiptId)
         val json: String = gson.toJson(newItem)
         return ResponseEntity.ok().body(json)
     }
@@ -43,13 +45,13 @@ class ItemController(val itemRepository: ItemDBRepository) {
     @DeleteMapping("/{receiptId}/item/{itemId}")
     fun deleteItemFromReceipt(@PathVariable receiptId: Long, @PathVariable itemId: Long)
     {
-        itemRepository.deleteItem(receiptId,itemId)
+        service.deleteItem(itemId)
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{receiptId}/item/{itemId}")
-    fun updateItem(@PathVariable receiptId: Long,@PathVariable itemId: Long, @RequestBody item:Item)
+    fun updateItem(@PathVariable receiptId: Long,@PathVariable itemId: Long, @RequestBody itemData: ItemDTO)
     {
-        itemRepository.updateItem(receiptId,itemId,item)
+        service.updateItem(Item(itemId,itemData))
     }
 }

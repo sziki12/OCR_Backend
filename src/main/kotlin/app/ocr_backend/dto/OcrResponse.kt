@@ -1,4 +1,4 @@
-package app.ocr_backend.model
+package app.ocr_backend.dto
 
 data class OcrResponse(
     var plainText:List<String>,
