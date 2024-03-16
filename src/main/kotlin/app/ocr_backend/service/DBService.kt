@@ -6,6 +6,7 @@ import app.ocr_backend.model.ReceiptImage
 import app.ocr_backend.repository.ItemDBRepository
 import app.ocr_backend.repository.ReceiptDBRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
@@ -17,11 +18,11 @@ class DBService(
 ) {
 
     //ITEM
-    fun createNewItem(receiptId: Long)
-    {
+    fun createNewItem(receiptId: Long): Item? {
         val receipt = receiptService.getReceipt(receiptId)
         if(receipt.isPresent)
-            itemService.createNewItem(receipt.get())
+            return itemService.createNewItem(receipt.get())
+        return null
     }
 
     fun saveItem(receiptId: Long, item: Item)
@@ -58,9 +59,20 @@ class DBService(
         receiptService.updateReceipt(receipt)
     }
 
-    fun deleteReceipt(itemId:Long)
+    @Transactional
+    fun deleteReceipt(receiptId:Long)
     {
-        receiptService.deleteReceipt(itemId)
+        val receipt = receiptService.getReceipt(receiptId)
+        if(receipt.isPresent)
+        {
+            imageService.deleteAllByReceipt(receipt.get())
+            println("DELETE IMAGE")
+            itemService.deleteAllByReceipt(receipt.get())
+            println("DELETE ITEM")
+            receiptService.deleteReceipt(receiptId)
+            println("DELETE RECEIPT")
+        }
+
     }
 
     fun getAllReceipt():List<Receipt>

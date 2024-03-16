@@ -10,12 +10,12 @@ import java.util.*
 @Service
 class ItemService(val itemRepository: ItemDBRepository) {
 
-    fun createNewItem(receipt: Receipt)
-    {
+    fun createNewItem(receipt: Receipt): Item {
         val newItem  = Item("",0,1)
         newItem.receipt = receipt
         receipt.items.add(newItem)
         itemRepository.save(newItem)
+        return newItem
     }
     fun saveItem(receipt: Receipt, item:Item)
     {
@@ -47,5 +47,10 @@ class ItemService(val itemRepository: ItemDBRepository) {
     fun deleteItem(itemId:Long)
     {
         itemRepository.deleteById(itemId)
+    }
+
+    fun deleteAllByReceipt(receipt: Receipt)
+    {
+        itemRepository.deleteAllByReceipt(receipt)
     }
 }

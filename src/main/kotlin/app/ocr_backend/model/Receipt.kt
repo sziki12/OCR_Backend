@@ -45,4 +45,14 @@ data class Receipt(
     {
         this.items= receiptData.items
     }
+
+    override fun equals(other: Any?): Boolean {
+
+        val otherReceipt = other as? Receipt
+        otherReceipt?.let {
+            if(it.id==this.id)
+                return true
+        }
+        return false
+    }
 }

@@ -3,6 +3,7 @@ package app.ocr_backend.controller
 import app.ocr_backend.dto.OcrResponse
 import app.ocr_backend.dto.ReceiptDTO
 import app.ocr_backend.model.Receipt
+import app.ocr_backend.service.DBService
 import app.ocr_backend.service.ReceiptService
 import app.ocr_backend.utils.PathHandler
 import com.google.gson.Gson
@@ -17,7 +18,7 @@ import kotlin.io.path.pathString
 @RestController
 @RequestMapping("/api/receipt")
 @CrossOrigin
-class ReceiptController(private val service: ReceiptService) {
+class ReceiptController(private val service: DBService) {
 
     @GetMapping("")
     fun getAllReceipts(): List<Receipt> = service.getAllReceipt()
