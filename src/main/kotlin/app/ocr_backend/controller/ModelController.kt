@@ -18,9 +18,9 @@ class ModelController {
         this.mainSeparator=mainSeparator
         this.itemSeparator=itemSeparator
     }
-    fun processImage(params:String):String
+    fun processImage(imageName:String):String
     {
-        val processBuilder = ProcessBuilder("python",execPath,"--image",params,"--path",imagePath)
+        val processBuilder = ProcessBuilder("python",execPath,"--image",imageName,"--path",imagePath)
         processBuilder.redirectErrorStream(true)
         processBuilder.environment()["PYTHONIOENCODING"] = "utf-8"
 
@@ -29,7 +29,6 @@ class ModelController {
         var out = ""
         while(outScanner.hasNextLine())
             out += outScanner.nextLine()+"\n"
-
         outScanner.close()
         return out
     }
