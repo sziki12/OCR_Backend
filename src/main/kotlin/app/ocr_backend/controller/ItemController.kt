@@ -15,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 @RequestMapping("/api/receipt")
 @CrossOrigin
-class ItemController(val service: DBService) {
+class ItemController(private val service: DBService) {
 
     val gson = Gson()
     @GetMapping("/{receiptId}/item/{itemId}")

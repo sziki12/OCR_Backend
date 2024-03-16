@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "items")
+@Table(name = "Item")
 data class Item(
     var name:String,
     var quantity:Int,

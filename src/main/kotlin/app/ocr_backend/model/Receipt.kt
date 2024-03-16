@@ -7,7 +7,7 @@ import java.io.File
 import java.util.Date
 
 @Entity
-@Table(name = "receipts")
+@Table(name = "Receipt")
 data class Receipt(
     @Column(name="date_of_purchase")
     var dateOfPurchase:Date,
@@ -21,16 +21,8 @@ data class Receipt(
    @OneToMany(mappedBy = "receipt")
    var items:MutableList<Item> = mutableListOf()
 
-    constructor(receiptId:Long,receiptData: ReceiptDTO):this(receiptData)
-    {
-        this.id = receiptId
-    }
-
-    constructor(receiptData: ReceiptDTO):
-            this(receiptData.dateOfPurchase,receiptData.description)
-    {
-        this.items= receiptData.items
-    }
+    @OneToMany(mappedBy = "receipt")
+    var images:MutableList<ReceiptImage> = mutableListOf()
 
     val totalCost:Int
         get(){
@@ -43,4 +35,14 @@ data class Receipt(
         }
 
     constructor():this(Date(),"")
+    constructor(receiptId:Long,receiptData: ReceiptDTO):this(receiptData)
+    {
+        this.id = receiptId
+    }
+
+    constructor(receiptData: ReceiptDTO):
+            this(receiptData.dateOfPurchase,receiptData.description)
+    {
+        this.items= receiptData.items
+    }
 }

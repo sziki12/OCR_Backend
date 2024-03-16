@@ -17,12 +17,8 @@ import kotlin.io.path.pathString
 @RestController
 @RequestMapping("/api/receipt")
 @CrossOrigin
-class ReceiptController(val service: ReceiptService) {
+class ReceiptController(private val service: ReceiptService) {
 
-    val modelController = ModelController()
-    val gson = Gson()
-
-    //GET
     @GetMapping("")
     fun getAllReceipts(): List<Receipt> = service.getAllReceipt()
 
@@ -31,7 +27,6 @@ class ReceiptController(val service: ReceiptService) {
         ResponseStatusException(HttpStatus.NOT_FOUND,"Receipt with the $receiptId Id not exists")
     }
 
-    //CREATE
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
     fun createReceipt(@RequestBody receiptData: ReceiptDTO)
@@ -39,7 +34,6 @@ class ReceiptController(val service: ReceiptService) {
         service.saveReceipt(Receipt(receiptData))
     }
 
-    //DELETE
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{receiptId}")
     fun deleteReceipt(@PathVariable receiptId: Long)
@@ -47,37 +41,10 @@ class ReceiptController(val service: ReceiptService) {
         service.deleteReceipt(receiptId)
     }
 
-
-    //UPDATE
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{receiptId}")
     fun updateReceipt(@PathVariable receiptId: Long, @RequestBody receiptData: ReceiptDTO)
     {
         service.updateReceipt(Receipt(receiptId,receiptData))
-    }
-
-    @PostMapping("/image")
-    fun uploadImage(@RequestParam("file") image: MultipartFile): ResponseEntity<String> {
-        val altName = "file.jpg"
-        val file = File(PathHandler.getImageDir().pathString + File.separator + (image.originalFilename?:altName))
-        image.transferTo(file)
-
-
-        val separator = "======"
-        val itemSeparator = "------"
-        val output = modelController.processImage(image.originalFilename?:altName).split(separator)
-
-        val newReceiptId = service.saveReceipt(Receipt()).id
-        val ocrOutput = newReceiptId?.let {
-            OcrResponse(
-                plainText = output[1].split("\n"),
-                filteredReceipt = output[1].split("\n"),
-                extractedItems = output[2].split(itemSeparator),
-                it
-            )
-        }?:""
-
-        val json: String = gson.toJson(ocrOutput)
-        return ResponseEntity.ok().body(json)
     }
 }
