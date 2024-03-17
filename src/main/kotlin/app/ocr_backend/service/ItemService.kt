@@ -11,7 +11,7 @@ import java.util.*
 class ItemService(val itemRepository: ItemDBRepository) {
 
     fun createNewItem(receipt: Receipt): Item {
-        val newItem  = Item("",0,1)
+        val newItem  = Item("",1,0)
         newItem.receipt = receipt
         receipt.items.add(newItem)
         itemRepository.save(newItem)
@@ -19,12 +19,9 @@ class ItemService(val itemRepository: ItemDBRepository) {
     }
     fun saveItem(receipt: Receipt, item:Item)
     {
-        println("SAVE ITEM")
         receipt.items.add(item)
         item.receipt = receipt
-        println("ADDED")
         itemRepository.save(item)
-        println("SAVED")
     }
     fun getItem(itemId:Long): Optional<Item> {
         return itemRepository.getItemById(itemId)

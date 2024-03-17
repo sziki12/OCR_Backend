@@ -10,7 +10,6 @@ import java.util.*
 class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
 
     fun saveReceipt(receipt: Receipt): Receipt {
-        println("saveReceipt: $receipt")
         val receiptToSave = Receipt()
         receiptToSave.let {
             it.description = receipt.description
@@ -26,7 +25,6 @@ class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
 
     fun updateReceipt(receipt: Receipt)
     {
-        println("id: ${receipt.id}")
         val receiptToUpdate = receiptDBRepository.getReceiptById(receipt.id)
         if(receiptToUpdate.isPresent)
         {
@@ -36,10 +34,7 @@ class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
                 it.items = receipt.items
             }
             receiptDBRepository.save(receiptToUpdate.get())
-            println("FOUND AND UPDATED")
         }
-        else
-            println("NOT FOUND")
     }
 
     fun deleteReceipt(itemId:Long)

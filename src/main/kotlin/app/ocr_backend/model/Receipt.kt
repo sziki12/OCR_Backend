@@ -43,7 +43,7 @@ data class Receipt(
     constructor(receiptData: ReceiptDTO):
             this(receiptData.dateOfPurchase,receiptData.description)
     {
-        this.items= receiptData.items
+        this.items = receiptData.items
     }
 
     override fun equals(other: Any?): Boolean {
@@ -54,5 +54,9 @@ data class Receipt(
                 return true
         }
         return false
+    }
+
+    override fun toString(): String {
+        return super.toString()+", "+this.items+", id:"+this.id
     }
 }

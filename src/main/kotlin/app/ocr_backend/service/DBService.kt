@@ -56,6 +56,11 @@ class DBService(
 
     fun updateReceipt(receipt: Receipt)
     {
+        /*println()
+        println("RECEIPT: $receipt")
+        println()*/
+        for(item in receipt.items)
+            itemService.updateItem(item)
         receiptService.updateReceipt(receipt)
     }
 
@@ -66,11 +71,8 @@ class DBService(
         if(receipt.isPresent)
         {
             imageService.deleteAllByReceipt(receipt.get())
-            println("DELETE IMAGE")
             itemService.deleteAllByReceipt(receipt.get())
-            println("DELETE ITEM")
             receiptService.deleteReceipt(receiptId)
-            println("DELETE RECEIPT")
         }
 
     }
