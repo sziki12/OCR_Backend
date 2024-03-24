@@ -28,6 +28,27 @@ object PathHandler {
         return file.toPath()
     }
 
+    fun getLlamaStartDir():Path
+    {
+        val path = getResourceDir().pathString+"${s}llama"
+        val file = File(path)
+        return file.toPath()
+    }
+
+    fun getLlamaInputDir():Path
+    {
+        val path = getLlamaStartDir().pathString+"${s}input_text"
+        val file = File(path)
+        return file.toPath()
+    }
+
+    fun getLlamaOutputDir():Path
+    {
+        val path = getLlamaStartDir().pathString+"${s}output_text"
+        val file = File(path)
+        return file.toPath()
+    }
+
     fun getPythonDir():Path
     {
         val path = getMainDir().pathString+"${s}python"
