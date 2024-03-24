@@ -55,4 +55,10 @@ object PathHandler {
         val file = File(path)
         return file.toPath()
     }
+
+    fun getLlamaRunnableDir():Path
+    {
+        val path = "D:\\Llama\\Files"
+        return File(path).toPath()
+    }
 }
