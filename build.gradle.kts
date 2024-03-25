@@ -25,6 +25,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-mustache")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -42,6 +43,17 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.2.2")
 
     implementation("com.google.code.gson:gson:2.10.1")
+
+    //implementation("org.springframework.boot:spring-boot-starter-security")
+    //testImplementation("org.springframework.security:spring-security-test")
+
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    implementation("org.apache.commons:commons-lang3:3.14.0")
+
 
 }
 

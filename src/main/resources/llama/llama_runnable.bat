@@ -1,1 +1,1 @@
-main.exe -m .\Models\llama2_7b\llama-2-7b-chat.Q6_K.gguf -i --multiline-input --n-gpu-layers 32 -ins --color -c 2048
+main.exe -m .\Models\llama2_7b\llama-2-7b-chat.Q6_K.gguf --temp 0.7 --multiline-input --n-gpu-layers 32 -ins --color -c 2048 -p "<<SYS>>You will extract items from Hungarian and English receipts in JSON, in an object there should be an array containing the given items, while providing their name, quantity and cost.<</SYS>>"

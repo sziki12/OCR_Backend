@@ -1,6 +1,8 @@
 package app.ocr_backend.controller
 
+import app.ocr_backend.dto.LlamaItemList
 import app.ocr_backend.dto.OcrResponse
+import app.ocr_backend.dto.ReceiptDTO
 import app.ocr_backend.model.Receipt
 import app.ocr_backend.service.DBService
 import app.ocr_backend.service.OCRService
@@ -21,9 +23,6 @@ class OCRController(private val service: DBService) {
 
     private final val separator = "======"
     private final val itemSeparator = "------"
-    init {
-        //modelController.setSeparators(separator,itemSeparator)
-    }
 
     @PostMapping("/image")
     fun uploadImage(@RequestParam("file") image: MultipartFile): ResponseEntity<String> {
@@ -44,8 +43,45 @@ class OCRController(private val service: DBService) {
             extractedItems = output[3].split(itemSeparator),
             newReceipt.id
         )
-        ocrService.extractItems(fileName,output[3])
-        val json: String = gson.toJson(ocrOutput)
-        return ResponseEntity.ok().body(json)
+
+        val itemsJson = ocrService.extractItems(fileName,output[3])
+        try {
+            val llamaItemList = gson.fromJson(itemsJson, LlamaItemList::class.java)
+            println(llamaItemList)
+            for(item in llamaItemList.toItemList())
+            {
+                service.saveItem(newReceipt.id,item)
+            }
+        }
+        catch (e:Exception)
+        {
+            e.printStackTrace()
+            //Failed to read JSON
+        }
+
+        val responseJson: String = gson.toJson(ocrOutput)
+        return ResponseEntity.ok().body(responseJson)
+    }
+
+    @GetMapping("/test")
+    fun test()
+    {
+        val newReceipt = service.saveReceipt(Receipt())
+        val itemsJson = ocrService.test()
+        println("JSON")
+        println(itemsJson)
+        try {
+            val llamaItemList = gson.fromJson(itemsJson, LlamaItemList::class.java)
+            println(llamaItemList)
+            for(item in llamaItemList.toItemList())
+            {
+                service.saveItem(newReceipt.id,item)
+            }
+        }
+        catch (e:Exception)
+        {
+            e.printStackTrace()
+            //Failed to read JSON
+        }
     }
 }
