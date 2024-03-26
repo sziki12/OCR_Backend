@@ -8,12 +8,10 @@ import app.ocr_backend.service.UserService
 import com.google.gson.Gson
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
+@CrossOrigin
 class AuthController(
     val userService: UserService,
     val userAuthProvider: UserAuthProvider,
@@ -23,11 +21,13 @@ class AuthController(
     @PostMapping("/login")
     fun login(@RequestBody credentials: CredentialsDTO):ResponseEntity<String>
     {
+        println("CREDENTIALS $credentials")
         val user = userService.loginUser(credentials)
-        val userDto = UserDTO(user).let {
-            it.token = userAuthProvider.createToken(it.login) ?: ""
+        val userDto = UserDTO(user).also {
+            it.token = userAuthProvider.createToken(it.userName) ?: ""
         }
         val json = gson.toJson(userDto)
+        println("LOGIN $userDto")
         return ResponseEntity.ok().body(json)
     }
 
@@ -37,10 +37,11 @@ class AuthController(
     {
         val user = userService.registerUser(signUpDto)
 
-        val userDto = UserDTO(user).let {
-            it.token = userAuthProvider.createToken(it.login) ?: ""
+        val userDto = UserDTO(user).also {
+            it.token = userAuthProvider.createToken(it.userName) ?: ""
         }
         val json = gson.toJson(userDto)
+        println("REGISTER $userDto")
         return ResponseEntity.ok().body(json)
     }
 }

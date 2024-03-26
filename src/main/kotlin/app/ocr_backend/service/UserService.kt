@@ -18,7 +18,7 @@ class UserService(
 
     fun registerUser(signUpDto: SignUpDTO):User
     {
-        val existingUSer = repository.findByLogin(signUpDto.login)
+        val existingUSer = repository.findByUserName(signUpDto.userName)
         if(existingUSer.isPresent)
         {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST,"User Already Exists")
@@ -33,7 +33,7 @@ class UserService(
 
     fun loginUser(credentials:CredentialsDTO):User
     {
-        val user = repository.findByLogin(credentials.login).orElseThrow{
+        val user = repository.findByUserName(credentials.userName).orElseThrow{
             ResponseStatusException(HttpStatus.NOT_FOUND,"User Not Exists")
         }
 
@@ -56,7 +56,7 @@ class UserService(
 
     }
 
-    fun findByLogin(login:String): Optional<User> {
-        return repository.findByLogin(login)
+    fun findByUserName(userName:String): Optional<User> {
+        return repository.findByUserName(userName)
     }
 }

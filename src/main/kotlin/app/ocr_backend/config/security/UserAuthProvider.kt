@@ -14,20 +14,19 @@ import java.util.*
 @Component
 class UserAuthProvider(val userService:UserService) {
 
-    @Value("${security.jwt.token.secret-key:secret-value}")
-    private lateinit var secretKey:String
+    //TODO REMOVE KEY FROM CODE
+    private var secretKey:String = "secret_key"
 
-    //TODO UserService
-    fun init()
+    init
     {
         secretKey = Base64.getEncoder().encodeToString(secretKey.encodeToByteArray())
     }
 
-    fun createToken(login:String): String? {
+    fun createToken(userName:String): String? {
         val now = Date()
         val validity = Date(now.time + 3_600_000)
         return JWT.create()
-            .withIssuer(login)
+            .withIssuer(userName)
             .withIssuedAt(now)
             .withExpiresAt(validity)
             .sign(Algorithm.HMAC256(secretKey))
@@ -39,10 +38,10 @@ class UserAuthProvider(val userService:UserService) {
 
         val decoded = verifier.verify(token)
 
-        val user = userService.findByLogin(decoded.issuer)
+        val user = userService.findByUserName(decoded.issuer)
         if(user.isPresent)
         {
-            return UsernamePasswordAuthenticationToken(user.get().name,null,Collections.emptyList())
+            return UsernamePasswordAuthenticationToken(user.get().userName,null,Collections.emptyList())
         }
         return null
     }

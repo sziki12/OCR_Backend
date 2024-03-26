@@ -1,6 +1,6 @@
 package app.ocr_backend.dto
 
 data class CredentialsDTO(
-    val login:String,
+    val userName:String,
     val password:String
 )

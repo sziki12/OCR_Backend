@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 class SecurityConfig(val userAuthProvider: UserAuthProvider) {
 
 
-    @Bean
+    /*@Bean
     fun admin():InMemoryUserDetailsManager
     {
         return InMemoryUserDetailsManager(
@@ -29,7 +29,7 @@ class SecurityConfig(val userAuthProvider: UserAuthProvider) {
                 .authorities("read")
                 .build()
         )
-    }
+    }*/
 
 
     @Bean
@@ -37,23 +37,21 @@ class SecurityConfig(val userAuthProvider: UserAuthProvider) {
     {
         return http
             .addFilterBefore(JwtAuthFilter(userAuthProvider),BasicAuthenticationFilter::class.java)
-                .csrf()
-                {
-                    it.disable()
-                }
-                .authorizeHttpRequests()
-                {
-                    it.requestMatchers(HttpMethod.POST,"/login","/register").permitAll()
-                    //TODO Remove in Production
-                    it.requestMatchers(HttpMethod.GET,"/h2-console").permitAll()
-                    it.anyRequest().authenticated()
-                }
-                .sessionManagement()
-                {
-                    it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                }
-                .httpBasic(Customizer.withDefaults())
-                .build()
+            .csrf()
+            {
+                it.disable()
+            }
+            .sessionManagement()
+            {
+                it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            }
+            .authorizeHttpRequests()
+            {
+                it.requestMatchers(HttpMethod.POST,"/login","/register").permitAll()
+                it.requestMatchers(HttpMethod.GET,"/h2-console").permitAll()
+                it.anyRequest().authenticated()
+            }
+            .build()
     }
 }
 

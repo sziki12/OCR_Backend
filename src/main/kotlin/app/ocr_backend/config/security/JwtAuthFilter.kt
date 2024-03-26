@@ -8,7 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
 
 
-class JwtAuthFilter(val userAuthProvider:UserAuthProvider):OncePerRequestFilter() {
+class JwtAuthFilter(private val userAuthProvider:UserAuthProvider):OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,

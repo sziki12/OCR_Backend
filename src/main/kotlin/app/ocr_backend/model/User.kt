@@ -5,9 +5,8 @@ import jakarta.persistence.*
 @Entity
 @Table(name = "App_User")
 data class User(
-    @Column("user_name")
-    var name:String,
-    var login:String,
+    @Column(name="user_name")
+    var userName:String,
     var password:String,
     )
 {

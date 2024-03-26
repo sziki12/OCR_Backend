@@ -3,18 +3,16 @@ package app.ocr_backend.dto
 import app.ocr_backend.model.User
 
 data class UserDTO (
-    val name:String,
-    val login:String,
+    val userName:String,
     var token:String,
 )
 {
     fun toUser(): User {
         return User(
-            name,
-            login,
+            userName,
             token
         )
     }
 
-    constructor(user:User):this(user.name,user.login,"")
+    constructor(user:User):this(user.userName,"")
 }

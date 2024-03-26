@@ -5,6 +5,13 @@ CREATE TABLE IF NOT EXISTS Receipt (
                                        date_of_purchase TIMESTAMP NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS App_User (
+                                       user_id SERIAL PRIMARY KEY,
+                                       user_name VARCHAR NOT NULL,
+                                       login VARCHAR NOT NULL,
+                                       password VARCHAR NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS Image (
                                         image_id SERIAL PRIMARY KEY,
                                         name VARCHAR NOT NULL,
