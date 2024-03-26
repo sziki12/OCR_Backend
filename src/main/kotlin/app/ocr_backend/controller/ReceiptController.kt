@@ -1,9 +1,10 @@
 package app.ocr_backend.controller
 
-import app.ocr_backend.model.Item
-import app.ocr_backend.model.OcrResponse
+import app.ocr_backend.dto.OcrResponse
+import app.ocr_backend.dto.ReceiptDTO
 import app.ocr_backend.model.Receipt
-import app.ocr_backend.repository.ReceiptCollectionRepository
+import app.ocr_backend.service.DBService
+import app.ocr_backend.service.ReceiptService
 import app.ocr_backend.utils.PathHandler
 import com.google.gson.Gson
 import org.springframework.http.HttpStatus
@@ -17,102 +18,34 @@ import kotlin.io.path.pathString
 @RestController
 @RequestMapping("/api/receipt")
 @CrossOrigin
-class ReceiptController(val repository:ReceiptCollectionRepository) {
+class ReceiptController(private val service: DBService) {
 
-    val modelController = ModelController()
-    val gson = Gson()
-
-    //GET
     @GetMapping("")
-    fun getAllReceipts() = repository.receipts
+    fun getAllReceipts(): List<Receipt> = service.getAllReceipt()
 
     @GetMapping("/{receiptId}")
-    fun getReceiptById(@PathVariable receiptId: Long): Receipt = repository.getReceiptById(receiptId).orElseThrow{
+    fun getReceiptById(@PathVariable receiptId: Long): Receipt = service.getReceipt(receiptId).orElseThrow{
         ResponseStatusException(HttpStatus.NOT_FOUND,"Receipt with the $receiptId Id not exists")
     }
 
-    @GetMapping("/{receiptId}/item/{itemId}")
-    fun getItemById(
-        @PathVariable receiptId:Long,
-        @PathVariable itemId:Long
-    ): Item =
-        repository.getItemById(receiptId,itemId).orElseThrow{
-        ResponseStatusException(HttpStatus.NOT_FOUND,"Item with the $itemId Id not exists int the Receipt with $receiptId Id")
-    }
-    //CREATE
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    fun createReceipt(@RequestBody receipt:Receipt)
+    fun createReceipt(@RequestBody receiptData: ReceiptDTO)
     {
-        repository.saveReceipt(receipt)
+        service.saveReceipt(Receipt(receiptData))
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/{receiptId}/item")
-    fun addItemToReceipt(@PathVariable receiptId:Long,@RequestBody item:Item)
-    {
-        repository.addItemToReceipt(receiptId,item)
-    }
-
-    @PostMapping("/{receiptId}/new/item")
-    fun addItemToReceipt(@PathVariable receiptId:Long): ResponseEntity<String> {
-        val newItem = repository.createNewItem(receiptId)
-        val json: String = gson.toJson(newItem)
-        return ResponseEntity.ok().body(json)
-    }
-
-    //DELETE
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{receiptId}")
     fun deleteReceipt(@PathVariable receiptId: Long)
     {
-        repository.deleteReceipt(receiptId)
-    }
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{receiptId}/item/{itemId}")
-    fun deleteItemFromReceipt(@PathVariable receiptId: Long, @PathVariable itemId: Long)
-    {
-        repository.deleteItemFromReceipt(receiptId,itemId)
+        service.deleteReceipt(receiptId)
     }
 
-    //UPDATE
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{receiptId}")
-    fun updateReceipt(@PathVariable receiptId: Long, @RequestBody receipt:Receipt)
+    fun updateReceipt(@PathVariable receiptId: Long, @RequestBody receiptData: ReceiptDTO)
     {
-       repository.updateReceipt(receiptId,receipt)
-    }
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PutMapping("/{receiptId}/item/{itemId}")
-    fun updateItem(@PathVariable receiptId: Long,@PathVariable itemId: Long, @RequestBody item:Item)
-    {
-        repository.updateItem(receiptId,itemId,item)
-    }
-
-
-
-    @PostMapping("/image")
-    fun uploadImage(@RequestParam("file") image: MultipartFile): ResponseEntity<String> {
-        val altName = "file.jpg"
-        val file = File(PathHandler.getImageDir().pathString + File.separator + (image.originalFilename?:altName))
-        image.transferTo(file)
-
-
-
-        val separator = "======"
-        val itemSeparator = "------"
-        val output = modelController.processImage(image.originalFilename?:altName).split(separator)
-
-        val newReceiptId = repository.saveReceipt(Receipt())
-        val ocrOutput = OcrResponse(
-            plainText = output[1].split("\n"),
-            filteredReceipt = output[1].split("\n"),
-            extractedItems = output[2].split(itemSeparator),
-            newReceiptId
-        )
-
-        val json: String = gson.toJson(ocrOutput)
-        return ResponseEntity.ok().body(json)
+        service.updateReceipt(Receipt(receiptId,receiptData))
     }
 }
