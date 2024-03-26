@@ -65,8 +65,20 @@ class OCRService {
         pw.close()
 
         val process = llamaProcessBuilder(inputFile,outFile).start()
-        Thread.sleep(60000)
+        Thread.sleep(70000)
+        val out = extractJson(outFile)
+        process.destroy()
+        return out
+    }
 
+
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!        TEST        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!        TEST        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    fun extractJson(outFile:File):String
+    {
         val outputScanner = Scanner(outFile, StandardCharsets.UTF_8)
         println("READING")
         var out = ""
@@ -76,10 +88,16 @@ class OCRService {
         while(outputScanner.hasNextLine()&&!found)
         {
             val next = outputScanner.nextLine()
-            val line = "$next \n"
+            var line = "$next \n"
+            println("$indentLevel TEST: $line")
 
             if(next.contains("{"))
             {
+                if(indentLevel<=0)
+                {
+                    val beginIndex = next.indexOf('{')
+                    line = line.substring(beginIndex)
+                }
                 toAdd=true
                 indentLevel++
             }
@@ -102,69 +120,11 @@ class OCRService {
                 out += line
             }
         }
+        println(out)
         println("READ")
-
         outputScanner.close()
-        process.destroy()
         return out
     }
-
-
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!        TEST        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    fun test(): String {
-        var counter = 1
-        var outFile = File(llamaOutputDir+"${File.separator}szamla0$counter.txt")
-        while(outFile.exists())
-        {
-            counter++
-            outFile = File(llamaOutputDir+"${File.separator}szamla0$counter.txt")
-        }
-        val inFile = File(llamaInputDir+"${File.separator}szamla0110.txt")
-
-        val process = llamaProcessBuilder(inFile,outFile).start()
-        Thread.sleep(60000)
-        val outputScanner = Scanner(outFile, StandardCharsets.UTF_8)
-
-        var out = ""
-        var indentLevel = 0
-        var found = false
-        var toAdd = false
-        while(outputScanner.hasNextLine()&&!found)
-        {
-            val next = outputScanner.nextLine()
-            val line = "$next \n"
-            println("TEST: "+line)
-            if(next.contains("{"))
-            {
-                toAdd=true
-                indentLevel++
-            }
-
-            if(next.contains("}"))
-            {
-                toAdd=true
-                indentLevel--
-                if(indentLevel<=0)
-                    found=true
-            }
-
-            if(indentLevel>0)
-            {
-                toAdd=true
-            }
-
-            if(toAdd)
-            {
-                out += line
-                println("OUT: "+line)
-            }
-        }
-        outputScanner.close()
-        process.destroy()
-        return out
-    }
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!        TEST        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
     private fun llamaProcessBuilder(inFile:File,outFile:File):ProcessBuilder
     {

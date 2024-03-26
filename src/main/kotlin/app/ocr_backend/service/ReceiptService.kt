@@ -13,8 +13,9 @@ class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
         val receiptToSave = Receipt()
         receiptToSave.let {
             it.description = receipt.description
-            //it.dateOfPurchase = receipt.dateOfPurchase
+            it.dateOfPurchase = receipt.dateOfPurchase
             it.items = receipt.items
+            it.isPending = receipt.isPending
         }
         receiptDBRepository.save(receipt)
         return receipt
@@ -32,6 +33,7 @@ class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
                 it.description = receipt.description
                 it.dateOfPurchase = receipt.dateOfPurchase
                 it.items = receipt.items
+                it.isPending = receipt.isPending
             }
             receiptDBRepository.save(receiptToUpdate.get())
         }

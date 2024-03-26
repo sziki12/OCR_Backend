@@ -1,6 +1,7 @@
 package app.ocr_backend.model
 
 import app.ocr_backend.dto.ItemDTO
+import app.ocr_backend.dto.OcrResponse
 import app.ocr_backend.dto.ReceiptDTO
 import jakarta.persistence.*
 import java.io.File
@@ -14,6 +15,9 @@ data class Receipt(
     var description:String,
 ) {
 
+    @Column(name="is_pending")
+    var isPending:Boolean = false
+
     @Column(name="receipt_id")
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     var id: Long = -1
@@ -23,6 +27,9 @@ data class Receipt(
 
     @OneToMany(mappedBy = "receipt")
     var images:MutableList<ReceiptImage> = mutableListOf()
+
+    //@Column(name="ocr_output")
+    //var ocrOutput:OcrResponse? = null
 
     val totalCost:Int
         get(){
