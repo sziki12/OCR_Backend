@@ -1,6 +1,8 @@
 
 import argparse
 import re
+import numpy as np
+from ReceiptProcessor import ReceiptProcessor
 from TesseractOCR import ReceiptOCRWrapper
 
 ap = argparse.ArgumentParser()
@@ -18,41 +20,12 @@ ocr = ReceiptOCRWrapper(args)
 
 receiptText = ocr.readReceipt()
 
-character = '[A-ZOÓÖŐUÚÜŰÍÉÁ:0-9]'
-
-afa = '([A-Z][0-9][0-9]|[A-Z]OO)'
-currency = '(FT|HUF|EUR|\$|\€|'+afa+')'
-price = '([ ]?([0-9]+[ .,]?)+)'
-validPrice = price+'[ ]*'+currency+'|'+currency+'[ ]*'+price
-
-
-name = '(('+character+'+[ ]?)+)'
-
-pricePattern = r'('+name+'[ \n]*'+validPrice+')|('+validPrice+'[ \n]*'+name+')'
-
-#r'('+name+'[ ]*|'+price+'[ ]*|'+afa+'[ ]*)+'
-
 separator = args["separator"]
 itemSeparator = "------"
 
-print(separator)
+receiptProcessor = ReceiptProcessor(separator,itemSeparator)
+receiptProcessor.process(receiptText)
 
-print(receiptText)
-
-print(separator)
-rows = receiptText.split("\n")
-i = 0
-for row in rows:
-    #print(i)
-    if(len(row)<40):
-        element = re.search(re.compile(pricePattern), row.upper())
-        if element is not None and element.group() != "":
-                print(row)
-                print(element)
-                print(itemSeparator)
-                
-    i+=1
-            
-    
-    # Provide the name, and price of the item from a receipt: VK296-00P-ONE PAPTRTASKA 80 COO
-    #in JSON
+#Llama prompt: Please extract from the given hungarian receipt the items name, price and quantity in a JSON format:
+#ITEMS LIST
+#\

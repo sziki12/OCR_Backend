@@ -1,0 +1,3 @@
+InputPath=C:\Users\Szikszai Levente\IdeaProjects\OCR_Backend\src\main\resources\llama\input_text
+OutputPath=C:\Users\Szikszai Levente\IdeaProjects\OCR_Backend\src\main\resources\llama\output_text
+FirstResponse=First Response
