@@ -20,7 +20,7 @@ class UserAuthProvider(val userService:UserService) {
     //TODO UserService
     fun init()
     {
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes())
+        secretKey = Base64.getEncoder().encodeToString(secretKey.encodeToByteArray())
     }
 
     fun createToken(login:String): String? {
@@ -33,14 +33,18 @@ class UserAuthProvider(val userService:UserService) {
             .sign(Algorithm.HMAC256(secretKey))
     }
 
-    fun validateToken(token:String): Authentication {
+    fun validateToken(token:String): Authentication? {
         val verifier = JWT.require(Algorithm.HMAC256(secretKey))
             .build()
 
         val decoded = verifier.verify(token)
 
         val user = userService.findByLogin(decoded.issuer)
-        return UsernamePasswordAuthenticationToken(user.name,null,Collections.emptyList())
+        if(user.isPresent)
+        {
+            return UsernamePasswordAuthenticationToken(user.get().name,null,Collections.emptyList())
+        }
+        return null
     }
 
 }

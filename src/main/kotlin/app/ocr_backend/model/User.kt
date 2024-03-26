@@ -3,11 +3,12 @@ package app.ocr_backend.model
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "User")
+@Table(name = "App_User")
 data class User(
-    val name:String,
-    val login:String,
-    val token:String,
+    @Column("user_name")
+    var name:String,
+    var login:String,
+    var password:String,
     )
 {
     @Column(name="user_id")

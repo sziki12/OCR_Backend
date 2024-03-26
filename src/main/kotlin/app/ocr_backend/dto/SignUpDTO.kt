@@ -2,19 +2,18 @@ package app.ocr_backend.dto
 
 import app.ocr_backend.model.User
 
-data class UserDTO (
+data class SignUpDTO(
     val name:String,
     val login:String,
-    var token:String,
+    val password:String
 )
 {
-    fun toUser(): User {
+    fun toUser():User
+    {
         return User(
             name,
             login,
-            token
+            ""
         )
     }
-
-    constructor(user:User):this(user.name,user.login,"")
 }
