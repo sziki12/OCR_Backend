@@ -46,6 +46,7 @@ class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
 
     fun getAllReceipt():List<Receipt>
     {
+        //TODO Assign Users to Receipts and return only the appropriate receipts
         return receiptDBRepository.findAll()
     }
 

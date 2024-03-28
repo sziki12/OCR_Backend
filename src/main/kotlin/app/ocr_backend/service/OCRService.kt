@@ -65,7 +65,7 @@ class OCRService {
         pw.close()
 
         val process = llamaProcessBuilder(inputFile,outFile).start()
-        Thread.sleep(70000)
+        Thread.sleep(80000)
         val out = extractJson(outFile)
         process.destroy()
         return out
