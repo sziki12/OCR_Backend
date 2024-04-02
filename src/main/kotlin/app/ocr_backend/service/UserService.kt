@@ -1,4 +1,5 @@
 package app.ocr_backend.service
+import app.ocr_backend.config.security.UserAuthProvider
 import app.ocr_backend.dto.CredentialsDTO
 import app.ocr_backend.dto.SignUpDTO
 import app.ocr_backend.model.User

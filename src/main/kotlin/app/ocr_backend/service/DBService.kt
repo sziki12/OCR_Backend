@@ -3,8 +3,8 @@ package app.ocr_backend.service
 import app.ocr_backend.model.Item
 import app.ocr_backend.model.Receipt
 import app.ocr_backend.model.ReceiptImage
-import app.ocr_backend.repository.ItemDBRepository
-import app.ocr_backend.repository.ReceiptDBRepository
+import app.ocr_backend.model.User
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -14,15 +14,16 @@ import java.util.*
 class DBService(
     private val receiptService: ReceiptService,
     private val itemService: ItemService,
-    private val imageService: ImageService
+    private val imageService: ImageService,
+    private val userService: UserService
 ) {
 
     //ITEM
-    fun createNewItem(receiptId: Long): Item? {
+    fun createNewItem(receiptId: Long): Optional<Item> {
         val receipt = receiptService.getReceipt(receiptId)
-        if(receipt.isPresent)
-            return itemService.createNewItem(receipt.get())
-        return null
+        return if(receipt.isPresent)
+             Optional.of(itemService.createNewItem(receipt.get()))
+        else Optional.empty()
     }
 
     fun saveItem(receiptId: Long, item: Item)
@@ -47,18 +48,27 @@ class DBService(
 
     //RECEIPT
 
-    fun saveReceipt(receipt: Receipt): Receipt {
-        return receiptService.saveReceipt(receipt)
+    fun saveReceipt(receipt: Receipt): Optional<Receipt> {
+        val optUser = getCurrentUser()
+        if(optUser.isPresent)
+        {
+            receipt.user = optUser.get()
+            val savedReceipt = receiptService.saveReceipt(receipt)
+            return Optional.of(savedReceipt)
+        }
+        return Optional.empty()
     }
     fun getReceipt(receiptId:Long): Optional<Receipt> {
-        return receiptService.getReceipt(receiptId)
+       val optUser = getCurrentUser()
+        return if(optUser.isPresent) {
+            val user = optUser.get()
+            user.receipts.find { it.user == user }?.let { Optional.of(it) } ?: Optional.empty<Receipt>()
+        } else
+            Optional.empty<Receipt>()
     }
 
     fun updateReceipt(receipt: Receipt)
     {
-        /*println()
-        println("RECEIPT: $receipt")
-        println()*/
         for(item in receipt.items)
             itemService.updateItem(item)
         receiptService.updateReceipt(receipt)
@@ -79,7 +89,11 @@ class DBService(
 
     fun getAllReceipt():List<Receipt>
     {
-        return receiptService.getAllReceipt()
+        val optUser = getCurrentUser()
+        return if(optUser.isPresent)
+            optUser.get().receipts
+        else
+            listOf()
     }
 
     //IMAGE
@@ -102,5 +116,10 @@ class DBService(
     fun generateImageName(receipt: Receipt,image: MultipartFile):String
     {
         return imageService.generateImageName(receipt,image)
+    }
+
+    private fun getCurrentUser(): Optional<User> {
+        val actualUserName = SecurityContextHolder.getContext().authentication.principal.toString()
+        return userService.findByUserName(actualUserName)
     }
 }

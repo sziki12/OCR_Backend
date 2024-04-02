@@ -37,9 +37,12 @@ class ItemController(private val service: DBService) {
     @PostMapping("/{receiptId}/new/item")
     fun addItemToReceipt(@PathVariable receiptId:Long): ResponseEntity<String> {
         val newItem = service.createNewItem(receiptId)
-        newItem?.let {
-            val json: String = gson.toJson(ItemDTO(it.id,it.name,it.quantity,it.totalCost))
-            return ResponseEntity.ok().body(json)
+        if(newItem.isPresent)
+        {
+            newItem.get().let {
+                val json: String = gson.toJson(ItemDTO(it.id,it.name,it.quantity,it.totalCost))
+                return ResponseEntity.ok().body(json)
+            }
         }
         return ResponseEntity.internalServerError().body("ERROR")
     }
