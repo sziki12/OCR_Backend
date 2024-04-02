@@ -15,7 +15,8 @@ class DBService(
     private val receiptService: ReceiptService,
     private val itemService: ItemService,
     private val imageService: ImageService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val placeService: PlaceService,
 ) {
 
     //ITEM
@@ -84,7 +85,6 @@ class DBService(
             itemService.deleteAllByReceipt(receipt.get())
             receiptService.deleteReceipt(receiptId)
         }
-
     }
 
     fun getAllReceipt():List<Receipt>

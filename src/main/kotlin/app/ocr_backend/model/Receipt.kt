@@ -33,8 +33,11 @@ data class Receipt(
     @ManyToOne
     @JoinColumn(name="user_id")
     lateinit var user:User
-    //@Column(name="ocr_output")
-    //var ocrOutput:OcrResponse? = null
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name="place_id")
+    var place:Place? = null
 
     val totalCost:Int
         get(){
