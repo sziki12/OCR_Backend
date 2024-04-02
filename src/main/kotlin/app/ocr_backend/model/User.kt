@@ -14,4 +14,7 @@ data class User(
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     val id:Long = -1
+
+    @OneToMany(mappedBy = "user")
+    lateinit var receipts:MutableList<Receipt>
 }

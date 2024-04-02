@@ -20,27 +20,35 @@ class ImageProcessingService(
 ) {
     private val gson = Gson()
     fun processImage(image: MultipartFile): String {
-        val newReceipt = service.saveReceipt(Receipt().also { it.isPending = true })
-        val fileName = service.generateImageName(newReceipt, image)
-        val file = File(PathHandler.getImageDir().pathString + File.separator + fileName)
+        val optReceipt = service.saveReceipt(Receipt().also { it.isPending = true })
+        return if(optReceipt.isPresent)
+        {
+            val newReceipt = optReceipt.get()
+            val fileName = service.generateImageName(newReceipt, image)
+            val file = File(PathHandler.getImageDir().pathString + File.separator + fileName)
 
-        image.transferTo(file)
+            image.transferTo(file)
 
-        val ocrOutput = ocrService.processImage(fileName, newReceipt.id)
-        service.saveImage(newReceipt.id, fileName)
+            val ocrOutput = ocrService.processImage(fileName, newReceipt.id)
+            service.saveImage(newReceipt.id, fileName)
 
-        val itemsJson = llamaService.extractItems(fileName, ocrOutput.extractedItems)
-        try {
-            val llamaItemList = gson.fromJson(itemsJson, LlamaItemList::class.java)
-            println(llamaItemList)
-            for (item in llamaItemList.toItemList()) {
-                service.saveItem(newReceipt.id, item)
+            val itemsJson = llamaService.extractItems(fileName, ocrOutput.extractedItems)
+            try {
+                val llamaItemList = gson.fromJson(itemsJson, LlamaItemList::class.java)
+                println(llamaItemList)
+                for (item in llamaItemList.toItemList()) {
+                    service.saveItem(newReceipt.id, item)
+                }
+            } catch (e: Exception) {
+                System.err.println("Failed to read JSON from Llama for image: $fileName")
+                //Failed to read JSON
             }
-        } catch (e: Exception) {
-            System.err.println("Failed to read JSON from Llama for image: $fileName")
-            //Failed to read JSON
+            service.updateReceipt(newReceipt.also { it.isPending = false })
+            gson.toJson(ocrOutput)
         }
-        service.updateReceipt(newReceipt.also { it.isPending = false })
-        return gson.toJson(ocrOutput)
+        else
+        {
+            ""
+        }
     }
 }
