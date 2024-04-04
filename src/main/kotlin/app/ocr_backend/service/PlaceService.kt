@@ -3,27 +3,38 @@ package app.ocr_backend.service
 import app.ocr_backend.model.Place
 import app.ocr_backend.repository.PlaceDBRepository
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class PlaceService(val repository:PlaceDBRepository) {
 
-    fun savePlace()
+    fun savePlace(place: Place)
     {
-        TODO("savePlace")
+        repository.save(place)
     }
 
-    fun deletePlaceById()
+    fun deletePlace(placeId:Long)
     {
-        TODO("deletePlaceById")
-    }
-
-    fun updatePlace()
-    {
-        TODO("updatePlace")
+        repository.deleteById(placeId)
     }
 
     fun getPlaces():List<Place>
     {
         return repository.findAll()
+    }
+
+    fun getPlace(placeId:Long): Optional<Place> {
+        return repository.findById(placeId)
+    }
+
+    fun validatePlace(placeId:Long)
+    {
+        val optPlace = repository.findById(placeId)
+        if(optPlace.isPresent)
+        {
+            val place = optPlace.get()
+            place.isValidated = true
+            repository.save(place)
+        }
     }
 }

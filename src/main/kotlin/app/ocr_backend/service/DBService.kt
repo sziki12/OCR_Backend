@@ -1,9 +1,6 @@
 package app.ocr_backend.service
 
-import app.ocr_backend.model.Item
-import app.ocr_backend.model.Receipt
-import app.ocr_backend.model.ReceiptImage
-import app.ocr_backend.model.User
+import app.ocr_backend.model.*
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -122,4 +119,44 @@ class DBService(
         val actualUserName = SecurityContextHolder.getContext().authentication.principal.toString()
         return userService.findByUserName(actualUserName)
     }
+
+    //PLACE
+
+    fun savePlace(place: Place)
+    {
+        placeService.savePlace(place)
+    }
+
+    fun assignPlaceToReceipt(receiptId: Long,placeId: Long)
+    {
+        val receipt = receiptService.getReceipt(receiptId)
+        if(receipt.isPresent)
+        {
+            val place = placeService.getPlace(placeId)
+            if(place.isPresent)
+            {
+                receipt.get().place=place.get()
+                receiptService.updateReceipt(receipt.get())
+            }
+        }
+    }
+
+    fun validatePlace(placeId: Long)
+    {
+        val optUser = getCurrentUser()
+        if(optUser.isPresent)
+        {
+            if(optUser.get().isAdmin)
+            {
+                placeService.validatePlace(placeId)
+            }
+        }
+    }
+
+    fun deletePlace(placeId: Long)
+    {
+        placeService.deletePlace(placeId)
+    }
+
+
 }

@@ -17,4 +17,7 @@ data class Place(
 
     @OneToMany(mappedBy = "place")
     var receipts:MutableList<Receipt> = mutableListOf()
+
+    @Column(name="is_validated")
+    var isValidated = false
 }
