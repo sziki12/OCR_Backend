@@ -10,13 +10,6 @@ import java.util.*
 class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
 
     fun saveReceipt(receipt: Receipt): Receipt {
-        val receiptToSave = Receipt()
-        receiptToSave.let {
-            it.description = receipt.description
-            it.dateOfPurchase = receipt.dateOfPurchase
-            it.items = receipt.items
-            it.isPending = receipt.isPending
-        }
         receiptDBRepository.save(receipt)
         return receipt
     }

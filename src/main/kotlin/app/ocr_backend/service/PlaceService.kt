@@ -8,9 +8,8 @@ import java.util.*
 @Service
 class PlaceService(val repository:PlaceDBRepository) {
 
-    fun savePlace(place: Place)
-    {
-        repository.save(place)
+    fun savePlace(place: Place): Place {
+        return repository.save(place)
     }
 
     fun deletePlace(placeId:Long)

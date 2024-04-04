@@ -13,13 +13,11 @@ class ItemService(val itemRepository: ItemDBRepository) {
     fun createNewItem(receipt: Receipt): Item {
         val newItem  = Item("",1,0)
         newItem.receipt = receipt
-        receipt.items.add(newItem)
         itemRepository.save(newItem)
         return newItem
     }
     fun saveItem(receipt: Receipt, item:Item)
     {
-        receipt.items.add(item)
         item.receipt = receipt
         itemRepository.save(item)
     }

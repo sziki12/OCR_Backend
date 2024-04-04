@@ -18,6 +18,9 @@ data class User(
     @OneToMany(mappedBy = "user")
     lateinit var receipts:MutableList<Receipt>
 
+    @OneToMany(mappedBy = "user")
+    var palces:MutableList<Place> = mutableListOf()
+
     @Column(name = "is_admin")
     var isAdmin = false
 }

@@ -18,6 +18,11 @@ data class Place(
     @OneToMany(mappedBy = "place")
     var receipts:MutableList<Receipt> = mutableListOf()
 
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    lateinit var user:User
+
     @Column(name="is_validated")
     var isValidated = false
 }

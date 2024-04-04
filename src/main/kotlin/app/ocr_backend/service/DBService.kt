@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
+import kotlin.collections.ArrayList
 
 @Service
 class DBService(
@@ -122,9 +123,14 @@ class DBService(
 
     //PLACE
 
-    fun savePlace(place: Place)
-    {
-        placeService.savePlace(place)
+    fun savePlace(place: Place): Optional<Place> {
+        val optUser = getCurrentUser()
+        if(optUser.isPresent)
+        {
+            place.user = optUser.get()
+            return Optional.of(placeService.savePlace(place))
+        }
+        return Optional.empty()
     }
 
     fun assignPlaceToReceipt(receiptId: Long,placeId: Long)
@@ -157,6 +163,22 @@ class DBService(
     {
         placeService.deletePlace(placeId)
     }
+
+    fun getPlaces(): List<Place> {
+        return placeService.getPlaces()
+    }
+
+    fun mergePlaces(holder:Place,part:Place)
+    {
+        for(receipt in part.receipts)
+        {
+            receipt.place = holder
+            receiptService.saveReceipt(receipt)
+        }
+        placeService.deletePlace(part.id)
+    }
+
+
 
 
 }
