@@ -1,5 +1,6 @@
 package app.ocr_backend.service
 
+import app.ocr_backend.dto.OcrResponse
 import app.ocr_backend.model.*
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -15,6 +16,7 @@ class DBService(
     private val imageService: ImageService,
     private val userService: UserService,
     private val placeService: PlaceService,
+    private val ocrEntityService: OcrEntityService,
 ) {
 
     //ITEM
@@ -185,5 +187,48 @@ class DBService(
             }
             placeService.deletePlace(partId)
         }
+    }
+
+    //OcrEntity
+
+    fun saveOcrEntity(receiptId:Long,entity:OcrEntity)
+    {
+        val optReceipt = receiptService.getReceipt(receiptId)
+        if(optReceipt.isPresent)
+        {
+            entity.receipt = optReceipt.get()
+            ocrEntityService.saveOcrEntity(entity)
+        }
+    }
+
+    fun createFromOcrResponse(ocrResponse: OcrResponse)
+    {
+        val optReceipt = receiptService.getReceipt(ocrResponse.newReceiptId)
+        if(optReceipt.isPresent)
+        {
+            val receipt = optReceipt.get()
+            receipt.dateOfPurchase = ocrResponse.date
+            val ocrEntity = OcrEntity.fromOcrResponse(ocrResponse).also {
+                it.receipt = receipt
+                it.date = receipt.dateOfPurchase
+            }
+            receiptService.saveReceipt(receipt)
+            ocrEntityService.saveOcrEntity(ocrEntity)
+        }
+    }
+
+    fun getOcrEntity(entityId:Long): Optional<OcrEntity> {
+        return ocrEntityService.getOcrEntity(entityId)
+    }
+
+    fun getOcrResponse(receiptId:Long): Optional<OcrResponse> {
+        val optReceipt = receiptService.getReceipt(receiptId)
+        if(optReceipt.isPresent)
+        {
+            optReceipt.get().ocrEntity?.let {
+                return Optional.of(it.toOcrResponse())
+            }
+        }
+        return Optional.empty()
     }
 }

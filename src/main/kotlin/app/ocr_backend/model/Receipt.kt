@@ -1,5 +1,6 @@
 package app.ocr_backend.model
 
+import app.ocr_backend.dto.OcrResponse
 import app.ocr_backend.dto.ReceiptDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
@@ -35,6 +36,9 @@ data class Receipt(
     @ManyToOne
     @JoinColumn(name="place_id")
     var place:Place? = null
+
+    @OneToOne(mappedBy = "receipt")
+    var ocrEntity: OcrEntity? = null
 
     val totalCost:Int
         get(){

@@ -1,6 +1,7 @@
 package app.ocr_backend.service.ocr
 
-import app.ocr_backend.model.OcrResponse
+import app.ocr_backend.dto.OcrResponse
+import app.ocr_backend.model.OcrEntity
 import app.ocr_backend.utils.PathHandler
 import org.springframework.stereotype.Service
 import java.io.File
@@ -16,8 +17,8 @@ class OcrService {
 
     private val execPythonPath = PathHandler.getPythonDir().pathString+"${File.separator}Runnable.py"
     private val imagePath = PathHandler.getImageDir().pathString
-    private var mainSeparator = "======"
-    private var itemSeparator = "=-----="
+    private var mainSeparator = OcrEntity.mainSeparator
+    private var itemSeparator = OcrEntity.itemSeparator
     fun processImage(imageName: String, newReceiptId: Long): OcrResponse {
         val process = ocrProcessBuilder(imageName).start()
         val outScanner = Scanner(process.inputStream, StandardCharsets.UTF_8)
