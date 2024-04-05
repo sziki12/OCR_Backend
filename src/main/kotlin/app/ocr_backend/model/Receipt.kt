@@ -1,11 +1,8 @@
 package app.ocr_backend.model
 
-import app.ocr_backend.dto.ItemDTO
-import app.ocr_backend.dto.OcrResponse
 import app.ocr_backend.dto.ReceiptDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
-import java.io.File
 import java.util.Date
 
 @Entity

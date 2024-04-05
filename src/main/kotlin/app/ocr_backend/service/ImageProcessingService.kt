@@ -43,7 +43,10 @@ class ImageProcessingService(
                 System.err.println("Failed to read JSON from Llama for image: $fileName")
                 //Failed to read JSON
             }
-            service.updateReceipt(newReceipt.also { it.isPending = false })
+            service.updateReceipt(newReceipt.also {
+                it.isPending = false
+                it.dateOfPurchase = ocrOutput.date
+            })
             gson.toJson(ocrOutput)
         }
         else

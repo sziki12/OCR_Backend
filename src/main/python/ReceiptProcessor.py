@@ -1,6 +1,8 @@
 import numpy as np
 import re
 
+import threading
+
 class ReceiptProcessor:
 
     def __init__(self,separator,itemSeparator):
@@ -16,41 +18,68 @@ class ReceiptProcessor:
             if(self.lengthFilter(row)):
                 filteredText += row+"\n"
         return filteredText
-        
+    
 
-    def process(self,rawReceiptText):
-        receiptText = self.filterText(rawReceiptText)
-        rows = receiptText.split("\n")
+    def getItems(self,rows):
         items = np.array([])
         row_size = self.getItemRowSize(rows)
         i = 0
         
         for row in rows:
-            element = self.findItemRow(row)
+            element =  self.findPatternRow(row,self.getItemPattern())
             if(element is not None):
                 for prev in range(i-row_size+1,i):
                     items = np.append(items,rows[prev])
                 items = np.append(items,rows[i])
             i+=1
-        self.printItems(rawReceiptText,receiptText,items,row_size)
+        self.items = items
+        self.row_size = row_size
+        #print("Items Finished")
+        
+        
+
+    def process(self,rawReceiptText):
+        #print("Processing Started")
+        receiptText = self.filterText(rawReceiptText)
+        #print("Rows Filtered")
+        rows = receiptText.split("\n")
+        
+        t1 = threading.Thread(target=self.getItems, args=(rows,))
+        t2 = threading.Thread(target=self.getDate, args=(rows,))
+        #print("Multi Thread Started")
+        t1.start()
+        t2.start()
+        
+        t1.join()
+        t2.join()
+        #print("Finish")
+        self.printItems(rawReceiptText,receiptText,self.items,self.row_size,self.date)
 
     def getItemPattern(self):
         character = '[A-ZOÓÖŐUÚÜŰÍÉÁ:0-9-()]'
         afa = '([A-Z][0-9][0-9]|[A-Z]OO)'
-        currency = '(FT|HUF|EUR|\$|\€|'+afa+')'
-        price = '([ ]?([0-9]+[ .,]?)+)'
-        validPrice = price+'[ ]*'+currency+'|'+currency+'[ ]*'+price
+        currency = '(FT|HUF|EUR|\$|\€|{afa})'.format(afa=afa)
+        price = '([ ]?([0-9]+[ \.,]?)+)'
+        validPrice = '{price}[ ]*{currency}|{currency}[ ]*{price}'.format(price=price,currency=currency)
         name = '(('+character+'+[ ]?)+)'
 
-        pricePattern = r'('+name+'[ \n]*'+validPrice+')|('+validPrice+'[ \n]*'+name+')'
-        return pricePattern
+        pricePattern = '({name}[ \n]*{price})|({price}[ \n]*{name})'.format(name=name,price=validPrice)
+        return r''+pricePattern
+    
+    def getDatePattern(self):
+        
+        separator = "[\. ,-]"
+        date = "([1-9][0-9][0-9][0-9]{s}{s}*[0-9][0-9]{s}{s}*[0-9][0-9])".format(s=separator)
+        time = "([ 0-9][0-9][ ]*:[ ]*[0-9][0-9])"
+        pattern = "({date}{s}{s}*{time})|({date})".format(date=date,s=separator,time=time)
+        return r''+pattern
 
     #Filters rows that might be too long to be readable
     def lengthFilter(self,row):
         return len(row)<40 and len(row)>0
     
-    def findItemRow(self,row):
-        element = re.search(re.compile(self.pricePattern), row.upper())
+    def findPatternRow(self,row,pattern):
+        element = re.search(re.compile(pattern), row.upper())
         if element is not None and element.group() != "":
             return element
         return None
@@ -62,7 +91,7 @@ class ReceiptProcessor:
         row_size = -1
         matches = 0
         for row in rows:
-            element = self.findItemRow(row)
+            element = self.findPatternRow(row,self.getItemPattern())
             if(element is not None):
                 matches += 1     
                 if(matches > 1):
@@ -75,11 +104,19 @@ class ReceiptProcessor:
         row_size = round(row_size / matches)
         return row_size
     
-    def printItems(self,rawReceiptText,filteredReceiptText,items,row_size):
+    def getDate(self,rows):
+        self.date = None
+        for row in rows:
+            element =  self.findPatternRow(row,self.getDatePattern())
+            if(element is not None):
+                self.date = element.group()
+        #print("Date Finished")
+    
+    def printItems(self,rawReceiptText,filteredReceiptText,items,row_size,date):
         print(self.separator)
-        print(rawReceiptText)
+        print(rawReceiptText)#rawReceiptText
         print(self.separator)
-        print(filteredReceiptText)
+        print(filteredReceiptText)#filteredReceiptText
         print(self.separator)
         i = 0
         for item in items:
@@ -87,4 +124,6 @@ class ReceiptProcessor:
             i+=1
             if(i%row_size == 0 and i != 0):
                 print(self.itemSeparator)
+        print(self.separator)
+        print(date)#date
         

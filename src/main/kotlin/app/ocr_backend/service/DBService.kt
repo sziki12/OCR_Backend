@@ -128,6 +128,8 @@ class DBService(
         if(optUser.isPresent)
         {
             place.user = optUser.get()
+            if(place.user.isAdmin)
+                place.isValidated = true
             return Optional.of(placeService.savePlace(place))
         }
         return Optional.empty()
@@ -170,17 +172,18 @@ class DBService(
         return placeService.getPlaces()
     }
 
-    fun mergePlaces(holder:Place,part:Place)
+    fun mergePlaces(holderId:Long,partId:Long)
     {
-        for(receipt in part.receipts)
+        val holder = placeService.getPlace(holderId)
+        val part = placeService.getPlace(partId)
+        if(holder.isPresent && part.isPresent)
         {
-            receipt.place = holder
-            receiptService.saveReceipt(receipt)
+            for(receipt in part.get().receipts)
+            {
+                receipt.place = holder.get()
+                receiptService.saveReceipt(receipt)
+            }
+            placeService.deletePlace(partId)
         }
-        placeService.deletePlace(part.id)
     }
-
-
-
-
 }

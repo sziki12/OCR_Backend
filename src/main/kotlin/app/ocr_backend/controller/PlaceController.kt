@@ -28,6 +28,13 @@ class PlaceController(val service:DBService) {
     }
 
     @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/merge/{partId}/into/{holderId}")
+    fun margePlaces(@PathVariable holderId:Long,@PathVariable partId: Long)
+    {
+        service.mergePlaces(holderId,partId)
+    }
+
+    @ResponseStatus(HttpStatus.OK)
     @PutMapping("/validate/{placeId}")
     fun validatePlace(@PathVariable placeId: Long)
     {
