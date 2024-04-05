@@ -40,7 +40,7 @@ class UserAuthProvider(val userService:UserService) {
         return null
     }
 
-    private fun getUserByToken(token: String): Optional<User> {
+    fun getUserByToken(token: String): Optional<User> {
         val verifier = JWT.require(Algorithm.HMAC256(secretKey))
             .build()
 

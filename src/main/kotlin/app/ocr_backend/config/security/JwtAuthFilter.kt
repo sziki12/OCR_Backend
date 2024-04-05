@@ -4,6 +4,9 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
 
@@ -24,8 +27,9 @@ class JwtAuthFilter(private val userAuthProvider:UserAuthProvider):OncePerReques
                 }
                 catch (e:RuntimeException)
                 {
+                    val optUser = userAuthProvider.getUserByToken(elements[1])
                     SecurityContextHolder.clearContext()
-                    throw e
+                    System.err.println("Token expired for user: ${if(optUser.isPresent)optUser.get().toString() else "Unknown"}")
                 }
             }
         }

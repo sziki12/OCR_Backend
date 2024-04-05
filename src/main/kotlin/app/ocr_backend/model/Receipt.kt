@@ -72,7 +72,7 @@ data class Receipt(
     }
 
     override fun toString(): String {
-        return super.toString()+", "+this.items+", id:"+this.id
+        return "Receipt(id: $id, isPedding: $isPending, description: $description, dateOfPurchase: $dateOfPurchase, items: $items, place: $place, user: $user)"
     }
 
     override fun hashCode(): Int {

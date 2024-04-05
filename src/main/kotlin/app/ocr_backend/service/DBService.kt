@@ -135,14 +135,16 @@ class DBService(
 
     fun assignPlaceToReceipt(receiptId: Long,placeId: Long)
     {
-        val receipt = receiptService.getReceipt(receiptId)
-        if(receipt.isPresent)
+        val optReceipt = receiptService.getReceipt(receiptId)
+        if(optReceipt.isPresent)
         {
-            val place = placeService.getPlace(placeId)
-            if(place.isPresent)
+            val receipt = optReceipt.get()
+            val optPlace = placeService.getPlace(placeId)
+            if(optPlace.isPresent)
             {
-                receipt.get().place=place.get()
-                receiptService.updateReceipt(receipt.get())
+                val place = optPlace.get()
+                receipt.place = place
+                receiptService.updateReceipt(receipt)
             }
         }
     }
