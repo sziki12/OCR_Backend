@@ -28,6 +28,13 @@ class PlaceController(val service:DBService) {
     }
 
     @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/remove/{receiptId}")
+    fun removePlace(@PathVariable receiptId:Long)
+    {
+        service.removePlaceFromReceipt(receiptId)
+    }
+
+    @ResponseStatus(HttpStatus.OK)
     @PutMapping("/merge/{partId}/into/{holderId}")
     fun margePlaces(@PathVariable holderId:Long,@PathVariable partId: Long)
     {

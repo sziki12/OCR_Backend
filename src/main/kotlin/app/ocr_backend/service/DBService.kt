@@ -153,6 +153,18 @@ class DBService(
         }
     }
 
+    fun removePlaceFromReceipt(receiptId: Long)
+    {
+        val optReceipt = receiptService.getReceipt(receiptId)
+        if(optReceipt.isPresent)
+        {
+            val receipt = optReceipt.get()
+
+            receipt.place = null
+            receiptService.updateReceipt(receipt)
+        }
+    }
+
     fun validatePlace(placeId: Long)
     {
         val optUser = getCurrentUser()
