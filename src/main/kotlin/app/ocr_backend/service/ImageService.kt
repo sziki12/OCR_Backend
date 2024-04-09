@@ -6,12 +6,21 @@ import app.ocr_backend.repository.ImageDBRepository
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
+import java.util.*
 
 @Service
 class ImageService(private val imageRepository: ImageDBRepository) {
 
     fun getImages(receiptId:Long): List<ReceiptImage> {
         return imageRepository.getByReceiptId(receiptId)
+    }
+
+    fun getImageName(receiptId:Long,imageID:Long): Optional<String> {
+        val imageName =  imageRepository.getByReceiptId(receiptId).singleOrNull { it.id == imageID }
+        imageName?.let {
+            return Optional.of(it.name)
+        }
+        return Optional.empty()
     }
 
     fun saveImage(receipt: Receipt,imageName:String)
