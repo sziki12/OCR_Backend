@@ -63,7 +63,7 @@ class DBService(
        val optUser = getCurrentUser()
         return if(optUser.isPresent) {
             val user = optUser.get()
-            user.receipts.find { it.user == user }?.let { Optional.of(it) } ?: Optional.empty<Receipt>()
+            user.receipts.find { it.id == receiptId }?.let { Optional.of(it) } ?: Optional.empty<Receipt>()
         } else
             Optional.empty<Receipt>()
     }
