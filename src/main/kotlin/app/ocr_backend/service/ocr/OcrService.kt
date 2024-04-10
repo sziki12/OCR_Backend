@@ -28,11 +28,18 @@ class OcrService {
         outScanner.close()
         val output = out.split(mainSeparator)
         println("output: $out")
+
+        var date = Date()
+        extractDate(output[4])?.let {
+            println("DATE: $it")
+            date=Date.from(it.toInstant(ZoneOffset.UTC))
+        }
+
         return OcrResponse(
             plainText = output[1].split("\n"),
             filteredReceipt = output[2].split("\n"),
             extractedItems = output[3].split(itemSeparator),
-            date = Date.from(extractDate(output[4])?.toInstant(ZoneOffset.UTC)),
+            date = date,
             newReceiptId
         )
     }
@@ -41,22 +48,29 @@ class OcrService {
     {
         if(inDate=="None")
             return null
-        var date = inDate.replace(Regex("[.,-]"),"")
-        date = date.replace(Regex("[ ]+")," ")
-        date = date.replace("\n","")
-        val parts = date.split(" ")
-        val year = parts[0].toInt()
-        val month = parts[1].toInt()
-        val day = parts[2].toInt()
+        try {
+            var date = inDate.replace(Regex("[.,-]"),"")
+            date = date.replace(Regex("[ ]+")," ")
+            date = date.replace("\n","")
+            val parts = date.split(" ")
+            val year = parts[0].toInt()
+            val month = parts[1].toInt()
+            val day = parts[2].toInt()
 
-        if(date.contains(":"))
-        {
-            val other = parts[3].split(":")
-            val hour = other[0].toInt()
-            val min = other[1].toInt()
-            return LocalDateTime.of(year, month, day,hour,min)
+            if(date.contains(":"))
+            {
+                val other = parts[3].split(":")
+                val hour = other[0].toInt()
+                val min = other[1].toInt()
+                return LocalDateTime.of(year, month, day,hour,min)
+            }
+            return LocalDateTime.of(year, month, day,0,0)
         }
-        return LocalDateTime.of(year, month, day,0,0)
+        catch (e:Exception)
+        {
+            e.printStackTrace()
+            return null
+        }
     }
 
     private fun ocrProcessBuilder(imageName:String):ProcessBuilder
