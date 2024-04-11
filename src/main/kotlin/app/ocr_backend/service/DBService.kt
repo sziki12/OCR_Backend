@@ -83,6 +83,9 @@ class DBService(
         {
             imageService.deleteAllByReceipt(receipt.get())
             itemService.deleteAllByReceipt(receipt.get())
+            receipt.get().ocrEntity?.let {
+                ocrEntityService.deleteOcrEntity(it.id)
+            }
             receiptService.deleteReceipt(receiptId)
         }
     }
