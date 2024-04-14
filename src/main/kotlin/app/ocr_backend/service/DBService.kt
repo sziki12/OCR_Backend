@@ -70,8 +70,21 @@ class DBService(
 
     fun updateReceipt(receipt: Receipt)
     {
+        val optReceipt = receiptService.getReceipt(receipt.id)
         for(item in receipt.items)
             itemService.updateItem(item)
+
+        if(optReceipt.isPresent)
+        {
+            val originalReceipt = optReceipt.get()
+            val itemsToRemove = ArrayList<Item>()
+            itemsToRemove.addAll(originalReceipt.items)
+            itemsToRemove.removeAll(receipt.items.toSet())
+            for(item in itemsToRemove)
+            {
+                itemService.deleteItem(item.id)
+            }
+        }
         receiptService.updateReceipt(receipt)
     }
 
