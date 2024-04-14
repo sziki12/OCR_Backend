@@ -15,7 +15,7 @@ import kotlin.io.path.pathString
 @Service
 class OcrService {
 
-    private val execPythonPath = PathHandler.getPythonDir().pathString+"${File.separator}Runnable.py"
+    private val execPythonPath = PathHandler.getOcrStartDir().pathString+"${File.separator}OcrRunnable.py"
     private val imagePath = PathHandler.getImageDir().pathString
     private var mainSeparator = OcrEntity.mainSeparator
     private var itemSeparator = OcrEntity.itemSeparator

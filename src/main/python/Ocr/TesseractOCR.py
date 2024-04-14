@@ -1,10 +1,7 @@
 import cv2
-import numpy as np
 import pytesseract
 from imutils.perspective import four_point_transform
 import imutils
-#import re
-
 
 class ReceiptOCRWrapper:
 	def __init__(self,args):
@@ -90,13 +87,5 @@ class ReceiptOCRWrapper:
 			config=options)
 	
 		return receiptText
-
-
-
-
-
-# Adding custom options
-#custom_config = r'--oem 3 --psm 4 load_system_dawg 0'
-#print(pytesseract.image_to_string(image, config=custom_config,lang="eng+hun"))
 
 

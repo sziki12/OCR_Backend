@@ -13,35 +13,23 @@ import kotlin.io.path.pathString
 @Service
 class LlamaService {
 
-    private val execLlama = PathHandler.getLlamaStartDir().pathString+"${File.separator}llama_runnable.bat"
-    private val llamaInputDir = PathHandler.getLlamaInputDir().pathString
+    private val execLlama = PathHandler.getLlamaStartDir().pathString+"${File.separator}LlamaRunnable.py"
     private val llamaOutputDir = PathHandler.getLlamaOutputDir().pathString
-
-    private val llamaPrompt = "Please extract from the given receipt the items name as string, cost as Number and quantity as Number in a JSON format:"
-
     fun extractItems(imageName: String, items: List<String>): String {
         //Remove Accents from Input, because Llama handles Accented chars the wrong way
+        println(execLlama)
         var itemsToProcess = ""
         for(item in items)
         {
             itemsToProcess += StringUtils.stripAccents(item)+"\n"
         }
         val inputName = imageName.replace(".jpg", ".txt")
-        val inputFile = File(llamaInputDir + "${File.separator}$inputName")
         val outFile = File(llamaOutputDir + "${File.separator}$inputName")
 
-        val pw = PrintWriter(
-            OutputStreamWriter(
-                inputFile.outputStream(), StandardCharsets.UTF_8
-            ), true
-        )
-        pw.write(llamaPrompt + "\n")
-        pw.write(itemsToProcess + "\n")
-        pw.write("\\")
-        pw.close()
-
-        val process = llamaProcessBuilder(inputFile, outFile).start()
+        println("Before Start")
+        val process = llamaProcessBuilder(itemsToProcess, outFile).start()
         process.waitFor()
+        println("Finished")
         return extractJson(outFile)
     }
 
@@ -94,11 +82,9 @@ class LlamaService {
         return out
     }
 
-    private fun llamaProcessBuilder(inFile: File, outFile: File):ProcessBuilder
+    private fun llamaProcessBuilder(receiptText: String, outFile: File):ProcessBuilder
     {
-        val processBuilder =  ProcessBuilder(execLlama)
-        processBuilder.directory(PathHandler.getLlamaRunnableDir().toFile())
-        processBuilder.redirectInput(inFile)
+        val processBuilder =  ProcessBuilder("python",execLlama,"--receiptText",receiptText,"--pathToModel",PathHandler.getModelDir().pathString)
         processBuilder.redirectOutput(outFile)
         processBuilder.redirectErrorStream(true)
         return processBuilder

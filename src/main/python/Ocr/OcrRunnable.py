@@ -1,7 +1,5 @@
 
 import argparse
-import re
-import numpy as np
 from ReceiptProcessor import ReceiptProcessor
 from TesseractOCR import ReceiptOCRWrapper
 
@@ -26,6 +24,4 @@ separator = args["separator"]
 itemSeparator = args["itemseparator"]
 
 receiptProcessor = ReceiptProcessor(separator,itemSeparator)
-#print(receiptProcessor.getDatePattern())
-#print(receiptProcessor.findPatternRow("2024, 02, 29. 12:08",receiptProcessor.getDatePattern()))
 receiptProcessor.process(receiptText)
