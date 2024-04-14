@@ -46,7 +46,6 @@ data class Item(
         result = 31 * result + quantity
         result = 31 * result + totalCost
         result = 31 * result + (id?.hashCode() ?: 0)
-        result = 31 * result + receipt.hashCode()
         return result
     }
 }
