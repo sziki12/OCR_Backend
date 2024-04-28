@@ -17,4 +17,18 @@ data class User(
 
     @OneToMany(mappedBy = "user")
     lateinit var receipts:MutableList<Receipt>
+
+    @OneToMany(mappedBy = "user")
+    var places:MutableList<Place> = mutableListOf()
+
+    @Column(name = "is_admin")
+    var isAdmin = false
+
+    override fun toString(): String {
+        return "User(id: $id, userName: $userName isAdmin: $isAdmin)"
+    }
+
+    fun toDetailedString(): String {
+        return "User(id: $id, userName: $userName isAdmin: $isAdmin, places: $places, receipts: $receipts)"
+    }
 }

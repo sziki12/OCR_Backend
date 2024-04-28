@@ -1,11 +1,9 @@
 package app.ocr_backend.model
 
-import app.ocr_backend.dto.ItemDTO
 import app.ocr_backend.dto.OcrResponse
 import app.ocr_backend.dto.ReceiptDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
-import java.io.File
 import java.util.Date
 
 @Entity
@@ -33,8 +31,14 @@ data class Receipt(
     @ManyToOne
     @JoinColumn(name="user_id")
     lateinit var user:User
-    //@Column(name="ocr_output")
-    //var ocrOutput:OcrResponse? = null
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name="place_id")
+    var place:Place? = null
+
+    @OneToOne(mappedBy = "receipt")
+    var ocrEntity: OcrEntity? = null
 
     val totalCost:Int
         get(){
@@ -69,7 +73,7 @@ data class Receipt(
     }
 
     override fun toString(): String {
-        return super.toString()+", "+this.items+", id:"+this.id
+        return "Receipt(id: $id, isPedding: $isPending, description: $description, dateOfPurchase: $dateOfPurchase, items: $items, place: $place, user: $user)"
     }
 
     override fun hashCode(): Int {

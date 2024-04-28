@@ -4,6 +4,7 @@ import app.ocr_backend.model.User
 import app.ocr_backend.service.UserService
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
@@ -13,8 +14,8 @@ import java.util.*
 @Component
 class UserAuthProvider(val userService:UserService) {
 
-    //TODO REMOVE KEY FROM CODE
-    private var secretKey:String = "secret_key"
+    @Value("\${security.jwt.token.secret-key:another-key}")
+    private var secretKey:String = ""
 
     init
     {
@@ -40,7 +41,7 @@ class UserAuthProvider(val userService:UserService) {
         return null
     }
 
-    private fun getUserByToken(token: String): Optional<User> {
+    fun getUserByToken(token: String): Optional<User> {
         val verifier = JWT.require(Algorithm.HMAC256(secretKey))
             .build()
 

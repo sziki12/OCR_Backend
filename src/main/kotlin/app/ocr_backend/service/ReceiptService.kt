@@ -10,13 +10,6 @@ import java.util.*
 class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
 
     fun saveReceipt(receipt: Receipt): Receipt {
-        val receiptToSave = Receipt()
-        receiptToSave.let {
-            it.description = receipt.description
-            it.dateOfPurchase = receipt.dateOfPurchase
-            it.items = receipt.items
-            it.isPending = receipt.isPending
-        }
         receiptDBRepository.save(receipt)
         return receipt
     }
@@ -24,8 +17,7 @@ class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
         return receiptDBRepository.getReceiptById(receiptId)
     }
 
-    fun updateReceipt(receipt: Receipt)
-    {
+    fun updateReceipt(receipt: Receipt): Optional<Receipt> {
         val receiptToUpdate = receiptDBRepository.getReceiptById(receipt.id)
         if(receiptToUpdate.isPresent)
         {
@@ -35,8 +27,9 @@ class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
                 it.items = receipt.items
                 it.isPending = receipt.isPending
             }
-            receiptDBRepository.save(receiptToUpdate.get())
+            return Optional.of(receiptDBRepository.save(receiptToUpdate.get()))
         }
+        return Optional.empty()
     }
 
     fun deleteReceipt(itemId:Long)
@@ -46,7 +39,6 @@ class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
 
     fun getAllReceipt():List<Receipt>
     {
-        //TODO Assign Users to Receipts and return only the appropriate receipts
         return receiptDBRepository.findAll()
     }
 

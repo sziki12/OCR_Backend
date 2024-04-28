@@ -30,21 +30,28 @@ object PathHandler {
 
     fun getLlamaStartDir():Path
     {
-        val path = getResourceDir().pathString+"${s}llama"
+        val path = getPythonDir().pathString+"${s}llama"
+        val file = File(path)
+        return file.toPath()
+    }
+
+    fun getOcrStartDir():Path
+    {
+        val path = getPythonDir().pathString+"${s}ocr"
         val file = File(path)
         return file.toPath()
     }
 
     fun getLlamaInputDir():Path
     {
-        val path = getLlamaStartDir().pathString+"${s}input_text"
+        val path = getResourceDir().pathString+"${s}llama${s}input_text"
         val file = File(path)
         return file.toPath()
     }
 
     fun getLlamaOutputDir():Path
     {
-        val path = getLlamaStartDir().pathString+"${s}output_text"
+        val path = getResourceDir().pathString+"${s}llama${s}output_text"
         val file = File(path)
         return file.toPath()
     }
@@ -56,9 +63,9 @@ object PathHandler {
         return file.toPath()
     }
 
-    fun getLlamaRunnableDir():Path
+    fun getModelDir():Path
     {
-        val path = "D:\\Llama\\Files"
+        val path = "D:\\Llama\\Files\\Models\\llama2_7b\\llama-2-7b-chat.Q6_K.gguf"
         return File(path).toPath()
     }
 }

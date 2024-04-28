@@ -1,6 +1,7 @@
 package app.ocr_backend.service
 
 import app.ocr_backend.dto.LlamaItemList
+import app.ocr_backend.model.OcrEntity
 import app.ocr_backend.model.Receipt
 import app.ocr_backend.service.llama.LlamaService
 import app.ocr_backend.service.ocr.OcrService
@@ -30,6 +31,8 @@ class ImageProcessingService(
             image.transferTo(file)
 
             val ocrOutput = ocrService.processImage(fileName, newReceipt.id)
+
+            service.saveOcrEntity(newReceipt.id,OcrEntity.fromOcrResponse(ocrOutput))
             service.saveImage(newReceipt.id, fileName)
 
             val itemsJson = llamaService.extractItems(fileName, ocrOutput.extractedItems)
@@ -43,7 +46,9 @@ class ImageProcessingService(
                 System.err.println("Failed to read JSON from Llama for image: $fileName")
                 //Failed to read JSON
             }
-            service.updateReceipt(newReceipt.also { it.isPending = false })
+            service.updateReceipt(newReceipt.also {
+                it.isPending = false
+            })
             gson.toJson(ocrOutput)
         }
         else
