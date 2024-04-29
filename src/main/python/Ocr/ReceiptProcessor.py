@@ -5,10 +5,11 @@ import threading
 
 class ReceiptProcessor:
 
-    def __init__(self,separator,itemSeparator):
+    def __init__(self,separator,itemSeparator,debug):
         self.pricePattern = self.getItemPattern()
         self.separator = separator
         self.itemSeparator = itemSeparator
+        self.debug = debug
 
     
     def filterText(self,rawReceiptText):
@@ -34,25 +35,30 @@ class ReceiptProcessor:
             i+=1
         self.items = items
         self.row_size = row_size
-        #print("Items Finished")
+        if(self.debug):
+            print("Items Finished")
         
         
 
     def process(self,rawReceiptText):
-        #print("Processing Started")
+        if(self.debug):
+            print("Processing Started")
         receiptText = self.filterText(rawReceiptText)
-        #print("Rows Filtered")
+        if(self.debug):
+            print("Rows Filtered")
         rows = receiptText.split("\n")
         
         t1 = threading.Thread(target=self.getItems, args=(rows,))
         t2 = threading.Thread(target=self.getDate, args=(rows,))
-        #print("Multi Thread Started")
+        if(self.debug):
+            print("Multi Thread Started")
         t1.start()
         t2.start()
         
         t1.join()
         t2.join()
-        #print("Finish")
+        if(self.debug):
+            print("Finish")
         self.printItems(rawReceiptText,receiptText,self.items,self.row_size,self.date)
 
     def getItemPattern(self):
@@ -102,6 +108,8 @@ class ReceiptProcessor:
                     last_match = first_match     
             i+=1
         row_size = round(row_size / matches)
+        if(self.debug):
+            print("Row Size {size}".format(size=row_size))
         return row_size
     
     def getDate(self,rows):
@@ -110,7 +118,8 @@ class ReceiptProcessor:
             element =  self.findPatternRow(row,self.getDatePattern())
             if(element is not None):
                 self.date = element.group()
-        #print("Date Finished")
+        if(self.debug):
+            print("Date Finished:  {date}".format(date=self.date))
     
     def printItems(self,rawReceiptText,filteredReceiptText,items,row_size,date):
         print(self.separator)

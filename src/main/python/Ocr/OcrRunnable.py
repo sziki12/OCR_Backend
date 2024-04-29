@@ -22,6 +22,7 @@ receiptText = ocr.readReceipt()
 
 separator = args["separator"]
 itemSeparator = args["itemseparator"]
+debug = args["debug"]
 
-receiptProcessor = ReceiptProcessor(separator,itemSeparator)
+receiptProcessor = ReceiptProcessor(separator,itemSeparator,debug)
 receiptProcessor.process(receiptText)
