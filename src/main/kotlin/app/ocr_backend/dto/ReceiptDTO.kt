@@ -6,14 +6,14 @@ import java.util.*
 
 data class ReceiptDTO(
     var dateOfPurchase: Date,
-    var description:String,
+    var name:String,
     var items:MutableList<Item>,
     var isPending:Boolean,
 )
 {
     constructor(receipt:Receipt):this(
         receipt.dateOfPurchase,
-        receipt.description,
+        receipt.name,
         receipt.items,
         receipt.isPending
         )

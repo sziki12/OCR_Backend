@@ -1,6 +1,5 @@
 package app.ocr_backend.model
 
-import app.ocr_backend.dto.OcrResponse
 import app.ocr_backend.dto.ReceiptDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
@@ -11,7 +10,7 @@ import java.util.Date
 data class Receipt(
     @Column(name="date_of_purchase")
     var dateOfPurchase:Date,
-    var description:String,
+    var name:String,
 ) {
 
     @Column(name="is_pending")
@@ -40,6 +39,8 @@ data class Receipt(
     @OneToOne(mappedBy = "receipt")
     var ocrEntity: OcrEntity? = null
 
+    val placeName:String?
+        get()=place?.name
     val totalCost:Int
         get(){
             var cost = 0
@@ -57,7 +58,7 @@ data class Receipt(
     }
 
     constructor(receiptData: ReceiptDTO):
-            this(receiptData.dateOfPurchase,receiptData.description)
+            this(receiptData.dateOfPurchase,receiptData.name)
     {
         this.items = receiptData.items
     }
@@ -73,12 +74,12 @@ data class Receipt(
     }
 
     override fun toString(): String {
-        return "Receipt(id: $id, isPedding: $isPending, description: $description, dateOfPurchase: $dateOfPurchase, items: $items, place: $place, user: $user)"
+        return "Receipt(id: $id, isPedding: $isPending, name: $name, dateOfPurchase: $dateOfPurchase, items: $items, place: $place, user: $user)"
     }
 
     override fun hashCode(): Int {
         var result = dateOfPurchase.hashCode()
-        result = 31 * result + description.hashCode()
+        result = 31 * result + name.hashCode()
         result = 31 * result + isPending.hashCode()
         result = 31 * result + id.hashCode()
         result = 31 * result + items.hashCode()

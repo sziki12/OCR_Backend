@@ -14,6 +14,18 @@ import java.util.*
 @CrossOrigin
 class PlaceController(val service:DBService) {
     val gson = Gson()
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @GetMapping("/{receiptId}")
+    fun getPlaceByReceiptId(@PathVariable receiptId: Long): Place? {
+        val optReceipt = service.getReceipt(receiptId)
+        if(optReceipt.isPresent)
+        {
+            return optReceipt.get().place
+        }
+
+        return null;
+    }
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/save")
     fun savePlace(@RequestBody place: Place): Optional<Place> {

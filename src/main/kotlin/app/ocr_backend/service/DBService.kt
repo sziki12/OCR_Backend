@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 
 @Service
 class DBService(
@@ -200,6 +201,20 @@ class DBService(
 
     fun getPlaces(): List<Place> {
         return placeService.getPlaces()
+    }
+
+    fun getPlacesWithReceipts(): List<Place> {
+        val receipts =  getAllReceipt()
+        val places = HashSet<Place>()
+        receipts.forEach()
+        {
+            val place = it.place
+            if(place != null && !places.contains(place))
+            {
+                places.add(place)
+            }
+        }
+        return places.toList()
     }
 
     fun mergePlaces(holderId:Long,partId:Long)

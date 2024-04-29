@@ -3,8 +3,6 @@ package app.ocr_backend.repository
 import app.ocr_backend.model.Item
 import app.ocr_backend.model.Receipt
 import jakarta.annotation.PostConstruct
-import org.springframework.stereotype.Repository
-import org.springframework.web.bind.annotation.PathVariable
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -26,8 +24,8 @@ class ReceiptCollectionRepository {
             receipt.items?.let {
                 toUpdate.get().items = it
             }
-            receipt.description?.let {
-                toUpdate.get().description = it
+            receipt.name?.let {
+                toUpdate.get().name = it
             }
             receipt.dateOfPurchase?.let {
                 toUpdate.get().dateOfPurchase = it

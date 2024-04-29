@@ -1,6 +1,5 @@
 package app.ocr_backend.service
 
-import app.ocr_backend.model.Item
 import app.ocr_backend.model.Receipt
 import app.ocr_backend.repository.ReceiptDBRepository
 import org.springframework.stereotype.Service
@@ -22,7 +21,7 @@ class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
         if(receiptToUpdate.isPresent)
         {
             receiptToUpdate.get().let {
-                it.description = receipt.description
+                it.name = receipt.name
                 it.dateOfPurchase = receipt.dateOfPurchase
                 it.items = receipt.items
                 it.isPending = receipt.isPending
