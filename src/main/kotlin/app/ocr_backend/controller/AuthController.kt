@@ -1,9 +1,7 @@
 package app.ocr_backend.controller
 
 import app.ocr_backend.config.security.UserAuthProvider
-import app.ocr_backend.dto.CredentialsDTO
-import app.ocr_backend.dto.SignUpDTO
-import app.ocr_backend.dto.UserDTO
+import app.ocr_backend.dto.*
 import app.ocr_backend.service.UserService
 import com.google.gson.Gson
 import org.springframework.http.HttpStatus
@@ -43,5 +41,19 @@ class AuthController(
         val json = gson.toJson(userDto)
         println("REGISTER $userDto")
         return ResponseEntity.ok().body(json)
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/salt")
+    fun getSalt(@RequestBody usernameDto:UserNameSaltDTO):ResponseEntity<String> {
+
+        val user = userService.findByUserName(usernameDto.userName)
+        return if(user.isPresent)
+        {
+            val json = gson.toJson(UserNameSaltDTO(usernameDto.userName,user.get().salt))
+            ResponseEntity.ok().body(json)
+        }
+        else
+            ResponseEntity.notFound().build()
     }
 }

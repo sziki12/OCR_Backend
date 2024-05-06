@@ -5,6 +5,7 @@ import app.ocr_backend.dto.SignUpDTO
 import app.ocr_backend.model.User
 import app.ocr_backend.repository.UserDBRepository
 import org.springframework.http.HttpStatus
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -16,6 +17,7 @@ class UserService(
     val passwordEncoder: PasswordEncoder,
 ) {
 
+    //val passwordEncoder = BCryptPasswordEncoder()
 
     fun registerUser(signUpDto: SignUpDTO):User
     {

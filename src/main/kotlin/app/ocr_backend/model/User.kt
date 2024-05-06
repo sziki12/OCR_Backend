@@ -8,6 +8,7 @@ data class User(
     @Column(name="user_name")
     var userName:String,
     var password:String,
+    var salt:String
     )
 {
     @Column(name="user_id")

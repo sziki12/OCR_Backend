@@ -47,7 +47,7 @@ class SecurityConfig(val userAuthProvider: UserAuthProvider) {
             }
             .authorizeHttpRequests()
             {
-                it.requestMatchers(HttpMethod.POST,"/login","/register").permitAll()
+                it.requestMatchers(HttpMethod.POST,"/login","/register","/salt").permitAll()
                 it.anyRequest().authenticated()
             }
             .build()
