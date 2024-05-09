@@ -1,11 +1,16 @@
 package app.ocr_backend.service
 
+import app.ocr_backend.dto.ChartRequestDTO
+import app.ocr_backend.dto.ItemCategoryData
 import app.ocr_backend.dto.OcrResponse
+import app.ocr_backend.dto.PieChartDTO
 import app.ocr_backend.model.*
+import enumeration.Category
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import java.time.LocalDate
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
@@ -273,5 +278,36 @@ class DBService(
             }
         }
         return Optional.empty()
+    }
+
+    fun getPieChartData(request:ChartRequestDTO): PieChartDTO
+    {
+        val categories = Category.getValidCategoryNames()
+        val receipts = getAllReceipt()
+        val categoryData = ArrayList<ItemCategoryData>()
+        val currentDate = LocalDate.now()
+        val oneMontBefore = LocalDate.of(currentDate.year,currentDate.month - 1 ,currentDate.dayOfMonth)
+
+        for(category in categories)
+        {
+            categoryData.add(ItemCategoryData(category,0,0))
+        }
+        for(receipt in receipts)
+        {
+            if(request.type == "All Time" ||
+                request.type == "Custom" && request.from!! <= receipt.dateOfPurchase && request.to!! >= receipt.dateOfPurchase ||
+                request.type == "Last Month" && oneMontBefore <= receipt.dateOfPurchase && currentDate >= receipt.dateOfPurchase)
+            {
+                for(item in receipt.items)
+                {
+                    if(item.category != Category.Undefined)
+                    {
+                        categoryData[item.category.ordinal].itemCount += 1
+                        categoryData[item.category.ordinal].totalCost += item.totalCost
+                    }
+                }
+            }
+        }
+        return PieChartDTO(categoryData)
     }
 }

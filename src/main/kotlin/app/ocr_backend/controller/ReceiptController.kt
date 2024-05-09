@@ -1,9 +1,13 @@
 package app.ocr_backend.controller
 
+import app.ocr_backend.dto.ChartRequestDTO
+import app.ocr_backend.dto.PieChartDTO
 import app.ocr_backend.dto.ReceiptDTO
 import app.ocr_backend.model.Receipt
 import app.ocr_backend.service.DBService
+import com.google.gson.Gson
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 
@@ -12,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException
 @CrossOrigin
 class ReceiptController(private val service: DBService) {
 
+    val gson = Gson()
     @GetMapping("")
     fun getAllReceipts(): List<Receipt> = service.getAllReceipt()
 
@@ -39,5 +44,13 @@ class ReceiptController(private val service: DBService) {
     fun updateReceipt(@PathVariable receiptId: Long, @RequestBody receiptData: ReceiptDTO)
     {
         service.updateReceipt(Receipt(receiptId,receiptData))
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/chart")
+    fun getReceiptsChartData(@RequestBody request: ChartRequestDTO): ResponseEntity<String> {
+        val chartData = service.getPieChartData(request)
+        val json = gson.toJson(chartData)
+        return ResponseEntity.ok().body(json)
     }
 }

@@ -6,6 +6,7 @@ import app.ocr_backend.utils.PathHandler
 import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.charset.StandardCharsets
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -29,10 +30,10 @@ class OcrService {
         val output = out.split(mainSeparator)
         println("output: $out")
 
-        var date = Date()
+        var date = LocalDate.now()
         extractDate(output[4])?.let {
             println("DATE: $it")
-            date=Date.from(it.toInstant(ZoneOffset.UTC))
+            date=LocalDate.ofInstant(it.toInstant(ZoneOffset.UTC),ZoneOffset.UTC)
         }
 
         return OcrResponse(

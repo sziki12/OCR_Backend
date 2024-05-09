@@ -3,13 +3,14 @@ package app.ocr_backend.model
 import app.ocr_backend.dto.ReceiptDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
+import java.time.LocalDate
 import java.util.Date
 
 @Entity
 @Table(name = "Receipt")
 data class Receipt(
     @Column(name="date_of_purchase")
-    var dateOfPurchase:Date,
+    var dateOfPurchase:LocalDate,
     var name:String,
 ) {
 
@@ -51,7 +52,7 @@ data class Receipt(
             return cost
         }
 
-    constructor():this(Date(),"")
+    constructor():this(LocalDate.now(),"")
     constructor(receiptId:Long,receiptData: ReceiptDTO):this(receiptData)
     {
         this.id = receiptId

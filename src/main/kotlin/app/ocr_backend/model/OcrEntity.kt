@@ -3,6 +3,7 @@ package app.ocr_backend.model
 import app.ocr_backend.dto.OcrResponse
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
+import java.time.LocalDate
 import java.util.*
 
 @Entity
@@ -14,7 +15,7 @@ data class OcrEntity(
     var filteredReceipt:String,
     @Column(name = "extracted_items",columnDefinition="TEXT")
     var extractedItems:String,
-    var date: Date,
+    var date: LocalDate,
 )
 {
     companion object
@@ -30,7 +31,7 @@ data class OcrEntity(
                 plainText = stringFromList(ocrResponse.plainText,"\n"),
                 filteredReceipt = stringFromList(ocrResponse.filteredReceipt,"\n"),
                 extractedItems = stringFromList(ocrResponse.extractedItems, "\n"+itemSeparator),
-                date = Date(),
+                date = LocalDate.now()
             )
         }
         private fun stringFromList(list:List<String>,separator:String):String
