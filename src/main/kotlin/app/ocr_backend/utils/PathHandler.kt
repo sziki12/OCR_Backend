@@ -65,7 +65,8 @@ object PathHandler {
 
     fun getModelDir():Path
     {
-        val path = "D:\\Llama\\Files\\Models\\llama2_7b\\llama-2-7b-chat.Q6_K.gguf"
+        //val path = "D:\\Llama\\Files\\Models\\llama2_7b\\llama-2-7b-chat.Q6_K.gguf"
+        val path = "C:\\Users\\Szikszai Levente\\Llama\\Files\\Models\\llama2_7b\\llama-2-7b-chat.Q6_K.gguf"
         return File(path).toPath()
     }
 }

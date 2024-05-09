@@ -2,6 +2,7 @@ package app.ocr_backend.model
 
 import app.ocr_backend.dto.ItemDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
+import enumeration.Category
 import jakarta.persistence.*
 
 @Entity
@@ -22,6 +23,7 @@ data class Item(
     @JoinColumn(name="receipt_id")
     lateinit var receipt:Receipt
 
+    var category:Category = Category.Undefined
 
     constructor(itemId:Long,itemData: ItemDTO): this(itemData)
     {
@@ -30,6 +32,9 @@ data class Item(
 
     constructor(itemData: ItemDTO):
             this(itemData.name,itemData.quantity,itemData.totalCost)
+    {
+      this.category = Category.parse(itemData.category)
+    }
 
     override fun equals(other: Any?): Boolean {
 

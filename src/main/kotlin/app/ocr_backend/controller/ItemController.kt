@@ -2,11 +2,10 @@ package app.ocr_backend.controller
 
 import app.ocr_backend.dto.ItemDTO
 import app.ocr_backend.model.Item
-import app.ocr_backend.model.Receipt
-import app.ocr_backend.repository.ItemDBRepository
-import app.ocr_backend.repository.ReceiptDBRepository
 import app.ocr_backend.service.DBService
+import app.ocr_backend.service.ItemCategorisingService
 import com.google.gson.Gson
+import enumeration.Category
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -15,7 +14,10 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 @RequestMapping("/api/receipt")
 @CrossOrigin
-class ItemController(private val service: DBService) {
+class ItemController(
+    private val service: DBService,
+    private val categorisingService: ItemCategorisingService
+) {
 
     val gson = Gson()
     @GetMapping("/{receiptId}/item/{itemId}")
@@ -40,7 +42,7 @@ class ItemController(private val service: DBService) {
         if(newItem.isPresent)
         {
             newItem.get().let {
-                val json: String = gson.toJson(ItemDTO(it.id,it.name,it.quantity,it.totalCost))
+                val json: String = gson.toJson(ItemDTO(it.id,it.name,it.quantity,it.totalCost,it.category.name))
                 return ResponseEntity.ok().body(json)
             }
         }
@@ -59,5 +61,24 @@ class ItemController(private val service: DBService) {
     fun updateItem(@PathVariable receiptId: Long,@PathVariable itemId: Long, @RequestBody itemData: ItemDTO)
     {
         service.updateItem(Item(itemId,itemData))
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PutMapping("/{receiptId}/categorise")
+    fun categoriseItems(@PathVariable receiptId: Long)
+    {
+        val receipt = service.getReceipt(receiptId)
+        if(receipt.isPresent)
+        {
+            categorisingService.categoriseItems(receipt.get())
+        }
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/item/categories")
+    fun getCategories():ResponseEntity<String>
+    {
+        val json: String = gson.toJson(Category.getValidCategoryNames())
+        return ResponseEntity.ok().body(json)
     }
 }

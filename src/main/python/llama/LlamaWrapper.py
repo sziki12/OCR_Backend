@@ -2,7 +2,7 @@ from llama_cpp.llama import Llama
 import json
 
 class ReceiptLlamaWrapper:
-    def __init__(self,pathToModel):
+    def __init__(self,pathToModel,role,prompt,temperature):
         self.llm = Llama(
             model_path=pathToModel,
             chat_format="chatml",
@@ -11,22 +11,44 @@ class ReceiptLlamaWrapper:
             n_ctx=2048, # Uncomment to increase the context window
             verbose=False,
         )
-        self.prompt = "Please extract from the given receipt the items name as string, cost as Number and quantity as Number in a JSON format:"
-        self.role = "You will extract items from Hungarian and English receipts in JSON, in an object there should be an array containing the given items, while providing their name, quantity and cost."
+        self.prompt = prompt
+        self.role = role
+        self.temperature = temperature
+        
     
-    def textToReceiptJson(self,receiptText):
+    def textToResponseJson(self,toProcess):
         self.response = self.llm.create_chat_completion(
         messages=[
             {
                 "role": "system",
                 "content": self.role,
             },
-            {"role": "user", "content":  self.prompt+"\n"+receiptText},
+            {"role": "user", "content":  self.prompt+"\n"+toProcess},
         ],
         response_format={
             "type": "json_object",
         },
-        temperature=0.7,
+        temperature=self.temperature,
+)
+        
+    def textToResponseStructuredJson(self,toProcess):
+        self.response = self.llm.create_chat_completion(
+        messages=[
+            {
+                "role": "system",
+                "content": self.role,
+            },
+            {"role": "user", "content":  self.prompt+"\n"+toProcess},
+        ],
+        response_format={
+            "type": "json_object",
+        "schema": {
+            "type": "object",
+            "properties": {"response": {"type": "list"}},
+            "required": ["response"],
+        },
+        },
+        temperature=self.temperature,
 )
     
     

@@ -13,11 +13,12 @@ import kotlin.io.path.pathString
 @Service
 class LlamaService {
 
-    private val execLlama = PathHandler.getLlamaStartDir().pathString+"${File.separator}LlamaRunnable.py"
+    private val execLlamaExtractor = PathHandler.getLlamaStartDir().pathString+"${File.separator}LlamaExtractionRunnable.py"
+    private val execLlamaCategoriser = PathHandler.getLlamaStartDir().pathString+"${File.separator}LlamaCategorisationRunnable.py"
     private val llamaOutputDir = PathHandler.getLlamaOutputDir().pathString
     fun extractItems(imageName: String, items: List<String>): String {
         //Remove Accents from Input, because Llama handles Accented chars the wrong way
-        println(execLlama)
+        //println(execLlamaExtractor)
         var itemsToProcess = ""
         for(item in items)
         {
@@ -27,9 +28,32 @@ class LlamaService {
         val outFile = File(llamaOutputDir + "${File.separator}$inputName")
 
         println("Before Start")
-        val process = llamaProcessBuilder(itemsToProcess, outFile).start()
+        val process = llamaExtractionProcessBuilder(itemsToProcess, outFile).start()
         process.waitFor()
         println("Finished")
+        return extractJson(outFile)
+    }
+
+    fun categoriseItems(fileName: String,itemArray:List<String>,categoryArray:List<String>): String {
+        var items = "";
+        var categories = ""
+        println("Items ${itemArray}}")
+        println("Categories ${categoryArray}}")
+        for(item in itemArray)
+        {
+            if(items.isNotEmpty())
+                items+=", "
+            items += item
+        }
+        for(category in categoryArray)
+        {
+            if(categories.isNotEmpty())
+                categories+=", "
+            categories += category
+        }
+        val outFile = File(llamaOutputDir + "${File.separator}$fileName")
+        val process = llamaCategorisationProcessBuilder(categories,items,outFile).start()
+        process.waitFor()
         return extractJson(outFile)
     }
 
@@ -82,9 +106,23 @@ class LlamaService {
         return out
     }
 
-    private fun llamaProcessBuilder(receiptText: String, outFile: File):ProcessBuilder
+    private fun llamaExtractionProcessBuilder(receiptText: String, outFile: File):ProcessBuilder
     {
-        val processBuilder =  ProcessBuilder("python",execLlama,"--receiptText",receiptText,"--pathToModel",PathHandler.getModelDir().pathString)
+        val processBuilder =  ProcessBuilder(
+            "python",execLlamaExtractor
+            ,"--receiptText",receiptText,
+            "--pathToModel",PathHandler.getModelDir().pathString)
+        processBuilder.redirectOutput(outFile)
+        processBuilder.redirectErrorStream(true)
+        return processBuilder
+    }
+    private fun llamaCategorisationProcessBuilder(categories: String,items: String, outFile: File):ProcessBuilder
+    {
+        val processBuilder =  ProcessBuilder(
+            "python",execLlamaCategoriser,
+            "--items",items,
+            "--categories",categories,
+            "--pathToModel",PathHandler.getModelDir().pathString)
         processBuilder.redirectOutput(outFile)
         processBuilder.redirectErrorStream(true)
         return processBuilder

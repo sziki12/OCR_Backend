@@ -1,6 +1,7 @@
 package app.ocr_backend.service
 
 import app.ocr_backend.dto.LlamaItemList
+import app.ocr_backend.dto.OcrResponse
 import app.ocr_backend.model.OcrEntity
 import app.ocr_backend.model.Receipt
 import app.ocr_backend.service.llama.LlamaService
@@ -19,6 +20,7 @@ class ImageProcessingService(
     val llamaService: LlamaService,
     val service: DBService
 ) {
+    private val maxRetryCount:Int = 10
     private val gson = Gson()
     fun processImage(image: MultipartFile): String {
         val optReceipt = service.saveReceipt(Receipt().also { it.isPending = true })
@@ -35,17 +37,8 @@ class ImageProcessingService(
             service.saveOcrEntity(newReceipt.id,OcrEntity.fromOcrResponse(ocrOutput))
             service.saveImage(newReceipt.id, fileName)
 
-            val itemsJson = llamaService.extractItems(fileName, ocrOutput.extractedItems)
-            try {
-                val llamaItemList = gson.fromJson(itemsJson, LlamaItemList::class.java)
-                println(llamaItemList)
-                for (item in llamaItemList.toItemList()) {
-                    service.saveItem(newReceipt.id, item)
-                }
-            } catch (e: Exception) {
-                System.err.println("Failed to read JSON from Llama for image: $fileName")
-                //Failed to read JSON
-            }
+            parseResponse(fileName,newReceipt, ocrOutput)
+
             service.updateReceipt(newReceipt.also {
                 it.isPending = false
             })
@@ -54,6 +47,28 @@ class ImageProcessingService(
         else
         {
             ""
+        }
+    }
+
+    private fun parseResponse(fileName:String, newReceipt:Receipt,ocrOutput:OcrResponse,numberOfRun:Int = 1)
+    {
+        val itemsJson = llamaService.extractItems(fileName, ocrOutput.extractedItems)
+        try
+        {
+            val llamaItemList = gson.fromJson(itemsJson, LlamaItemList::class.java)
+            println(llamaItemList)
+            for (item in llamaItemList.toItemList())
+            {
+                service.saveItem(newReceipt.id, item)
+            }
+        } catch (e: Exception)
+        {
+            System.err.println("Failed to read JSON from Llama for image: $fileName")
+            if(numberOfRun < maxRetryCount)
+            {
+                parseResponse(fileName, newReceipt, ocrOutput, numberOfRun + 1)
+            }
+            //Failed to read JSON
         }
     }
 }

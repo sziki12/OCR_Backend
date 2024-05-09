@@ -1,12 +1,19 @@
 package app.ocr_backend.service
 
+import app.ocr_backend.dto.CategoriesDTO
+import app.ocr_backend.dto.LlamaItemList
 import app.ocr_backend.model.Receipt
 import app.ocr_backend.repository.ReceiptDBRepository
+import app.ocr_backend.service.llama.LlamaService
+import com.google.gson.Gson
+import enumeration.Category
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
+class ReceiptService(
+    val receiptDBRepository: ReceiptDBRepository,
+) {
 
     fun saveReceipt(receipt: Receipt): Receipt {
         receiptDBRepository.save(receipt)
@@ -40,5 +47,4 @@ class ReceiptService(val receiptDBRepository: ReceiptDBRepository) {
     {
         return receiptDBRepository.findAll()
     }
-
 }

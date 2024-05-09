@@ -46,7 +46,7 @@ data class Receipt(
             var cost = 0
             for(item in items)
             {
-                cost+=item.totalCost
+                cost += item.totalCost
             }
             return cost
         }
