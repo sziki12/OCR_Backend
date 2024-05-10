@@ -74,11 +74,14 @@ class DBService(
             Optional.empty<Receipt>()
     }
 
-    fun updateReceipt(receipt: Receipt)
+    fun updateReceipt(receipt: Receipt)//TODO updateReceipt
     {
+        println(receipt)
         val optReceipt = receiptService.getReceipt(receipt.id)
         for(item in receipt.items)
+        {
             itemService.updateItem(item)
+        }
 
         if(optReceipt.isPresent)
         {
@@ -298,6 +301,7 @@ class DBService(
                 request.type == "Custom" && request.from!! <= receipt.dateOfPurchase && request.to!! >= receipt.dateOfPurchase ||
                 request.type == "Last Month" && oneMontBefore <= receipt.dateOfPurchase && currentDate >= receipt.dateOfPurchase)
             {
+                println("IF ${receipt.name} ${receipt.dateOfPurchase}")
                 for(item in receipt.items)
                 {
                     if(item.category != Category.Undefined)
@@ -306,6 +310,10 @@ class DBService(
                         categoryData[item.category.ordinal].totalCost += item.totalCost
                     }
                 }
+            }
+            else
+            {
+                println("ELSE ${receipt.name} ${receipt.dateOfPurchase}")
             }
         }
         return PieChartDTO(categoryData)

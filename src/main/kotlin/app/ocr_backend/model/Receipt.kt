@@ -61,7 +61,7 @@ data class Receipt(
     constructor(receiptData: ReceiptDTO):
             this(receiptData.dateOfPurchase,receiptData.name)
     {
-        this.items = receiptData.items
+        this.items = receiptData.toItemsArray()
     }
 
     override fun equals(other: Any?): Boolean {
@@ -75,7 +75,7 @@ data class Receipt(
     }
 
     override fun toString(): String {
-        return "Receipt(id: $id, isPedding: $isPending, name: $name, dateOfPurchase: $dateOfPurchase, items: $items, place: $place, user: $user)"
+        return "Receipt(id: $id, isPedding: $isPending, name: $name, dateOfPurchase: $dateOfPurchase, items: $items, place: $place)"
     }
 
     override fun hashCode(): Int {
