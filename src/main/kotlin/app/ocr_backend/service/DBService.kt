@@ -301,7 +301,6 @@ class DBService(
                 request.type == "Custom" && request.from!! <= receipt.dateOfPurchase && request.to!! >= receipt.dateOfPurchase ||
                 request.type == "Last Month" && oneMontBefore <= receipt.dateOfPurchase && currentDate >= receipt.dateOfPurchase)
             {
-                println("IF ${receipt.name} ${receipt.dateOfPurchase}")
                 for(item in receipt.items)
                 {
                     if(item.category != Category.Undefined)
@@ -310,10 +309,6 @@ class DBService(
                         categoryData[item.category.ordinal].totalCost += item.totalCost
                     }
                 }
-            }
-            else
-            {
-                println("ELSE ${receipt.name} ${receipt.dateOfPurchase}")
             }
         }
         return PieChartDTO(categoryData)
