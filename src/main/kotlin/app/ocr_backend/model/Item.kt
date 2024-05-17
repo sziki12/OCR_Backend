@@ -33,7 +33,11 @@ data class Item(
     constructor(itemData: ItemDTO):
             this(itemData.name,itemData.quantity,itemData.totalCost)
     {
-      this.category = Category.parse(itemData.category)
+        this.category = Category.parse(itemData.category)
+        itemData.id?.let {
+            this.id = it
+        }
+        //println(this.category)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -52,5 +56,9 @@ data class Item(
         result = 31 * result + totalCost
         result = 31 * result + (id?.hashCode() ?: 0)
         return result
+    }
+
+    override fun toString(): String {
+        return " id:$id category: $category name: $name totalCost: $totalCost quantity: $quantity"
     }
 }

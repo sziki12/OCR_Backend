@@ -30,12 +30,8 @@ class ItemService(val itemRepository: ItemDBRepository) {
         val itemToUpdate = itemRepository.getItemById(item.id)
         if(itemToUpdate.isPresent)
         {
-            itemToUpdate.get().let {
-                it.name = item.name
-                it.quantity = item.quantity
-                it.totalCost = item.totalCost
-            }
-            itemRepository.save(itemToUpdate.get())
+            item.receipt = itemToUpdate.get().receipt
+            itemRepository.save(item)
         }
     }
 

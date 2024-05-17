@@ -33,6 +33,7 @@ class ReceiptService(
                 it.items = receipt.items
                 it.isPending = receipt.isPending
             }
+            println(receipt.items)
             return Optional.of(receiptDBRepository.save(receiptToUpdate.get()))
         }
         return Optional.empty()

@@ -27,6 +27,7 @@ class ItemCategorisingService(
             }
             itemIds[item.name] = item.id
         }
+        //println("LLAMA CATEGORISATION START")
         val json = llamaService.categoriseItems(receipt.name,itemNames, Category.getValidCategoryNames())
         val gson = Gson()
 

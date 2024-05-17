@@ -3,13 +3,14 @@ package app.ocr_backend.model
 import app.ocr_backend.dto.ReceiptDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
+import java.time.LocalDate
 import java.util.Date
 
 @Entity
 @Table(name = "Receipt")
 data class Receipt(
     @Column(name="date_of_purchase")
-    var dateOfPurchase:Date,
+    var dateOfPurchase:LocalDate,
     var name:String,
 ) {
 
@@ -51,7 +52,7 @@ data class Receipt(
             return cost
         }
 
-    constructor():this(Date(),"")
+    constructor():this(LocalDate.now(),"")
     constructor(receiptId:Long,receiptData: ReceiptDTO):this(receiptData)
     {
         this.id = receiptId
@@ -60,7 +61,7 @@ data class Receipt(
     constructor(receiptData: ReceiptDTO):
             this(receiptData.dateOfPurchase,receiptData.name)
     {
-        this.items = receiptData.items
+        this.items = receiptData.toItemsArray()
     }
 
     override fun equals(other: Any?): Boolean {
@@ -74,7 +75,7 @@ data class Receipt(
     }
 
     override fun toString(): String {
-        return "Receipt(id: $id, isPedding: $isPending, name: $name, dateOfPurchase: $dateOfPurchase, items: $items, place: $place, user: $user)"
+        return "Receipt(id: $id, isPedding: $isPending, name: $name, dateOfPurchase: $dateOfPurchase, items: $items, place: $place)"
     }
 
     override fun hashCode(): Int {

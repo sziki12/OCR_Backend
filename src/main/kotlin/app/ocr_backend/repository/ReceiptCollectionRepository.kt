@@ -118,25 +118,4 @@ class ReceiptCollectionRepository {
         receipt.items.add(item)
         return item
     }
-
-    @PostConstruct
-    fun init()
-    {
-        val i1 = Item("Alma",10,1500)
-        val i2 = Item("GamePass",1,3000)
-        val r1 = Receipt(
-            Date(),
-            "First Receipt")
-        r1.items.addAll(listOf(i1,i2))
-        val r2 = Receipt(
-            Date(),
-            "Second Receipt")
-        val r3 = Receipt(
-            Date(),
-            "Third Receipt")
-        val r4 = Receipt(
-            Date(),
-            "Fourth Receipt")
-        receipts.addAll(listOf(r1,r2,r3,r4))
-    }
 }
