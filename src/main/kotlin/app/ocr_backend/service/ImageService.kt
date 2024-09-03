@@ -1,6 +1,6 @@
 package app.ocr_backend.service
 
-import app.ocr_backend.model.Receipt
+import app.ocr_backend.receipt.Receipt
 import app.ocr_backend.model.ReceiptImage
 import app.ocr_backend.repository.ImageDBRepository
 import app.ocr_backend.utils.PathHandler
@@ -25,7 +25,7 @@ class ImageService(private val imageRepository: ImageDBRepository) {
         return Optional.empty()
     }
 
-    fun saveImage(receipt: Receipt,imageName:String)
+    fun saveImage(receipt: Receipt, imageName:String)
     {
         val image = ReceiptImage(imageName)
         image.receipt = receipt
@@ -57,7 +57,7 @@ class ImageService(private val imageRepository: ImageDBRepository) {
         return imageRepository.deleteById(imageId)
     }
 
-    fun generateImageName(receipt: Receipt,image: MultipartFile):String
+    fun generateImageName(receipt: Receipt, image: MultipartFile):String
     {
         val altName = "file.jpg"
         //TODO ADD USER ID TO FRONT IF NEEDED

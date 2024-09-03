@@ -1,7 +1,7 @@
 package app.ocr_backend.service.ocr
 
-import app.ocr_backend.dto.OcrResponse
-import app.ocr_backend.model.OcrEntity
+import app.ocr_backend.ai.ocr.OcrResponse
+import app.ocr_backend.ai.ocr.OcrEntity
 import app.ocr_backend.utils.PathHandler
 import org.springframework.stereotype.Service
 import java.io.File

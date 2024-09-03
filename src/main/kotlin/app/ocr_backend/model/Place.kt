@@ -1,5 +1,6 @@
 package app.ocr_backend.model
 
+import app.ocr_backend.receipt.Receipt
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 

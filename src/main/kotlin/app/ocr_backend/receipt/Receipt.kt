@@ -1,10 +1,13 @@
-package app.ocr_backend.model
+package app.ocr_backend.receipt
 
-import app.ocr_backend.dto.ReceiptDTO
+import app.ocr_backend.ai.ocr.OcrEntity
+import app.ocr_backend.model.Item
+import app.ocr_backend.model.Place
+import app.ocr_backend.model.ReceiptImage
+import app.ocr_backend.model.User
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.time.LocalDate
-import java.util.Date
 
 @Entity
 @Table(name = "Receipt")
@@ -30,12 +33,12 @@ data class Receipt(
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="user_id")
-    lateinit var user:User
+    lateinit var user: User
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="place_id")
-    var place:Place? = null
+    var place: Place? = null
 
     @OneToOne(mappedBy = "receipt")
     var ocrEntity: OcrEntity? = null

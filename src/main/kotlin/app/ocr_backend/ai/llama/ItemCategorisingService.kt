@@ -1,7 +1,7 @@
-package app.ocr_backend.service
+package app.ocr_backend.ai.llama
 
-import app.ocr_backend.dto.CategoriesDTO
-import app.ocr_backend.model.Receipt
+import app.ocr_backend.receipt.Receipt
+import app.ocr_backend.service.DBService
 import app.ocr_backend.service.llama.LlamaService
 import com.google.gson.Gson
 import enumeration.Category
@@ -14,7 +14,7 @@ class ItemCategorisingService(
     val llamaService: LlamaService
 ) {
     private val maxRetryCount:Int = 10
-    fun categoriseItems(receipt: Receipt, itemsToCategorise:MutableList<String>? = null,numberOfRuns:Int = 1)
+    fun categoriseItems(receipt: Receipt, itemsToCategorise:MutableList<String>? = null, numberOfRuns:Int = 1)
     {
         val itemIds = HashMap<String,Long>()
         val itemNames = itemsToCategorise ?: ArrayList()

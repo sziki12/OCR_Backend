@@ -1,10 +1,9 @@
-package app.ocr_backend.model
+package app.ocr_backend.ai.ocr
 
-import app.ocr_backend.dto.OcrResponse
+import app.ocr_backend.receipt.Receipt
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.time.LocalDate
-import java.util.*
 
 @Entity
 @Table(name="ocr_response")
@@ -25,12 +24,12 @@ data class OcrEntity(
         @JsonIgnore
         val itemSeparator = "=-----="
 
-        fun fromOcrResponse(ocrResponse: OcrResponse):OcrEntity
+        fun fromOcrResponse(ocrResponse: OcrResponse): OcrEntity
         {
             return OcrEntity(
                 plainText = stringFromList(ocrResponse.plainText,"\n"),
                 filteredReceipt = stringFromList(ocrResponse.filteredReceipt,"\n"),
-                extractedItems = stringFromList(ocrResponse.extractedItems, "\n"+itemSeparator),
+                extractedItems = stringFromList(ocrResponse.extractedItems, "\n"+ itemSeparator),
                 date = LocalDate.now()
             )
         }
@@ -53,9 +52,9 @@ data class OcrEntity(
     @JsonIgnore
     @OneToOne
     @JoinColumn(name="receipt_id")
-    lateinit var receipt:Receipt
+    lateinit var receipt: Receipt
 
-    fun toOcrResponse():OcrResponse
+    fun toOcrResponse(): OcrResponse
     {
         return OcrResponse(
             plainText = plainText.split("\n"),

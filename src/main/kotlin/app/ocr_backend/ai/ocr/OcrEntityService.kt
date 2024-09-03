@@ -1,13 +1,13 @@
-package app.ocr_backend.service
+package app.ocr_backend.ai.ocr
 
-import app.ocr_backend.model.OcrEntity
-import app.ocr_backend.repository.OcrEntityDBRepository
+import app.ocr_backend.ai.ocr.OcrEntity
+import app.ocr_backend.ai.ocr.OcrEntityDBRepository
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class OcrEntityService(private val repository:OcrEntityDBRepository) {
-    fun saveOcrEntity(entity:OcrEntity): OcrEntity {
+class OcrEntityService(private val repository: OcrEntityDBRepository) {
+    fun saveOcrEntity(entity: OcrEntity): OcrEntity {
         return repository.save(entity)
     }
 

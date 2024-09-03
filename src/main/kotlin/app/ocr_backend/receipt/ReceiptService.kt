@@ -1,12 +1,5 @@
-package app.ocr_backend.service
+package app.ocr_backend.receipt
 
-import app.ocr_backend.dto.CategoriesDTO
-import app.ocr_backend.dto.LlamaItemList
-import app.ocr_backend.model.Receipt
-import app.ocr_backend.repository.ReceiptDBRepository
-import app.ocr_backend.service.llama.LlamaService
-import com.google.gson.Gson
-import enumeration.Category
 import org.springframework.stereotype.Service
 import java.util.*
 

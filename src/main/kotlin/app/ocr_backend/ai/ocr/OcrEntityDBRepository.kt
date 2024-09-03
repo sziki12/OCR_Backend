@@ -1,7 +1,6 @@
-package app.ocr_backend.repository
+package app.ocr_backend.ai.ocr
 
-import app.ocr_backend.model.Item
-import app.ocr_backend.model.OcrEntity
+import app.ocr_backend.ai.ocr.OcrEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 

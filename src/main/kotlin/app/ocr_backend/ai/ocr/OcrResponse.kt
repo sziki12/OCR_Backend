@@ -1,4 +1,4 @@
-package app.ocr_backend.dto
+package app.ocr_backend.ai.ocr
 
 import java.time.LocalDate
 import java.util.*

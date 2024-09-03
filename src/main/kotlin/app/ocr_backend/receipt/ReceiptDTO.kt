@@ -1,9 +1,8 @@
-package app.ocr_backend.dto
+package app.ocr_backend.receipt
 
+import app.ocr_backend.item.ItemDTO
 import app.ocr_backend.model.Item
-import app.ocr_backend.model.Receipt
 import java.time.LocalDate
-import java.util.*
 import kotlin.collections.ArrayList
 
 data class ReceiptDTO(
@@ -13,7 +12,7 @@ data class ReceiptDTO(
     var isPending:Boolean,
 )
 {
-    constructor(receipt:Receipt):this(
+    constructor(receipt: Receipt):this(
         receipt.dateOfPurchase,
         receipt.name,
         dtoFromItems(receipt.items),

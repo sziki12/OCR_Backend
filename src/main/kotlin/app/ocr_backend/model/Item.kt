@@ -1,6 +1,7 @@
 package app.ocr_backend.model
 
-import app.ocr_backend.dto.ItemDTO
+import app.ocr_backend.item.ItemDTO
+import app.ocr_backend.receipt.Receipt
 import com.fasterxml.jackson.annotation.JsonIgnore
 import enumeration.Category
 import jakarta.persistence.*
@@ -21,7 +22,7 @@ data class Item(
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="receipt_id")
-    lateinit var receipt:Receipt
+    lateinit var receipt: Receipt
 
     var category:Category = Category.Undefined
 

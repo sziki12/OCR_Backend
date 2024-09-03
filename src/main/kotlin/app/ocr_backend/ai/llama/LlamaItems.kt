@@ -1,4 +1,4 @@
-package app.ocr_backend.dto
+package app.ocr_backend.ai.llama
 
 import app.ocr_backend.model.Item
 

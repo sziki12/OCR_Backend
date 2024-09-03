@@ -1,6 +1,5 @@
-package app.ocr_backend.controller
+package app.ocr_backend.ai.ocr
 
-import app.ocr_backend.service.ImageProcessingService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -9,7 +8,8 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping("/api")
 @CrossOrigin
 class ImageProcessingController(
-    private val imageProcessingService:ImageProcessingService) {
+    private val imageProcessingService: ImageProcessingService
+) {
 
     @PostMapping("/image")
     fun uploadImage(@RequestParam("file") image: MultipartFile): ResponseEntity<String> {

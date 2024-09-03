@@ -1,9 +1,8 @@
-package app.ocr_backend.service
+package app.ocr_backend.item
 
 import app.ocr_backend.model.Item
-import app.ocr_backend.model.Receipt
-import app.ocr_backend.repository.ItemDBRepository
-import app.ocr_backend.repository.ReceiptDBRepository
+import app.ocr_backend.receipt.Receipt
+import app.ocr_backend.item.ItemDBRepository
 import org.springframework.stereotype.Service
 import java.util.*
 

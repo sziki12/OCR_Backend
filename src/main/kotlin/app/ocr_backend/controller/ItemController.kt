@@ -1,9 +1,9 @@
 package app.ocr_backend.controller
 
-import app.ocr_backend.dto.ItemDTO
+import app.ocr_backend.item.ItemDTO
 import app.ocr_backend.model.Item
 import app.ocr_backend.service.DBService
-import app.ocr_backend.service.ItemCategorisingService
+import app.ocr_backend.ai.llama.ItemCategorisingService
 import com.google.gson.Gson
 import enumeration.Category
 import org.springframework.http.HttpStatus

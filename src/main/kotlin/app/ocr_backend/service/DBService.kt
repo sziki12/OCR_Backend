@@ -1,10 +1,15 @@
 package app.ocr_backend.service
 
+import app.ocr_backend.ai.ocr.OcrEntity
+import app.ocr_backend.ai.ocr.OcrEntityService
 import app.ocr_backend.dto.ChartRequestDTO
 import app.ocr_backend.dto.ItemCategoryData
-import app.ocr_backend.dto.OcrResponse
+import app.ocr_backend.ai.ocr.OcrResponse
 import app.ocr_backend.dto.PieChartDTO
+import app.ocr_backend.item.ItemService
 import app.ocr_backend.model.*
+import app.ocr_backend.receipt.Receipt
+import app.ocr_backend.receipt.ReceiptService
 import enumeration.Category
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -138,7 +143,7 @@ class DBService(
         return imageService.deleteImage(imageId)
     }
 
-    fun generateImageName(receipt: Receipt,image: MultipartFile):String
+    fun generateImageName(receipt: Receipt, image: MultipartFile):String
     {
         return imageService.generateImageName(receipt,image)
     }
@@ -242,7 +247,7 @@ class DBService(
 
     //OcrEntity
 
-    fun saveOcrEntity(receiptId:Long,entity:OcrEntity)
+    fun saveOcrEntity(receiptId:Long,entity: OcrEntity)
     {
         val optReceipt = receiptService.getReceipt(receiptId)
         if(optReceipt.isPresent)

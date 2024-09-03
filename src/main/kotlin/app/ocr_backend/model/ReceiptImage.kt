@@ -1,5 +1,6 @@
 package app.ocr_backend.model
 
+import app.ocr_backend.receipt.Receipt
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 
@@ -16,5 +17,5 @@ data class ReceiptImage(var name:String) {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="receipt_id")
-    lateinit var receipt:Receipt
+    lateinit var receipt: Receipt
 }

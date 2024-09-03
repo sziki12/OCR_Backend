@@ -1,4 +1,4 @@
-package app.ocr_backend.dto
+package app.ocr_backend.ai.llama
 
 data class CategoriesDTO(
     val Housing:List<String>?,

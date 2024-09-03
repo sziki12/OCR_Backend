@@ -1,9 +1,8 @@
 package app.ocr_backend.controller
 
 import app.ocr_backend.dto.ChartRequestDTO
-import app.ocr_backend.dto.PieChartDTO
-import app.ocr_backend.dto.ReceiptDTO
-import app.ocr_backend.model.Receipt
+import app.ocr_backend.receipt.ReceiptDTO
+import app.ocr_backend.receipt.Receipt
 import app.ocr_backend.service.DBService
 import com.google.gson.Gson
 import org.springframework.http.HttpStatus

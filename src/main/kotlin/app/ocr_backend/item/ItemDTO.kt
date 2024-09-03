@@ -1,4 +1,4 @@
-package app.ocr_backend.dto
+package app.ocr_backend.item
 
 import app.ocr_backend.model.Item
 import enumeration.Category

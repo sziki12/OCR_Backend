@@ -1,6 +1,6 @@
 package app.ocr_backend.repository
 
-import app.ocr_backend.model.Receipt
+import app.ocr_backend.receipt.Receipt
 import app.ocr_backend.model.ReceiptImage
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.Optional

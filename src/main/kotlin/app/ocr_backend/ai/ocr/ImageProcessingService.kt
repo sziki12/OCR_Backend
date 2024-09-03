@@ -1,9 +1,8 @@
-package app.ocr_backend.service
+package app.ocr_backend.ai.ocr
 
-import app.ocr_backend.dto.LlamaItemList
-import app.ocr_backend.dto.OcrResponse
-import app.ocr_backend.model.OcrEntity
-import app.ocr_backend.model.Receipt
+import app.ocr_backend.ai.llama.LlamaItemList
+import app.ocr_backend.receipt.Receipt
+import app.ocr_backend.service.DBService
 import app.ocr_backend.service.llama.LlamaService
 import app.ocr_backend.service.ocr.OcrService
 import app.ocr_backend.utils.PathHandler
@@ -34,7 +33,7 @@ class ImageProcessingService(
 
             val ocrOutput = ocrService.processImage(fileName, newReceipt.id)
 
-            service.saveOcrEntity(newReceipt.id,OcrEntity.fromOcrResponse(ocrOutput))
+            service.saveOcrEntity(newReceipt.id, OcrEntity.fromOcrResponse(ocrOutput))
             service.saveImage(newReceipt.id, fileName)
 
             parseResponse(fileName,newReceipt, ocrOutput)
@@ -50,7 +49,7 @@ class ImageProcessingService(
         }
     }
 
-    private fun parseResponse(fileName:String, newReceipt:Receipt,ocrOutput:OcrResponse,numberOfRun:Int = 1)
+    private fun parseResponse(fileName:String, newReceipt: Receipt, ocrOutput: OcrResponse, numberOfRun:Int = 1)
     {
         val itemsJson = llamaService.extractItems(fileName, ocrOutput.extractedItems)
         try
