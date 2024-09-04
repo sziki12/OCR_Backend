@@ -2,10 +2,9 @@ package app.ocr_backend.ai.ocr
 
 import app.ocr_backend.ai.llama.LlamaItemList
 import app.ocr_backend.receipt.Receipt
-import app.ocr_backend.service.DBService
-import app.ocr_backend.service.llama.LlamaService
-import app.ocr_backend.service.ocr.OcrService
-import app.ocr_backend.utils.PathHandler
+import app.ocr_backend.db_service.DBService
+import app.ocr_backend.ai.llama.LlamaService
+import app.ocr_backend.util.PathHandler
 import com.google.gson.Gson
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile

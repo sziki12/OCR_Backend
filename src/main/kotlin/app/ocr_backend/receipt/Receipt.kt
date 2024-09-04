@@ -1,10 +1,10 @@
 package app.ocr_backend.receipt
 
 import app.ocr_backend.ai.ocr.OcrEntity
-import app.ocr_backend.model.Item
-import app.ocr_backend.model.Place
-import app.ocr_backend.model.ReceiptImage
-import app.ocr_backend.model.User
+import app.ocr_backend.item.Item
+import app.ocr_backend.place.Place
+import app.ocr_backend.receipt_image.ReceiptImage
+import app.ocr_backend.user.User
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.time.LocalDate

@@ -1,8 +1,6 @@
 package app.ocr_backend.item
 
-import app.ocr_backend.model.Item
 import app.ocr_backend.receipt.Receipt
-import app.ocr_backend.item.ItemDBRepository
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -15,7 +13,7 @@ class ItemService(val itemRepository: ItemDBRepository) {
         itemRepository.save(newItem)
         return newItem
     }
-    fun saveItem(receipt: Receipt, item:Item)
+    fun saveItem(receipt: Receipt, item: Item)
     {
         item.receipt = receipt
         itemRepository.save(item)
@@ -24,7 +22,7 @@ class ItemService(val itemRepository: ItemDBRepository) {
         return itemRepository.getItemById(itemId)
     }
 
-    fun updateItem(item:Item)
+    fun updateItem(item: Item)
     {
         val itemToUpdate = itemRepository.getItemById(item.id)
         if(itemToUpdate.isPresent)

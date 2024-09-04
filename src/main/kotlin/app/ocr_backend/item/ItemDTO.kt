@@ -1,9 +1,5 @@
 package app.ocr_backend.item
 
-import app.ocr_backend.model.Item
-import enumeration.Category
-import jakarta.persistence.Column
-
 
 data class ItemDTO(
     var id:Long?,

@@ -1,6 +1,6 @@
 package app.ocr_backend.ai.llama
 
-import app.ocr_backend.model.Item
+import app.ocr_backend.item.Item
 
 data class LlamaItemList(
     val items:List<LlamaItem>
@@ -21,7 +21,7 @@ data class LlamaItem(
     val cost:Int,
 )
 {
-    fun toItem():Item
+    fun toItem(): Item
     {
         return Item(name,quantity,cost)
     }

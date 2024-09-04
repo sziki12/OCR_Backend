@@ -1,8 +1,7 @@
 package app.ocr_backend.ai.llama
 
 import app.ocr_backend.receipt.Receipt
-import app.ocr_backend.service.DBService
-import app.ocr_backend.service.llama.LlamaService
+import app.ocr_backend.db_service.DBService
 import com.google.gson.Gson
 import enumeration.Category
 import org.springframework.stereotype.Service

@@ -1,6 +1,6 @@
 package app.ocr_backend.ai.ocr
 
-import app.ocr_backend.service.DBService
+import app.ocr_backend.db_service.DBService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException

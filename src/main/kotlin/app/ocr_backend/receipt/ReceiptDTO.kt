@@ -1,7 +1,7 @@
 package app.ocr_backend.receipt
 
 import app.ocr_backend.item.ItemDTO
-import app.ocr_backend.model.Item
+import app.ocr_backend.item.Item
 import java.time.LocalDate
 import kotlin.collections.ArrayList
 
