@@ -1,7 +1,10 @@
 import cv2
 import pytesseract
+from paddleocr import PaddleOCR,draw_ocr
 from imutils.perspective import four_point_transform
 import imutils
+import ImageProcessing as ip
+from PIL import Image
 
 class ReceiptOCRWrapper:
 	def __init__(self,args):
@@ -19,7 +22,11 @@ class ReceiptOCRWrapper:
 			receipt = self.fourPointTransform(cnts) 
 		else:
 			receipt = self.original.copy()
-			
+
+		#receipt = ip.AdvancedImageProcessing.enhance_image(receipt)
+		#if self.args["debug"] > 0:
+		#	cv2.imshow("enhance_image", receipt)
+		#	cv2.waitKey(0)	
 		return receipt
 		
 
@@ -77,15 +84,40 @@ class ReceiptOCRWrapper:
 
 		return receipt
 	
-	def readReceipt(self):
+	def readReceiptWithTesseract(self):
 		
 		receipt = self.getReceipt()
 
 		options = "--psm 4 -l hun+eng"
 		receiptText = pytesseract.image_to_string(
 			cv2.cvtColor(receipt, cv2.COLOR_BGR2RGB),
+			#receipt,
 			config=options)
 	
 		return receiptText
+	
+	def readReceiptWithPaddle(self):
+		# Paddleocr supports Chinese, English, French, German, Korean and Japanese.
+		# You can set the parameter `lang` as `ch`, `en`, `fr`, `german`, `korean`, `japan`
+		# to switch the language model in order.
+		ocr = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False) #, use_gpu=True   need to run only once to download and load model into memory
+		img_path = self.args["path"]+"/"+self.args["image"]
+		result = ocr.ocr(img_path, cls=True)
+		for idx in range(len(result)):
+			res = result[idx]
+			for line in res:
+				print(line)
+
+
+		# draw result
+		result = result[0]
+		image = Image.open(img_path).convert('RGB')
+		boxes = [line[0] for line in result]
+		txts = [line[1][0] for line in result]
+		scores = [line[1][1] for line in result]
+		print(txts)
+		#im_show = draw_ocr(image, boxes, txts, scores, font_path='./fonts/simfang.ttf')
+		#im_show = Image.fromarray(im_show)
+		#im_show.save('result.jpg')
 
 

@@ -1,0 +1,10 @@
+setuptools
+pytesseract
+cv2
+paddleocr
+imutils
+numpy
+scipy
+llama_cpp
+openai
+--extra-index-url https://pypi.ngc.nvidia.com
