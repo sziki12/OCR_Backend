@@ -11,7 +11,7 @@ ap.add_argument("-i", "--image", required=True,
 ap.add_argument("-p", "--path", required=True,
 	help="path to image folder")
 
-ap.add_argument("-ot", "--ocr_type",
+ap.add_argument("-ot", "--ocr_type", required=True,
 	help="tesseract, paddle")
 ap.add_argument("-pt", "--processing_type",
 	help="manual, chatgpt")
@@ -26,8 +26,14 @@ ap.add_argument("-is", "--itemseparator", default="------",
 args = vars(ap.parse_args())
 
 ocr = ReceiptOCRWrapper(args)
+ocr_type = args["ocr_type"]
 
-receiptText = ocr.readReceiptWithPaddle()
+receiptText = ""
+
+if ocr_type == "tesseract":
+    receiptText = ocr.readReceiptWithTesseract()   
+elif ocr_type == "paddle":	
+	receiptText = ocr.readReceiptWithPaddle()
 
 separator = args["separator"]
 itemSeparator = args["itemseparator"]

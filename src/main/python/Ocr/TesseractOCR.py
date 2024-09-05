@@ -4,7 +4,7 @@ from paddleocr import PaddleOCR,draw_ocr
 from imutils.perspective import four_point_transform
 import imutils
 import ImageProcessing as ip
-from PIL import Image
+from PIL import Image,ImageFont,ImageDraw
 
 class ReceiptOCRWrapper:
 	def __init__(self,args):
@@ -102,22 +102,26 @@ class ReceiptOCRWrapper:
 		# to switch the language model in order.
 		ocr = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False) #, use_gpu=True   need to run only once to download and load model into memory
 		img_path = self.args["path"]+"/"+self.args["image"]
-		result = ocr.ocr(img_path, cls=True)
-		for idx in range(len(result)):
-			res = result[idx]
-			for line in res:
-				print(line)
-
+		results = ocr.ocr(img_path, cls=True)
+		#for idx in range(len(result)):
+		#	res = result[idx]
+		#	for line in res:
+		#		print(line)
 
 		# draw result
-		result = result[0]
-		image = Image.open(img_path).convert('RGB')
-		boxes = [line[0] for line in result]
-		txts = [line[1][0] for line in result]
-		scores = [line[1][1] for line in result]
-		print(txts)
-		#im_show = draw_ocr(image, boxes, txts, scores, font_path='./fonts/simfang.ttf')
-		#im_show = Image.fromarray(im_show)
-		#im_show.save('result.jpg')
+		image = Image.open(img_path).convert("RGB")
+		draw = ImageDraw.Draw(image)
+		font = ImageFont.load_default()
+		for res in results:
+			for line in res:
+				box = [tuple(point) for point in line[0]]
+				# Finding the bounding box
+				box = [(min(point[0] for point in box), min(point[1] for point in box)),
+					(max(point[0] for point in box), max(point[1] for point in box))]
+				txt = line[1][0]
+				draw.rectangle(box, outline="red", width=2)  # Draw rectangle
+				draw.text((box[0][0], box[0][1] - 25), txt, fill="blue", font=font)
+		image.save("result.jpg")		
+		return "txts"
 
 
