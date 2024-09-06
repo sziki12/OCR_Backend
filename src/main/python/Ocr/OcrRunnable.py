@@ -1,7 +1,8 @@
 
 import argparse
 from ReceiptProcessor import ReceiptProcessor
-from TesseractOCR import ReceiptOCRWrapper
+from TesseractOcrProcessor import TesseractOcrProcessor
+from PaddleOcrProcessor import PaddleOcrProcessor
 from openai import OpenAI
 
 ap = argparse.ArgumentParser()
@@ -25,14 +26,16 @@ ap.add_argument("-is", "--itemseparator", default="------",
 
 args = vars(ap.parse_args())
 
-ocr = ReceiptOCRWrapper(args)
 ocr_type = args["ocr_type"]
 
 receiptText = ""
 
 if ocr_type == "tesseract":
-    receiptText = ocr.readReceiptWithTesseract()   
+    ocr = TesseractOcrProcessor(args)
+    receiptText = ocr.readReceiptWithTesseract() 
+      
 elif ocr_type == "paddle":	
+	ocr = PaddleOcrProcessor(args)
 	receiptText = ocr.readReceiptWithPaddle()
 
 separator = args["separator"]
