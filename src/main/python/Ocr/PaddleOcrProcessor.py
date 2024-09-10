@@ -1,6 +1,8 @@
 from paddleocr import PaddleOCR,draw_ocr
 import ImageProcessing as ip
 from PIL import Image,ImageFont,ImageDraw
+from Rect.WordRectangle import WordRectangle
+from Rect.OcrDocument import OcrDocument
 
 class PaddleOcrProcessor:
     def __init__(self,args):
@@ -48,6 +50,8 @@ class PaddleOcrProcessor:
         texts = [line[1][0] for line in result]
         scores = [line[1][1] for line in result]
 
+        OcrDocument(boxes, texts, scores)
+
         prev_pos = None
         out_text = ""
         row_params = self.determineRowParams(texts,boxes)
@@ -64,8 +68,8 @@ class PaddleOcrProcessor:
                 #prev_right_top = prev_pos[1]
                 #prev_right_bot = prev_pos[2]
                 #prev_left_bot = prev_pos[3]
-                if abs(left_top[0] - prev_left_top[0]) <= row_params[0] and abs(left_top[1] - prev_left_top[1]) <= row_params[1]:
-                    print_next_row = False
+                #if abs(left_top[0] - prev_left_top[0]) <= row_params[0] and abs(left_top[1] - prev_left_top[1]) <= row_params[1]:
+                #    print_next_row = False
 
             prev_pos = boxes[index_to_write]
             if print_next_row == True:
