@@ -11,8 +11,8 @@ boxes = [#[[1302.0, 1762.0], [1403.0, 1767.0], [1362.0, 2706.0], [1261.0, 2701.0
 texts = ["KACSA", "190"]
 #texts = ["PADTHAIWOKBAR", "PADUNA KFT"]
 scores = [1,1]
-OcrDocument(boxes, texts, scores)
-
+doc = OcrDocument(boxes, texts, scores)
+print(doc.get_text())
 
 """ Distance: 145.29235247236562 Expected: 191.925
 Midpoints: (862.5, 342.0) (446.5, 373.0)

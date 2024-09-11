@@ -50,9 +50,9 @@ class PaddleOcrProcessor:
         texts = [line[1][0] for line in result]
         scores = [line[1][1] for line in result]
 
-        OcrDocument(boxes, texts, scores)
-
-        prev_pos = None
+        document = OcrDocument(boxes, texts, scores)
+        out_text = document.get_text()
+        """  prev_pos = None
         out_text = ""
         row_params = self.determineRowParams(texts,boxes)
         for i in range(len(texts)):
@@ -75,7 +75,7 @@ class PaddleOcrProcessor:
             if print_next_row == True:
                 out_text += ("\n"+str(texts[index_to_write]))
             else: 
-                out_text += (" "+str(texts[index_to_write]))
+                out_text += (" "+str(texts[index_to_write]))"""
 
         self.showProcessedImage(img_path, self.args["image"], results)
         return out_text

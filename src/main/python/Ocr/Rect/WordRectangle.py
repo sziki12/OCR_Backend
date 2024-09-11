@@ -1,4 +1,12 @@
 import numpy as np
+from enum import Enum
+
+class WordRelation(Enum):
+    RIGHT = 0
+    LEFT = 1
+    ABOVE = 2
+    BELOW = 3
+    SAME = 4
 
 class WordRectangle:
     def __init__(self,bounding_box, text, probability):
@@ -11,12 +19,12 @@ class WordRectangle:
         self.left_midpoint = tuple(i / 2 for i in  tuple(np.add(self.left_top, self.left_bot)))
         self.middle_point = tuple(i / 2 for i in  tuple(np.add(self.right_midpoint, self.left_midpoint)))
 
-        range = tuple(abs(i) / 2 for i in  tuple(np.subtract(self.right_top, self.left_bot)))
+        self.shape = tuple(abs(i) / 2 for i in  tuple(np.subtract(self.right_top, self.left_bot)))
         
-        print("Range: "+str(range))
+        print("Shape: "+str(self.shape))
         #TODO
-        self.x_range =  range[0] * 0.9
-        self.y_range =  range[1] * 0.9
+        self.x_range =  self.shape[0] * 0.9
+        self.y_range =  self.shape[1] * 0.9
 
         self.text = text
         self.probability = probability
@@ -24,9 +32,21 @@ class WordRectangle:
         self.row = None
         self.column = None
 
+    def order(self, other_word):
+        if not isinstance(other_word,WordRectangle):
+            return None
+        
+        if(self.middle_point[0] > other_word.middle_point[0]):
+            return WordRelation.LEFT
+        
+        elif(self.middle_point[0] < other_word.middle_point[0]):
+            return WordRelation.RIGHT
+        
+        elif(self.middle_point[0] == other_word.middle_point[0]):
+            return WordRelation.SAME
+
     def is_in_same_line(self, otherRect):
         if not isinstance(otherRect,WordRectangle):
-            print("otherRect is not WordRectangle")
             return False
         
         """ xdiff = (self.right_midpoint[0]- self.left_midpoint[0], otherRect.right_top[0]- otherRect.right_bot[0])
@@ -45,11 +65,19 @@ class WordRectangle:
 
         (x,y) = intersection(line(self.right_midpoint, self.left_midpoint),  line(otherRect.right_top, otherRect.right_bot))
 #TODO Print all point and assert calculation
-        print("\n")
+        """ print("\n")
+        print("Self")
+        print("Top: "+str(self.right_top)+" "+str(self.left_top))
+        print("Bot: "+str(self.right_bot)+" "+str(self.left_bot))
+
+        print("Other")
+        print("Top: "+str(otherRect.right_top)+" "+str(otherRect.left_top))
+        print("Bot: "+str(otherRect.right_bot)+" "+str(otherRect.left_bot))
+
         print("Distance: "+str(abs(otherRect.right_midpoint[1]-y))+" Expected: "+str(otherRect.y_range))
         print("Midpoints: "+str(self.right_midpoint)+" "+str(self.left_midpoint))
-        print("Target: "+str(self.right_top)+" "+str(self.right_bot))
-        print("x,y: "+"("+str(x)+","+str(y)+")")
+        print("Target: "+str(otherRect.right_top)+" "+str(otherRect.right_bot))
+        print("x,y: "+"("+str(x)+","+str(y)+")") """
         if abs(otherRect.right_midpoint[1]-y) <= otherRect.y_range:
             return True
         
