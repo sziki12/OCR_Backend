@@ -1,5 +1,6 @@
-package app.ocr_backend.ai.ocr
+package app.ocr_backend.ai.ocr.ocr_entity
 
+import app.ocr_backend.ai.ocr.response.OcrResponse
 import app.ocr_backend.receipt.Receipt
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
@@ -57,10 +58,11 @@ data class OcrEntity(
     fun toOcrResponse(): OcrResponse
     {
         return OcrResponse(
+            extractedOcrResponse = null,//TODO fix extractedOcrResponse = null
             plainText = plainText.split("\n"),
             filteredReceipt = filteredReceipt.split("\n"),
             extractedItems = extractedItems.split(itemSeparator),
-            date = receipt.dateOfPurchase,
+            date = receipt.dateOfPurchase.toString(),
             newReceiptId = receipt.id
         )
     }

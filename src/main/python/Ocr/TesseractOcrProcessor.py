@@ -1,7 +1,7 @@
 import pytesseract
 import cv2
 import imutils
-import ImageProcessing as ip
+import Ocr.ImageProcessing as ip
 
 class TesseractOcrProcessor:
     def __init__(self,args):

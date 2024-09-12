@@ -1,5 +1,5 @@
-from Rect.WordRectangle import WordRectangle, WordRelation
-from Rect.OcrRow import OcrRow
+from Ocr.Rect.WordRectangle import WordRectangle, WordRelation
+from Ocr.Rect.OcrRow import OcrRow
 
 class OcrDocument:
     def __init__(self, boxes, texts, probabilities):

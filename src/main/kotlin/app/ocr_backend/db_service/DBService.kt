@@ -1,10 +1,10 @@
 package app.ocr_backend.db_service
 
-import app.ocr_backend.ai.ocr.OcrEntity
-import app.ocr_backend.ai.ocr.OcrEntityService
+import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
+import app.ocr_backend.ai.ocr.ocr_entity.OcrEntityService
 import app.ocr_backend.statistic.ChartRequestDTO
 import app.ocr_backend.statistic.ItemCategoryData
-import app.ocr_backend.ai.ocr.OcrResponse
+import app.ocr_backend.ai.ocr.response.OcrResponse
 import app.ocr_backend.statistic.PieChartDTO
 import app.ocr_backend.item.Item
 import app.ocr_backend.item.ItemService
@@ -269,7 +269,7 @@ class DBService(
         if(optReceipt.isPresent)
         {
             val receipt = optReceipt.get()
-            receipt.dateOfPurchase = ocrResponse.date
+            receipt.dateOfPurchase = LocalDate.parse(ocrResponse.date)
             val ocrEntity = OcrEntity.fromOcrResponse(ocrResponse).also {
                 it.receipt = receipt
                 it.date = receipt.dateOfPurchase

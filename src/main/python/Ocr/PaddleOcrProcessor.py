@@ -1,8 +1,10 @@
 from paddleocr import PaddleOCR,draw_ocr
-import ImageProcessing as ip
+import Ocr.ImageProcessing as ip
 from PIL import Image,ImageFont,ImageDraw
-from Rect.WordRectangle import WordRectangle
-from Rect.OcrDocument import OcrDocument
+from Ocr.Rect.WordRectangle import WordRectangle
+from Ocr.Rect.OcrDocument import OcrDocument
+from Ocr.ManualReceiptProcessor import ManualReceiptProcessor
+from Ocr.ChatGptReceiptProcessor import ChatGptReceiptProcessor
 
 class PaddleOcrProcessor:
     def __init__(self,args):
@@ -51,31 +53,10 @@ class PaddleOcrProcessor:
         scores = [line[1][1] for line in result]
 
         document = OcrDocument(boxes, texts, scores)
-        out_text = document.get_text()
-        """  prev_pos = None
-        out_text = ""
-        row_params = self.determineRowParams(texts,boxes)
-        for i in range(len(texts)):
-            index_to_write = boxes.index(sorted_boxes[i])
-            print_next_row = True
-            print((str(boxes[index_to_write])+" "+str(texts[index_to_write])+" r: "+str(scores[index_to_write])))
-            if prev_pos != None:
-                left_top = boxes[index_to_write][0]
-                #right_top = boxes[index_to_write][1]
-                #right_bot = boxes[index_to_write][2]
-                #left_bot = boxes[index_to_write][3]
-                prev_left_top = prev_pos[0]
-                #prev_right_top = prev_pos[1]
-                #prev_right_bot = prev_pos[2]
-                #prev_left_bot = prev_pos[3]
-                #if abs(left_top[0] - prev_left_top[0]) <= row_params[0] and abs(left_top[1] - prev_left_top[1]) <= row_params[1]:
-                #    print_next_row = False
+        receipt_text = document.get_text()
 
-            prev_pos = boxes[index_to_write]
-            if print_next_row == True:
-                out_text += ("\n"+str(texts[index_to_write]))
-            else: 
-                out_text += (" "+str(texts[index_to_write]))"""
-
-        self.showProcessedImage(img_path, self.args["image"], results)
-        return out_text
+        receipt_text_processor =  ChatGptReceiptProcessor(receipt_text, self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
+        processed_text = receipt_text_processor.process()
+       # if self.args["debug"] > 0:
+        #    self.showProcessedImage(img_path, self.args["image"], results)
+        return processed_text

@@ -1,7 +1,5 @@
-package app.ocr_backend.ai.ocr
+package app.ocr_backend.ai.ocr.ocr_entity
 
-import app.ocr_backend.ai.ocr.OcrEntity
-import app.ocr_backend.ai.ocr.OcrEntityDBRepository
 import org.springframework.stereotype.Service
 import java.util.*
 

@@ -46,7 +46,7 @@ class WordRectangle:
             return WordRelation.SAME
 
     def is_in_same_line(self, otherRect):
-        if not isinstance(otherRect,WordRectangle):
+        if not isinstance(otherRect, WordRectangle):
             return False
         
         """ xdiff = (self.right_midpoint[0]- self.left_midpoint[0], otherRect.right_top[0]- otherRect.right_bot[0])

@@ -1,12 +1,12 @@
-package app.ocr_backend.ai.ocr
+package app.ocr_backend.ai.ocr.response
 
 import java.time.LocalDate
-import java.util.*
 
 data class OcrResponse(
+    val extractedOcrResponse: ExtractedOcrResponse?,
     var plainText:List<String>,
     var filteredReceipt:List<String>,
     var extractedItems:List<String>,
-    var date: LocalDate,
+    var date: String,
     var newReceiptId:Long,
 )

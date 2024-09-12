@@ -1,9 +1,7 @@
 
 import argparse
-from ReceiptProcessor import ReceiptProcessor
 from TesseractOcrProcessor import TesseractOcrProcessor
 from PaddleOcrProcessor import PaddleOcrProcessor
-from openai import OpenAI
 
 ap = argparse.ArgumentParser()
 
@@ -44,15 +42,7 @@ debug = args["debug"]
 print(receiptText)
 
 
-#prompt = "Extract the store address, total cost, date of purchase and for all purchased items the quantity, name and price from the following hungarian or english receipt:"
 
-#client = OpenAI()
-#completion = client.chat.completions.create(
-#    model="gpt-4o",
-#    messages=[
-#        {"role": "user", "content": "Extract the useful informations from the following hungarian or english receipt:"}
-#    ]
-#)
 
 #receiptProcessor = ReceiptProcessor(separator,itemSeparator,debug)
 #receiptProcessor.process(receiptText)

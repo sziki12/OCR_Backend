@@ -1,4 +1,4 @@
-from Rect.WordRectangle import WordRectangle, WordRelation
+from Ocr.Rect.WordRectangle import WordRectangle, WordRelation
 class OcrRow:
     def __init__(self, first_word) :
         self.words = []
