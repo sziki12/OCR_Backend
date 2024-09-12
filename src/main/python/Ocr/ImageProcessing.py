@@ -44,8 +44,11 @@ class BaseImageProcessor:
 
     #skew correction
     def deskew(self, image):
+        if self.args["debug"] > 0:
+            cv2.imshow("image", image)
+            cv2.waitKey(0)
         coords = np.column_stack(np.where(image > 0))
-        angle = cv2.minAreaRect(coords)[-1]
+        angle = cv2.minAreaRect(coords.copy())[-1]
         if angle < -45:
             angle = -(90 + angle)
         else:
@@ -54,6 +57,9 @@ class BaseImageProcessor:
         center = (w // 2, h // 2)
         M = cv2.getRotationMatrix2D(center, angle, 1.0)
         rotated = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+        if self.args["debug"] > 0:
+            cv2.imshow("rotated", rotated)
+            cv2.waitKey(0)
         return rotated
 
     #template matching

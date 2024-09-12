@@ -1,14 +1,34 @@
 from paddleocr import PaddleOCR,draw_ocr
 import Ocr.ImageProcessing as ip
+import cv2
 from PIL import Image,ImageFont,ImageDraw
 from Ocr.Rect.WordRectangle import WordRectangle
 from Ocr.Rect.OcrDocument import OcrDocument
 from Ocr.ManualReceiptProcessor import ManualReceiptProcessor
 from Ocr.ChatGptReceiptProcessor import ChatGptReceiptProcessor
+import Ocr.ImageProcessing as ip
+import imutils
 
 class PaddleOcrProcessor:
     def __init__(self,args):
         self.args = args
+        self.advanced_image_processor = ip.AdvancedImageProcessor(args)
+        self.base_image_processor = self.advanced_image_processor.base_image_processor
+
+    """ 
+    Must have for paddle ocr for consistency, some images (where the fourPointTransform is walid option) are ocr-ed after rotated 270 degres if the fourPointTransform is not called.
+    """
+    def preprocess_and_load_image(self, image_path):
+        original = cv2.imread(image_path)
+        resized = imutils.resize(original.copy(), width=1000)
+        cnts = self.advanced_image_processor.edgeDetection(resized)
+        ratio = original.shape[1] / float(resized.shape[1])
+
+        if cnts is not None:
+            processed_image = self.advanced_image_processor.fourPointTransform(original, ratio, cnts) 
+        else:
+            processed_image = original.copy()
+        return processed_image
 
     def determineRowParams(self, texts, boxes):
             longest = max(texts, key = len)
@@ -19,8 +39,8 @@ class PaddleOcrProcessor:
             left_bot = boxes[i][3]
             return (abs(left_top[0] - right_top[0]), abs(left_top[1] - left_bot[1]))		
 
-    def showProcessedImage(self, img_path, image_name, results):
-        image = Image.open(img_path).convert("RGB")
+    def saveProcessedImage(self, image_path, image_name, results):
+        image = Image.open(image_path).convert("RGB")
         draw = ImageDraw.Draw(image)
         font = ImageFont.load_default()
         # Process and draw results
@@ -41,8 +61,9 @@ class PaddleOcrProcessor:
         # You can set the parameter `lang` as `ch`, `en`, `fr`, `german`, `korean`, `japan`
         # to switch the language model in order.
         ocr = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False) #, use_gpu=True   need to run only once to download and load model into memory
-        img_path = self.args["path"]+"/"+self.args["image"]
-        results = ocr.ocr(img_path, cls=True)
+        image_path = self.args["path"]+"/"+self.args["image"]
+        image = self.preprocess_and_load_image(image_path)
+        results = ocr.ocr(image, cls=True)
 
         result = results[0]
         
@@ -57,6 +78,6 @@ class PaddleOcrProcessor:
 
         receipt_text_processor =  ChatGptReceiptProcessor(receipt_text, self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
         processed_text = receipt_text_processor.process()
-       # if self.args["debug"] > 0:
-        #    self.showProcessedImage(img_path, self.args["image"], results)
+        if self.args["debug"] > 0:
+            self.saveProcessedImage(image_path, self.args["image"], results)
         return processed_text
