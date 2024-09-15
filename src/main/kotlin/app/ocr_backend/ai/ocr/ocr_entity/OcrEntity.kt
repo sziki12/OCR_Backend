@@ -1,37 +1,38 @@
 package app.ocr_backend.ai.ocr.ocr_entity
 
-import app.ocr_backend.ai.ocr.response.OcrResponse
+import app.ocr_backend.ai.ocr.backend_dto.ProcessedReceipt
+import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
 import app.ocr_backend.receipt.Receipt
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.google.gson.Gson
 import jakarta.persistence.*
 import java.time.LocalDate
 
 @Entity
 @Table(name="ocr_response")
 data class OcrEntity(
-    @Column(name = "plain_text",columnDefinition="TEXT")
-    var plainText:String,
-    @Column(name = "filtered_receipt",columnDefinition="TEXT")
-    var filteredReceipt:String,
-    @Column(name = "extracted_items",columnDefinition="TEXT")
-    var extractedItems:String,
+    @Column(name = "receipt_text",columnDefinition="TEXT")
+    var receiptText:String,
+    @Column(name = "processed_receipt",columnDefinition="TEXT")
+    var processedReceipt:String,
     var date: LocalDate,
 )
 {
+
     companion object
     {
-        @JsonIgnore
+        private val gson = Gson()
+        /*@JsonIgnore
         val mainSeparator = "======"
         @JsonIgnore
-        val itemSeparator = "=-----="
+        val itemSeparator = "=-----="*/
 
         fun fromOcrResponse(ocrResponse: OcrResponse): OcrEntity
         {
             return OcrEntity(
-                plainText = stringFromList(ocrResponse.plainText,"\n"),
-                filteredReceipt = stringFromList(ocrResponse.filteredReceipt,"\n"),
-                extractedItems = stringFromList(ocrResponse.extractedItems, "\n"+ itemSeparator),
-                date = LocalDate.now()
+                receiptText = ocrResponse.receiptText,
+                processedReceipt = gson.toJson(ocrResponse.processedReceipt),
+                date = LocalDate.parse(ocrResponse.date)
             )
         }
         private fun stringFromList(list:List<String>,separator:String):String
@@ -58,10 +59,8 @@ data class OcrEntity(
     fun toOcrResponse(): OcrResponse
     {
         return OcrResponse(
-            extractedOcrResponse = null,//TODO fix extractedOcrResponse = null
-            plainText = plainText.split("\n"),
-            filteredReceipt = filteredReceipt.split("\n"),
-            extractedItems = extractedItems.split(itemSeparator),
+            receiptText = receiptText,
+            processedReceipt = gson.fromJson(processedReceipt, ProcessedReceipt::class.java),
             date = receipt.dateOfPurchase.toString(),
             newReceiptId = receipt.id
         )

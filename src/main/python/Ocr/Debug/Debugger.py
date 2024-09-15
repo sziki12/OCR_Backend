@@ -7,7 +7,7 @@ class Debugger:
 
     def debug_image(self, image_name, image):
         if self.isDebugging > 0:
-            cv2.imshow(image_name, imutils.resize(image, width=1000))
+            cv2.imshow(image_name, imutils.resize(image, height=1000))
             cv2.waitKey(0)
 
     def debug_image_with_contour(self, image_name, image, contour):

@@ -1,11 +1,9 @@
 package app.ocr_backend.ai.ocr
 
-import app.ocr_backend.ai.llama.LlamaItemList
 import app.ocr_backend.receipt.Receipt
 import app.ocr_backend.db_service.DBService
-import app.ocr_backend.ai.llama.LlamaService
 import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
-import app.ocr_backend.ai.ocr.response.OcrResponse
+import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
 import app.ocr_backend.item.Item
 import app.ocr_backend.util.PathHandler
 import com.google.gson.Gson
@@ -23,7 +21,7 @@ class ImageProcessingService(
 ) {
     private val maxRetryCount: Int = 10
     private val gson = Gson()
-    fun processImage(image: MultipartFile): String {
+    fun processImage(image: MultipartFile): OcrResponse? {
         val optReceipt = service.saveReceipt(Receipt().also { it.isPending = true })
         return if (optReceipt.isPresent) {
             val newReceipt = optReceipt.get()
@@ -42,9 +40,9 @@ class ImageProcessingService(
             service.updateReceipt(newReceipt.also {
                 it.isPending = false
             })
-            gson.toJson(ocrOutput)
+            ocrOutput
         } else {
-            ""
+            null
         }
     }
 
@@ -59,7 +57,7 @@ class ImageProcessingService(
      */
 
     private fun parseResponse(fileName: String, newReceipt: Receipt, ocrOutput: OcrResponse) {
-        ocrOutput.extractedOcrResponse?.let {
+        ocrOutput.processedReceipt.let {
             var parsedItemCost = 0
             for (item in it.toItemList()) {
                 parsedItemCost += item.totalCost

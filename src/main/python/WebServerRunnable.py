@@ -48,21 +48,21 @@ class PythonWebServer(BaseHTTPRequestHandler):
         self.init_params()
         
         if self.path == "/ocr":
-            receiptText = ""
+            response_json = ""
             ocr_type = self.args["ocr_type"]
 
             if ocr_type == "tesseract":
                 ocr = TesseractOcrProcessor(self.args)
-                receiptText = ocr.read_receipt_with_tesseract() 
+                response_json = ocr.read_receipt_with_tesseract() 
                 
             elif ocr_type == "paddle":	
                 ocr = PaddleOcrProcessor(self.args)
-                receiptText = ocr.readReceiptWithPaddle()
+                response_json = ocr.read_receipt_with_paddle()
 
             self.send_response(200)
             self.send_header("Content-type", "text/json")
             self.end_headers() 
-            self.wfile.write(bytes(receiptText, 'utf-8'))
+            self.wfile.write(bytes(response_json, 'utf-8'))
 
 if __name__ == "__main__":        
     webServer = HTTPServer((hostName, serverPort), PythonWebServer)

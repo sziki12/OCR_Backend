@@ -1,7 +1,11 @@
 import pytesseract
 import cv2
 import imutils
+import json
+from types import SimpleNamespace
 import Ocr.ImageProcessing as ip
+from Ocr.ManualReceiptProcessor import ManualReceiptProcessor
+from Ocr.ChatGptReceiptProcessor import ChatGptReceiptProcessor
 
 class TesseractOcrProcessor:
     def __init__(self,args):
@@ -31,12 +35,17 @@ class TesseractOcrProcessor:
         receipt = self.get_receipt()
 
         options = "--psm 4 -l hun+eng"
-        receiptText = pytesseract.image_to_string(
+        receipt_text = pytesseract.image_to_string(
             cv2.cvtColor(receipt, cv2.COLOR_BGR2RGB),
             config=options)
-
-        #TODO Process Text
-        return receiptText
+        
+        receipt_text_processor =  ChatGptReceiptProcessor(receipt_text, self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
+        processed_text = receipt_text_processor.process()
+        response_json = {
+            "processed_receipt": json.loads(processed_text),
+            "receipt_text": receipt_text
+        }
+        return json.dumps(response_json)
 
     def get_receipt(self):
         cnts = self.advanced_image_processor.edgeDetection(self.resized)

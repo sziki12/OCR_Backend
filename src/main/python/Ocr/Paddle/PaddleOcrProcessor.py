@@ -1,13 +1,14 @@
 from paddleocr import PaddleOCR,draw_ocr
 import Ocr.ImageProcessing as ip
 import cv2
+import imutils
+import json
 from PIL import Image,ImageFont,ImageDraw
 from Ocr.Rect.WordRectangle import WordRectangle
 from Ocr.Rect.OcrDocument import OcrDocument
 from Ocr.ManualReceiptProcessor import ManualReceiptProcessor
 from Ocr.ChatGptReceiptProcessor import ChatGptReceiptProcessor
 import Ocr.ImageProcessing as ip
-import imutils
 from Ocr.Debug.Debugger import Debugger
 
 class PaddleOcrProcessor:
@@ -28,15 +29,16 @@ class PaddleOcrProcessor:
 
         cnts = self.advanced_image_processor.edgeDetection(resized)
         ratio = original.shape[1] / float(resized.shape[1])
-        processed_image = self.base_image_processor.deskew(original)
+        processed_image = original.copy()
         if cnts is not None:
-            processed_image = self.advanced_image_processor.fourPointTransform(original, ratio, cnts) 
+            processed_image = self.advanced_image_processor.fourPointTransform(processed_image, ratio, cnts)
+        processed_image = self.base_image_processor.deskew(processed_image,"portrait")   
             
         return processed_image
     '''
     Returns the width and height of a bouinding box as touple
     '''
-    def determineRowParams(self, texts, boxes):
+    def determine_row_params(self, texts, boxes):
             longest = max(texts, key = len)
             i = texts.index(longest)
             left_top = boxes[i][0]
@@ -45,7 +47,7 @@ class PaddleOcrProcessor:
             left_bot = boxes[i][3]
             return (abs(left_top[0] - right_top[0]), abs(left_top[1] - left_bot[1]))		
 
-    def saveProcessedImage(self, image_path, image_name, results):
+    def save_processed_image(self, image_path, image_name, results):
         image = Image.open(image_path).convert("RGB")
         draw = ImageDraw.Draw(image)
         font = ImageFont.load_default()
@@ -62,7 +64,7 @@ class PaddleOcrProcessor:
         # Save result
         image.save(image_name+"-result.jpg")
 		
-    def readReceiptWithPaddle(self):
+    def read_receipt_with_paddle(self):
         # Paddleocr supports Chinese, English, French, German, Korean and Japanese.
         # You can set the parameter `lang` as `ch`, `en`, `fr`, `german`, `korean`, `japan`
         # to switch the language model in order.
@@ -82,9 +84,14 @@ class PaddleOcrProcessor:
         document = OcrDocument(boxes, texts, scores)
         receipt_text = document.get_text()
 
-        """ receipt_text_processor =  ChatGptReceiptProcessor(receipt_text, self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
-        processed_text = receipt_text_processor.process() """
+        receipt_text_processor =  ChatGptReceiptProcessor(receipt_text, self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
+        processed_text = receipt_text_processor.process()
+
         if self.args["debug"] > 0:
-            self.saveProcessedImage(image_path, self.args["image"], results)
-        return receipt_text
-    """ processed_text """
+            self.save_processed_image(image_path, self.args["image"], results)
+
+        response_json = {
+            "processed_receipt": json.loads(processed_text),
+            "receipt_text": receipt_text
+        }
+        return json.dumps(response_json)

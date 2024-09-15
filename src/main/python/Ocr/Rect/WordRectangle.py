@@ -21,8 +21,7 @@ class WordRectangle:
 
         self.shape = tuple(abs(i) / 2 for i in  tuple(np.subtract(self.right_top, self.left_bot)))
         
-        print("Shape: "+str(self.shape))
-        #TODO
+        #TODO Fix row detection
         self.x_range =  self.shape[0] * 0.9
         self.y_range =  self.shape[1] * 0.9
 

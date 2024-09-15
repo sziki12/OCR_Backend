@@ -4,7 +4,7 @@ import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
 import app.ocr_backend.ai.ocr.ocr_entity.OcrEntityService
 import app.ocr_backend.statistic.ChartRequestDTO
 import app.ocr_backend.statistic.ItemCategoryData
-import app.ocr_backend.ai.ocr.response.OcrResponse
+import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
 import app.ocr_backend.statistic.PieChartDTO
 import app.ocr_backend.item.Item
 import app.ocr_backend.item.ItemService

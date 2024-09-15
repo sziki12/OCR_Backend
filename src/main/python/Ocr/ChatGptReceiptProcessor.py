@@ -3,13 +3,13 @@ from openai import OpenAI
 class ChatGptReceiptProcessor:
     def __init__(self, receiptText, api_key):
         self.api_key = api_key
-        self.prompt = "Extract the store address, store name, total cost, date of purchase and for all purchased items the quantity, name and price from the following hungarian or english receipt and respond in json. If an item's cost is unknown make it 0, if it's quantity is unknown make it 1, if a string is not found make it empty. The text is:"
+        self.prompt = "Extract the store address, store name as store_name, total cost as total_cost, date of purchase as date_of_purchase and for all purchased items the quantity, name and price in the purchased_items list from the following hungarian or english receipt and respond in json. If an item's cost is unknown make it 0 else return only the number, if it's quantity is unknown make it 1, if a string is not found make it empty. The text is:"
         self.receiptText = receiptText
         
     def process(self):        
         client = OpenAI(api_key = self.api_key)
         completion = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "user", "content": self.prompt+"\n"+self.receiptText}
             ],

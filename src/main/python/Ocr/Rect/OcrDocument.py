@@ -21,14 +21,14 @@ class OcrDocument:
 
     def order_words_in_rows(self):
         for word in self.words:
-            print("\nword: "+word.text)
+            #print("\nword: "+word.text)
             if(len(self.rows)==0):
                 self.rows.append(OcrRow(word))
-                print("self.rows.append(OcrRow(word)")
+                #print("self.rows.append(OcrRow(word)")
             else:
                 has_row = False
                 for row_index in range(len(self.rows)):
-                    print("row_index: "+str(row_index))
+                    #print("row_index: "+str(row_index))
                     relative_place = self.rows[row_index].is_in_row(word)
                     if(relative_place == WordRelation.SAME):
                         #print(word.text+ " SAME "+self.rows[row_index].get_text())

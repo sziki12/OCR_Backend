@@ -34,7 +34,7 @@ if ocr_type == "tesseract":
       
 elif ocr_type == "paddle":	
 	ocr = PaddleOcrProcessor(args)
-	receiptText = ocr.readReceiptWithPaddle()
+	receiptText = ocr.read_receipt_with_paddle()
 
 separator = args["separator"]
 itemSeparator = args["itemseparator"]

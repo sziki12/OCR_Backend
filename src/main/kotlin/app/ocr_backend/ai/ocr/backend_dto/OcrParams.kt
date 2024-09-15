@@ -1,4 +1,4 @@
-package app.ocr_backend.ai.ocr.dto
+package app.ocr_backend.ai.ocr.backend_dto
 
 data class OcrParams(
     val image:String,

@@ -1,4 +1,4 @@
-package app.ocr_backend.ai.ocr.response
+package app.ocr_backend.ai.ocr.backend_dto
 
 import app.ocr_backend.item.Item
 

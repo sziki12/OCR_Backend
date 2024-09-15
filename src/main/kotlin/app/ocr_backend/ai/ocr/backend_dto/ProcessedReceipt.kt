@@ -1,8 +1,8 @@
-package app.ocr_backend.ai.ocr.response
+package app.ocr_backend.ai.ocr.backend_dto
 
 import app.ocr_backend.item.Item
 
-data class ExtractedOcrResponse(
+data class ProcessedReceipt(
     val store_name: String?,
     val store_address: String?,
     val total_cost: Int,

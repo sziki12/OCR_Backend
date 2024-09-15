@@ -45,7 +45,7 @@ class BaseImageProcessor:
         return cv2.Canny(image, 100, 200)
 
     #skew correction
-    def deskew(self, image, max_skew=10):
+    def deskew(self, image,orientation, max_skew=10):
         (height, width) = image.shape[:2]
 
         # Create a grayscale image and denoise it
@@ -59,7 +59,6 @@ class BaseImageProcessor:
         lines = cv2.HoughLinesP(
             im_bw, 1, np.pi / 180, 200, minLineLength=width / 12, maxLineGap=width / 150
         )
-
         # Collect the angles of these lines (in radians)
         angles = []
         for line in lines:
@@ -67,28 +66,26 @@ class BaseImageProcessor:
             angles.append(np.arctan2(y2 - y1, x2 - x1))
 
         # If the majority of our lines are vertical, this is probably a landscape image
-        landscape = np.sum([abs(angle) > np.pi / 4 for angle in angles]) > len(angles) / 2
-
+        #landscape = np.sum([abs(angle) > np.pi / 4 for angle in angles]) > 7 * len(angles) / 12
         # Filter the angles to remove outliers based on max_skew
-        if landscape:
+        if orientation == "landscape":
             angles = [
                 angle
                 for angle in angles
                 if np.deg2rad(90 - max_skew) < abs(angle) < np.deg2rad(90 + max_skew)
             ]
-        else:
+        elif orientation == "portrait":
             angles = [angle for angle in angles if abs(angle) < np.deg2rad(max_skew)]
-
+        else:
+            return image
+            
         if len(angles) < 5:
             # Insufficient data to deskew
             return image
-
         # Average the angles to a degree offset
-        # 90 degrees added, because without it the image is incorrectly rotated 90 degrees
-        angle_deg = 90 + np.rad2deg(np.median(angles))
-        
+        angle_deg = np.rad2deg(np.median(angles))
         # If this is landscape image, rotate the entire canvas appropriately
-        if landscape:
+        if orientation == "landscape":
             if angle_deg < 0:
                 image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
                 angle_deg += 90
