@@ -8,12 +8,14 @@ from Ocr.ManualReceiptProcessor import ManualReceiptProcessor
 from Ocr.ChatGptReceiptProcessor import ChatGptReceiptProcessor
 import Ocr.ImageProcessing as ip
 import imutils
+from Ocr.Debug.Debugger import Debugger
 
 class PaddleOcrProcessor:
     def __init__(self,args):
         self.args = args
         self.advanced_image_processor = ip.AdvancedImageProcessor(args)
         self.base_image_processor = self.advanced_image_processor.base_image_processor
+        self.debugger = Debugger(args["debug"])
 
     """ 
     Must have for paddle ocr for consistency, some images (where the fourPointTransform is walid option) are ocr-ed after rotated 270 degres if the fourPointTransform is not called.
@@ -21,15 +23,19 @@ class PaddleOcrProcessor:
     def preprocess_and_load_image(self, image_path):
         original = cv2.imread(image_path)
         resized = imutils.resize(original.copy(), width=1000)
+
+        self.debugger.debug_image("resized", resized)
+
         cnts = self.advanced_image_processor.edgeDetection(resized)
         ratio = original.shape[1] / float(resized.shape[1])
-
+        processed_image = self.base_image_processor.deskew(original)
         if cnts is not None:
             processed_image = self.advanced_image_processor.fourPointTransform(original, ratio, cnts) 
-        else:
-            processed_image = original.copy()
+            
         return processed_image
-
+    '''
+    Returns the width and height of a bouinding box as touple
+    '''
     def determineRowParams(self, texts, boxes):
             longest = max(texts, key = len)
             i = texts.index(longest)
@@ -76,8 +82,9 @@ class PaddleOcrProcessor:
         document = OcrDocument(boxes, texts, scores)
         receipt_text = document.get_text()
 
-        receipt_text_processor =  ChatGptReceiptProcessor(receipt_text, self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
-        processed_text = receipt_text_processor.process()
+        """ receipt_text_processor =  ChatGptReceiptProcessor(receipt_text, self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
+        processed_text = receipt_text_processor.process() """
         if self.args["debug"] > 0:
             self.saveProcessedImage(image_path, self.args["image"], results)
-        return processed_text
+        return receipt_text
+    """ processed_text """

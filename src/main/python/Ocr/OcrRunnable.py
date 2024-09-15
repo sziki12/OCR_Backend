@@ -1,7 +1,7 @@
 
 import argparse
-from TesseractOcrProcessor import TesseractOcrProcessor
-from PaddleOcrProcessor import PaddleOcrProcessor
+from Ocr.Tesseract.TesseractOcrProcessor import TesseractOcrProcessor
+from Ocr.Paddle.PaddleOcrProcessor import PaddleOcrProcessor
 
 ap = argparse.ArgumentParser()
 
@@ -30,7 +30,7 @@ receiptText = ""
 
 if ocr_type == "tesseract":
     ocr = TesseractOcrProcessor(args)
-    receiptText = ocr.readReceiptWithTesseract() 
+    receiptText = ocr.read_receipt_with_tesseract() 
       
 elif ocr_type == "paddle":	
 	ocr = PaddleOcrProcessor(args)

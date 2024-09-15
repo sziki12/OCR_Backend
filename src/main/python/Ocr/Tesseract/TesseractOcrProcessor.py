@@ -11,10 +11,24 @@ class TesseractOcrProcessor:
         self.resized = imutils.resize(copy, width=1000)
         self.ratio = self.original.shape[1] / float(self.resized.shape[1])
         self.advanced_image_processor = ip.AdvancedImageProcessor(args)
+
+    def preprocess_and_load_image(self, image_path):
+        original = cv2.imread(image_path)
+        resized = imutils.resize(original.copy(), width=1000)
+
+        self.debugger.debug_image("resized", resized)
+
+        cnts = self.advanced_image_processor.edgeDetection(resized)
+        ratio = original.shape[1] / float(resized.shape[1])
+        processed_image = self.base_image_processor.deskew_new(original)
+        if cnts is not None:
+            processed_image = self.advanced_image_processor.fourPointTransform(original, ratio, cnts) 
+            
+        return processed_image    
                 
-    def readReceiptWithTesseract(self):
+    def read_receipt_with_tesseract(self):
         
-        receipt = self.getReceipt()
+        receipt = self.get_receipt()
 
         options = "--psm 4 -l hun+eng"
         receiptText = pytesseract.image_to_string(
@@ -24,7 +38,7 @@ class TesseractOcrProcessor:
         #TODO Process Text
         return receiptText
 
-    def getReceipt(self):
+    def get_receipt(self):
         cnts = self.advanced_image_processor.edgeDetection(self.resized)
 
         if cnts is not None:
@@ -32,8 +46,4 @@ class TesseractOcrProcessor:
         else:
             receipt = self.original.copy()
 
-        #receipt = ip.AdvancedImageProcessing.enhance_image(receipt)
-        #if self.args["debug"] > 0:
-        #	cv2.imshow("enhance_image", receipt)
-        #	cv2.waitKey(0)	
         return receipt

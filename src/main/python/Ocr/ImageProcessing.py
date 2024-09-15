@@ -3,11 +3,13 @@ import numpy as np
 from scipy.ndimage import interpolation as inter
 from imutils.perspective import four_point_transform
 import imutils
+from Ocr.Debug.Debugger import Debugger
 
 class BaseImageProcessor:
 
     def __init__(self, args):
         self.args = args
+        self.debugger = Debugger(args["debug"])
 
     def rescale_image(self, image):
         return cv2.resize(image, None, fx=1.2, fy=1.2, interpolation=cv2.INTER_CUBIC)
@@ -43,24 +45,62 @@ class BaseImageProcessor:
         return cv2.Canny(image, 100, 200)
 
     #skew correction
-    def deskew(self, image):
-        if self.args["debug"] > 0:
-            cv2.imshow("image", image)
-            cv2.waitKey(0)
-        coords = np.column_stack(np.where(image > 0))
-        angle = cv2.minAreaRect(coords.copy())[-1]
-        if angle < -45:
-            angle = -(90 + angle)
+    def deskew(self, image, max_skew=10):
+        (height, width) = image.shape[:2]
+
+        # Create a grayscale image and denoise it
+        image_grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        image_grey = cv2.fastNlMeansDenoising(image_grey, h=3)
+
+        # Create an inverted B&W copy using Otsu (automatic) thresholding
+        im_bw = cv2.threshold(image_grey, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+
+        # Detect lines in this image. Parameters here mostly arrived at by trial and error.
+        lines = cv2.HoughLinesP(
+            im_bw, 1, np.pi / 180, 200, minLineLength=width / 12, maxLineGap=width / 150
+        )
+
+        # Collect the angles of these lines (in radians)
+        angles = []
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            angles.append(np.arctan2(y2 - y1, x2 - x1))
+
+        # If the majority of our lines are vertical, this is probably a landscape image
+        landscape = np.sum([abs(angle) > np.pi / 4 for angle in angles]) > len(angles) / 2
+
+        # Filter the angles to remove outliers based on max_skew
+        if landscape:
+            angles = [
+                angle
+                for angle in angles
+                if np.deg2rad(90 - max_skew) < abs(angle) < np.deg2rad(90 + max_skew)
+            ]
         else:
-            angle = -angle
-        (h, w) = image.shape[:2]
-        center = (w // 2, h // 2)
-        M = cv2.getRotationMatrix2D(center, angle, 1.0)
-        rotated = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-        if self.args["debug"] > 0:
-            cv2.imshow("rotated", rotated)
-            cv2.waitKey(0)
-        return rotated
+            angles = [angle for angle in angles if abs(angle) < np.deg2rad(max_skew)]
+
+        if len(angles) < 5:
+            # Insufficient data to deskew
+            return image
+
+        # Average the angles to a degree offset
+        # 90 degrees added, because without it the image is incorrectly rotated 90 degrees
+        angle_deg = 90 + np.rad2deg(np.median(angles))
+        
+        # If this is landscape image, rotate the entire canvas appropriately
+        if landscape:
+            if angle_deg < 0:
+                image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+                angle_deg += 90
+            elif angle_deg > 0:
+                image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                angle_deg -= 90
+        # Rotate the image by the residual offset
+        M = cv2.getRotationMatrix2D((width / 2, height / 2), angle_deg, 1)
+        image = cv2.warpAffine(image, M, (width, height), borderMode=cv2.BORDER_REPLICATE)
+
+        self.debugger.debug_image("Rotated",image)
+        return image
 
     #template matching
     def match_template(self, image, template):
@@ -71,6 +111,7 @@ class AdvancedImageProcessor:
     def __init__(self, args):
         self.args = args
         self.base_image_processor = BaseImageProcessor(args)
+        self.debugger = Debugger(args["debug"])
 
     """ def remove_noise(self, image):
         image = self.base_image_processor.dilate(image)
@@ -156,10 +197,8 @@ class AdvancedImageProcessor:
     
     def fourPointTransform(self,original_image, ratio, receiptCnt):
         receipt = four_point_transform(original_image, receiptCnt.reshape(4, 2) * ratio)
-        if self.args["debug"] > 0:
-            cv2.imshow("Receipt Transform", imutils.resize(receipt, width=500))
-            cv2.waitKey(0)
 
+        self.debugger.debug_image("Four Point Transform", receipt)
         return receipt
     
     def edgeDetection(self, resized_image):
@@ -169,10 +208,8 @@ class AdvancedImageProcessor:
         blurred = cv2.GaussianBlur(gray, (5, 5,), 0)
         edged = cv2.Canny(blurred, 75, 200)
 
-        if self.args["debug"] > 0:
-            cv2.imshow("Input", resized_image)
-            cv2.imshow("Edged", edged)
-            cv2.waitKey(0)
+        self.debugger.debug_image("Input", resized_image)
+        self.debugger.debug_image("Edged", edged)
             
         cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
             cv2.CHAIN_APPROX_SIMPLE)
@@ -185,11 +222,7 @@ class AdvancedImageProcessor:
 
         receiptCnt = self.findReceiptContour(cnts,minArea)
 
-        if self.args["debug"] > 0 and receiptCnt is not None:
-            output = resized_image.copy()
-            cv2.drawContours(output, [receiptCnt], -1, (0, 255, 0), 2)
-            cv2.imshow("Receipt Outline", output)
-            cv2.waitKey(0)
+        self.debugger.debug_image_with_contour("Receipt Contour", resized_image.copy(), receiptCnt)
 
         return receiptCnt
     

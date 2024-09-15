@@ -2,8 +2,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import time
 import json
 from types import SimpleNamespace
-from Ocr.TesseractOcrProcessor import TesseractOcrProcessor
-from Ocr.PaddleOcrProcessor import PaddleOcrProcessor
+from Ocr.Tesseract.TesseractOcrProcessor import TesseractOcrProcessor
+from Ocr.Paddle.PaddleOcrProcessor import PaddleOcrProcessor
 
 hostName = "localhost"
 serverPort = 9090
@@ -53,7 +53,7 @@ class PythonWebServer(BaseHTTPRequestHandler):
 
             if ocr_type == "tesseract":
                 ocr = TesseractOcrProcessor(self.args)
-                receiptText = ocr.readReceiptWithTesseract() 
+                receiptText = ocr.read_receipt_with_tesseract() 
                 
             elif ocr_type == "paddle":	
                 ocr = PaddleOcrProcessor(self.args)
