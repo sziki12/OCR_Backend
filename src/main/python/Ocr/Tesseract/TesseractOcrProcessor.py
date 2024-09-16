@@ -24,11 +24,12 @@ class TesseractOcrProcessor:
 
         cnts = self.advanced_image_processor.edgeDetection(resized)
         ratio = original.shape[1] / float(resized.shape[1])
-        processed_image = self.base_image_processor.deskew_new(original)
+        processed_image = original.copy()
         if cnts is not None:
-            processed_image = self.advanced_image_processor.fourPointTransform(original, ratio, cnts) 
+            processed_image = self.advanced_image_processor.fourPointTransform(processed_image, ratio, cnts)
+        processed_image = self.base_image_processor.deskew(processed_image, self.args["orientation"])   
             
-        return processed_image    
+        return processed_image  
                 
     def read_receipt_with_tesseract(self):
         
@@ -39,7 +40,7 @@ class TesseractOcrProcessor:
             cv2.cvtColor(receipt, cv2.COLOR_BGR2RGB),
             config=options)
         
-        receipt_text_processor =  ChatGptReceiptProcessor(receipt_text, self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
+        receipt_text_processor =  ChatGptReceiptProcessor(receipt_text, self.args["parse_model"], self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
         processed_text = receipt_text_processor.process()
         response_json = {
             "processed_receipt": json.loads(processed_text),

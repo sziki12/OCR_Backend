@@ -27,6 +27,14 @@ class PythonWebServer(BaseHTTPRequestHandler):
         except:
             pass
         try:
+            self.args["orientation"] = parsed_body.orientation
+        except:
+            self.args["orientation"] = "portrait"
+        try:
+            self.args["parse_model"] = parsed_body.parse_model
+        except:
+            pass
+        try:
             self.args["openai_api_key"] = parsed_body.openai_api_key
         except:
             pass
@@ -43,7 +51,7 @@ class PythonWebServer(BaseHTTPRequestHandler):
         except:
             self.args["debug"] = 0
 
-        print(self.args)    
+        print("ARGS:\n"+str(self.args)+"\n")  
     def do_POST(self):
         self.init_params()
         

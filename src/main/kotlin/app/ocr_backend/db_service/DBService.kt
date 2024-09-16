@@ -270,7 +270,7 @@ class DBService(
         {
             val receipt = optReceipt.get()
             receipt.dateOfPurchase = LocalDate.parse(ocrResponse.date)
-            val ocrEntity = OcrEntity.fromOcrResponse(ocrResponse).also {
+            val ocrEntity = OcrEntity.fromOcrResponse(ocrResponse, receipt.dateOfPurchase).also {
                 it.receipt = receipt
                 it.date = receipt.dateOfPurchase
             }

@@ -32,7 +32,7 @@ class PaddleOcrProcessor:
         processed_image = original.copy()
         if cnts is not None:
             processed_image = self.advanced_image_processor.fourPointTransform(processed_image, ratio, cnts)
-        processed_image = self.base_image_processor.deskew(processed_image,"portrait")   
+        processed_image = self.base_image_processor.deskew(processed_image, self.args["orientation"])   
             
         return processed_image
     '''
@@ -84,7 +84,7 @@ class PaddleOcrProcessor:
         document = OcrDocument(boxes, texts, scores)
         receipt_text = document.get_text()
 
-        receipt_text_processor =  ChatGptReceiptProcessor(receipt_text, self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
+        receipt_text_processor =  ChatGptReceiptProcessor(receipt_text,  self.args["parse_model"], self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
         processed_text = receipt_text_processor.process()
 
         if self.args["debug"] > 0:

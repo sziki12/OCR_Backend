@@ -23,62 +23,51 @@ class OcrService {
 
     //private val execPythonPath = PathHandler.getOcrStartDir().pathString+"${File.separator}OcrRunnable.py"
     private val url = "http://localhost:9090/ocr"
+
     @Value("\${openai_api_key}")
-    private lateinit var openaiApiKey:String
+    private lateinit var openaiApiKey: String
     private val imagePath = PathHandler.getImageDir().pathString
+
     //private var mainSeparator = OcrEntity.mainSeparator
     //private var itemSeparator = OcrEntity.itemSeparator
     private val gson = Gson()
-    fun processImage(imageName: String, newReceiptId: Long): OcrResponse {
-        val receiptOcrResponse = sendOcrRequest(imageName)
+    fun processImage(imageName: String, ocrParams: OcrParams, newReceiptId: Long): OcrResponse {
+        val receiptOcrResponse = sendOcrRequest(imageName, ocrParams)
 
-        var date = LocalDate.now()
-        receiptOcrResponse.processed_receipt.date_of_purchase?.let { dateOfPurchase ->
-            extractDate(dateOfPurchase)?.let { processedDate ->
-                println("DATE: $processedDate")
-                date = LocalDate.ofInstant(processedDate.toInstant(ZoneOffset.UTC),ZoneOffset.UTC)
-            }
-        }
-
-        //TODO Fix OcrTextResponse content
         return OcrResponse(
             processedReceipt = receiptOcrResponse.processed_receipt,
             receiptText = receiptOcrResponse.receipt_text,
-            date = date.toString(),
+            date = receiptOcrResponse.processed_receipt.date_of_purchase ?: LocalDate.now().toString(),
             newReceiptId = newReceiptId
         )
     }
 
-    private fun extractDate(inDate:String):LocalDateTime?
-    {
-        if(inDate=="None")
+    fun extractDate(inDate: String): LocalDateTime? {
+        if (inDate == "None")
             return null
         try {
-            var date = inDate.replace(Regex("[.,-]")," ")
-            date = date.replace(Regex("[ ]+")," ")
-            date = date.replace("\n","")
+            var date = inDate.replace(Regex("[.,-]"), " ")
+            date = date.replace(Regex("[ ]+"), " ")
+            date = date.replace("\n", "")
             val parts = date.split(" ")
             val year = parts[0].toInt()
             val month = parts[1].toInt()
             val day = parts[2].toInt()
 
-            if(date.contains(":"))
-            {
+            if (date.contains(":")) {
                 val other = parts[3].split(":")
                 val hour = other[0].toInt()
                 val min = other[1].toInt()
-                return LocalDateTime.of(year, month, day,hour,min)
+                return LocalDateTime.of(year, month, day, hour, min)
             }
-            return LocalDateTime.of(year, month, day,0,0)
-        }
-        catch (e:Exception)
-        {
+            return LocalDateTime.of(year, month, day, 0, 0)
+        } catch (e: Exception) {
             e.printStackTrace()
             return null
         }
     }
 
-    private fun sendOcrRequest(imageName:String): ReceiptOcrResponse {
+    private fun sendOcrRequest(imageName: String, ocrParams: OcrParams): ReceiptOcrResponse {
         val jsoType = "application/json".toMediaType()
 
         val client = OkHttpClient.Builder()
@@ -86,12 +75,16 @@ class OcrService {
             .writeTimeout(300, TimeUnit.SECONDS)
             .readTimeout(300, TimeUnit.SECONDS)
             .build()
-        val json = gson.toJson(OcrParams(
-            ocr_type = "paddle",
-            path = imagePath,
-            image = imageName,
-            openai_api_key = openaiApiKey
-        ))
+        val json = gson.toJson(
+            OcrParams(
+                orientation = ocrParams.orientation,
+                ocr_type = ocrParams.ocr_type,
+                parse_model = ocrParams.parse_model,
+                path = imagePath,
+                image = imageName,
+                openai_api_key = openaiApiKey
+            )
+        )
         val body = json.toRequestBody(jsoType)
         val request = Request.Builder()
             .url(url)
