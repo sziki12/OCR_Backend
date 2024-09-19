@@ -1,5 +1,6 @@
-package app.ocr_backend.ai.ocr
+package app.ocr_backend.ai.ocr.ocr_entity
 
+import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
 import app.ocr_backend.db_service.DBService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*

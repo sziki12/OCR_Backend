@@ -1,6 +1,6 @@
 package app.ocr_backend.receipt
 
-import app.ocr_backend.ai.ocr.OcrEntity
+import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
 import app.ocr_backend.item.Item
 import app.ocr_backend.place.Place
 import app.ocr_backend.receipt_image.ReceiptImage
