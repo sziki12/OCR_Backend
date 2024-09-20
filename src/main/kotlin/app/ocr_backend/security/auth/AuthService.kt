@@ -19,10 +19,11 @@ class AuthService(
         return userService.findByEmail(email)
     }
 
-    fun getCurrentHouseholdUser(household: Household): Optional<HouseholdUser> {
+    fun getCurrentHouseholdUser(householdId: UUID): Optional<HouseholdUser> {
         val currentUser = getCurrentUser()
-        if (currentUser.isPresent) {
-            return householdService.getHouseholdUser(currentUser.get(), household)
+        val household = householdService.getHousehold(householdId)
+        if (currentUser.isPresent&&household.isPresent) {
+            return householdService.getHouseholdUser(currentUser.get(), household.get())
         }
         return Optional.empty()
     }

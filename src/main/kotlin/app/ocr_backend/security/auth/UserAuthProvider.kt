@@ -14,22 +14,22 @@ import java.util.*
 
 
 @Component
-class UserAuthProvider(val userService: UserService,
-    val decoder: JwtDecoder) {
+class UserAuthProvider(
+    val userService: UserService,
+    val decoder: JwtDecoder
+) {
 
     @Value("\${security.jwt.token.secret-key:another-key}")
-    private var secretKey:String = ""
+    private var secretKey: String = ""
 
-    init
-    {
+    init {
         secretKey = Base64.getEncoder().encodeToString(secretKey.encodeToByteArray())
     }
 
-    fun validateToken(token:String): Authentication? {
+    fun validateToken(token: String): Authentication? {
         val user = getUserByToken(token)
-        if(user.isPresent)
-        {
-            return UsernamePasswordAuthenticationToken(user.get().email,null,Collections.emptyList())
+        if (user.isPresent) {
+            return UsernamePasswordAuthenticationToken(user.get().email, null, Collections.emptyList())
         }
         return null
     }

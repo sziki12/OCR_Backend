@@ -5,13 +5,14 @@ import app.ocr_backend.receipt.ReceiptService
 import enumeration.Category
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.UUID
 
 @Service
 class ChartService(private val receiptService: ReceiptService) {
-    fun getPieChartData(household: Household, request:ChartRequestDTO): PieChartDTO
+    fun getPieChartData(householdId: UUID, request:ChartRequestDTO): PieChartDTO
     {
         val categories = Category.getValidCategoryNames()
-        val receipts = receiptService.getReceiptsByHousehold(household)
+        val receipts = receiptService.getReceiptsByHousehold(householdId)
         val categoryData = ArrayList<ItemCategoryData>()
         val currentDate = LocalDate.now()
         val oneMontBefore = LocalDate.of(currentDate.year,currentDate.month - 1 ,currentDate.dayOfMonth)

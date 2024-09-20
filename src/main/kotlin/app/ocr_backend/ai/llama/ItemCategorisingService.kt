@@ -8,7 +8,8 @@ import app.ocr_backend.receipt.ReceiptService
 import com.google.gson.Gson
 import enumeration.Category
 import org.springframework.stereotype.Service
-import java.util.ArrayList
+import java.util.*
+import kotlin.collections.HashMap
 
 @Service
 class ItemCategorisingService(
@@ -19,12 +20,12 @@ class ItemCategorisingService(
 ) {
     private val maxRetryCount: Int = 10
     fun categoriseItems(
-        household: Household,
+        householdId: UUID,
         receiptId: Long,
         itemsToCategorise: MutableList<String>? = null,
         numberOfRuns: Int = 1
     ) {
-        val optReceipt = receiptService.getReceipt(household, receiptId)
+        val optReceipt = receiptService.getReceipt(householdId, receiptId)
         if (!optReceipt.isPresent)
             return //TODO Throw error
         val receipt = optReceipt.get()
@@ -70,7 +71,7 @@ class ItemCategorisingService(
         if (uncategorizedItems.isNotEmpty() && numberOfRuns < maxRetryCount) {
             println("Restarting Categorisation Process")
             println("Uncategorized Items: $uncategorizedItems")
-            categoriseItems(household, receipt.id, uncategorizedItems, numberOfRuns + 1)
+            categoriseItems(householdId, receipt.id, uncategorizedItems, numberOfRuns + 1)
         }
     }
 

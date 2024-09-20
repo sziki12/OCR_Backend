@@ -1,11 +1,16 @@
 package app.ocr_backend.security.auth
 
 
+import app.ocr_backend.security.config.RsaKeyProperties
+import com.nimbusds.jose.jwk.JWKSet
+import com.nimbusds.jose.jwk.RSAKey
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet
+import com.nimbusds.jose.jwk.source.JWKSource
+import com.nimbusds.jose.proc.SecurityContext
+import org.springframework.context.annotation.Bean
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.oauth2.jwt.JwtClaimsSet
-import org.springframework.security.oauth2.jwt.JwtEncoder
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters
+import org.springframework.security.oauth2.jwt.*
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -14,9 +19,9 @@ import java.util.stream.Collectors
 @Service
 class TokenService(
     private val encoder: JwtEncoder,
-    ) {
+) {
     //authentication: Authentication
-    fun generateToken(subject:String): String {
+    fun generateToken(subject: String): String {
         val now = Instant.now()
         val scope = "user"/*authentication.authorities.stream()
             .map(GrantedAuthority::getAuthority)

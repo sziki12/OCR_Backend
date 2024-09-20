@@ -2,7 +2,7 @@ package app.ocr_backend.db_service
 
 import app.ocr_backend.ai.ocr.ocr_entity.OcrEntityService
 import app.ocr_backend.item.ItemService
-import app.ocr_backend.place.placeService
+import app.ocr_backend.place.PlaceService
 import app.ocr_backend.receipt.ReceiptService
 import app.ocr_backend.receipt_image.ImageService
 import app.ocr_backend.user.UserService
@@ -14,7 +14,7 @@ class DBService(
     private val itemService: ItemService,
     private val imageService: ImageService,
     private val userService: UserService,
-    private val placeService: placeService,
+    private val placeService: PlaceService,
     private val ocrEntityService: OcrEntityService,
 ) {
 

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class placeService(
+class PlaceService(
     val repository: PlaceRepository,
     val receiptService: ReceiptService,
     val authService: AuthService
@@ -50,9 +50,9 @@ class placeService(
         }
     }
 
-    fun getPlacesWithReceipts(household: Household): List<Place> {
-        val householdUser = authService.getCurrentHouseholdUser(household)
-        val receipts = receiptService.getReceiptsByHousehold(household)
+    fun getPlacesWithReceipts(householdId: UUID): List<Place> {//TODO householdUser unused
+        val householdUser = authService.getCurrentHouseholdUser(householdId)
+        val receipts = receiptService.getReceiptsByHousehold(householdId)
         val places = HashSet<Place>()
         receipts.forEach()
         {

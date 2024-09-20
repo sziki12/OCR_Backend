@@ -36,15 +36,16 @@ class ReceiptService(
 
     //TODO change household
     fun getReceipt(householdId: UUID, receiptId: Long): Optional<Receipt> {
-        val optHUser = authService.getCurrentHouseholdUser(household)
-        return if (optHUser.isPresent) {
-            household.receipts.find { it.id == receiptId }?.let { Optional.of(it) } ?: Optional.empty<Receipt>()
-        } else
-            Optional.empty<Receipt>()
+        val optHousehold = householdService.getHousehold(householdId)
+        val optHUser = authService.getCurrentHouseholdUser(householdId)
+        if(optHousehold.isPresent.not() || optHUser.isPresent.not())
+            return Optional.empty<Receipt>()
+        val household = optHousehold.get()
+        return household.receipts.find { it.id == receiptId }?.let { Optional.of(it) } ?: Optional.empty<Receipt>()
     }
 
     fun updateReceipt(householdId: UUID, receipt: Receipt): Optional<Receipt> {
-        val optReceipt = this.getReceipt(household, receipt.id)
+        val optReceipt = this.getReceipt(householdId, receipt.id)
         for (item in receipt.items) {
             itemRepository.save(item)
         }
@@ -64,13 +65,13 @@ class ReceiptService(
 
     @Transactional
     fun deleteReceipt(householdId: UUID, receiptId: Long) {
-        val receipt = this.getReceipt(household, receiptId)
+        val receipt = this.getReceipt(householdId, receiptId)
         if (receipt.isPresent) {
             imageRepository.deleteAllByReceipt(receipt.get())
             receipt.get().ocrEntity?.let {
                 ocrEntityRepository.deleteById(it.id)
             }
-            this.deleteReceipt(household, receiptId)
+            this.deleteReceipt(householdId, receiptId)
         }
     }
     /*fun getAllReceipt():List<Receipt>
@@ -83,34 +84,38 @@ class ReceiptService(
     }*/
 
     fun getReceiptsByHousehold(householdId: UUID): List<Receipt> {
+        val optHousehold = householdService.getHousehold(householdId)
+        if(optHousehold.isPresent.not())
+            return listOf()
+        val household = optHousehold.get()
         return receiptRepository.getByHousehold(household)
     }
 
     fun assignPlaceToReceipt(householdId: UUID, receiptId: Long, placeId: Long) {
-        val optReceipt = this.getReceipt(household, receiptId)
+        val optReceipt = this.getReceipt(householdId, receiptId)
         if (optReceipt.isPresent) {
             val receipt = optReceipt.get()
             val optPlace = placeRepository.findById(placeId)
             if (optPlace.isPresent) {
                 val place = optPlace.get()
                 receipt.place = place
-                this.updateReceipt(household, receipt)
+                this.updateReceipt(householdId, receipt)
             }
         }
     }
 
     fun removePlaceFromReceipt(householdId: UUID, receiptId: Long) {
-        val optReceipt = this.getReceipt(household, receiptId)
+        val optReceipt = this.getReceipt(householdId, receiptId)
         if (optReceipt.isPresent) {
             val receipt = optReceipt.get()
 
             receipt.place = null
-            this.updateReceipt(household, receipt)
+            this.updateReceipt(householdId, receipt)
         }
     }
 
     fun saveAndAssignOcrEntity(householdId: UUID, receiptId: Long, entity: OcrEntity) {
-        val optReceipt = this.getReceipt(household, receiptId)
+        val optReceipt = this.getReceipt(householdId, receiptId)
         if (optReceipt.isPresent) {
             entity.receipt = optReceipt.get()
             ocrEntityRepository.save(entity)
@@ -118,7 +123,7 @@ class ReceiptService(
     }
 
     fun getOcrResponse(householdId: UUID, receiptId: Long): Optional<OcrResponse> {
-        val optReceipt = this.getReceipt(household, receiptId)
+        val optReceipt = this.getReceipt(householdId, receiptId)
         if (optReceipt.isPresent) {
             optReceipt.get().ocrEntity?.let {
                 return Optional.of(it.toOcrResponse())

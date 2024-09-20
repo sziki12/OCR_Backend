@@ -13,60 +13,56 @@ import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/household/{householdId}")
 @CrossOrigin
 class ReceiptController(
     private val receiptService: ReceiptService,
     private val householdService: HouseholdService,
     private val chartService: ChartService,
-    ) {
+) {
 
     val gson = Gson()
-    @GetMapping("/household/{householdId}/receipt")
+
+    @GetMapping("/receipt")
     fun getAllReceipts(@PathVariable householdId: UUID): List<Receipt> {
-        val household = householdService.getHousehold(householdId)
-        if(household.isPresent)
-        {
-            return  receiptService.getReceiptsByHousehold(household.get())
-        }
-        return listOf()
+        return receiptService.getReceiptsByHousehold(householdId)
     }
 
     @GetMapping("receipt/{receiptId}")
-    fun getReceiptById(@PathVariable receiptId: Long): Receipt = receiptService.getReceipt(receiptId).orElseThrow{
-        ResponseStatusException(HttpStatus.NOT_FOUND,"Receipt with the $receiptId Id not exists")
-    }
+    fun getReceiptById(@PathVariable receiptId: Long, @PathVariable householdId: UUID): Receipt =
+        receiptService.getReceipt(householdId, receiptId).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Receipt with the $receiptId Id not exists")
+        }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("receipt")
-    fun createReceipt(@RequestBody receiptData: ReceiptDTO)//TODO Household
+    fun createReceipt(@RequestBody receiptData: ReceiptDTO, @PathVariable householdId: UUID)//TODO Household
     {
         receiptService.saveReceipt(Receipt(receiptData))
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("receipt/{receiptId}")
-    fun deleteReceipt(@PathVariable receiptId: Long)
-    {
-        receiptService.deleteReceipt(receiptId)
+    fun deleteReceipt(@PathVariable receiptId: Long, @PathVariable householdId: UUID) {
+        receiptService.deleteReceipt(householdId, receiptId)
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("receipt/{receiptId}")
-    fun updateReceipt(@PathVariable receiptId: Long, @RequestBody receiptData: ReceiptDTO)
-    {
-        receiptService.updateReceipt(Receipt(receiptId,receiptData))
+    fun updateReceipt(
+        @PathVariable receiptId: Long, @RequestBody receiptData: ReceiptDTO,
+        @PathVariable householdId: UUID
+    ) {
+        receiptService.updateReceipt(householdId, Receipt(receiptId, receiptData))
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PostMapping("/household/{householdId}/chart")
-    fun getReceiptsChartData(@RequestBody request: ChartRequestDTO, @PathVariable householdId: UUID): ResponseEntity<PieChartDTO> {
-        val household = householdService.getHousehold(householdId)
-        if(household.isPresent)
-        {
-            val chartData = chartService.getPieChartData(household.get(), request)
-            return ResponseEntity.ok().body(chartData)
-        }
-        return ResponseEntity.notFound().build()
+    @PostMapping("/chart")
+    fun getReceiptsChartData(
+        @RequestBody request: ChartRequestDTO,
+        @PathVariable householdId: UUID
+    ): ResponseEntity<PieChartDTO> {
+        val chartData = chartService.getPieChartData(householdId, request)
+        return ResponseEntity.ok().body(chartData)
     }
 }

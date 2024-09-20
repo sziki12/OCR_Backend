@@ -5,9 +5,10 @@ import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import java.util.UUID
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/household/{householdId}")
 @CrossOrigin
 class ImageProcessingController(
     private val imageProcessingService: ImageProcessingService
@@ -16,7 +17,7 @@ class ImageProcessingController(
     @PostMapping("/image")
     fun uploadImage(
         @RequestParam("file") image: MultipartFile, @RequestParam ocrType: String,
-        @RequestParam orientation: String, @RequestParam parseModel: String
+        @RequestParam orientation: String, @RequestParam parseModel: String, @PathVariable householdId: UUID
     ): ResponseEntity<OcrResponse> {
 
         val ocrParams = OcrParams(
@@ -27,7 +28,7 @@ class ImageProcessingController(
             path = "",
             openai_api_key = "",
         )
-        val response = imageProcessingService.processImage(image, ocrParams)
+        val response = imageProcessingService.processImage(householdId, image, ocrParams)
         return ResponseEntity.ok().body(response)
     }
 }

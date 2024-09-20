@@ -7,6 +7,7 @@ import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
 import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
 import app.ocr_backend.ai.ocr.ocr_entity.OcrEntityService
 import app.ocr_backend.household.Household
+import app.ocr_backend.household.HouseholdService
 import app.ocr_backend.item.Item
 import app.ocr_backend.item.ItemService
 import app.ocr_backend.receipt.ReceiptService
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.util.*
 import kotlin.io.path.pathString
 
 
@@ -31,7 +33,7 @@ class ImageProcessingService(
     //val llamaService: LlamaService,
     //val service: DBService
 ) {
-    fun processImage(household: Household, image: MultipartFile, ocrParams: OcrParams): OcrResponse? {
+    fun processImage(householdId: UUID, image: MultipartFile, ocrParams: OcrParams): OcrResponse? {
         val optReceipt = receiptService.saveReceipt(Receipt().also { it.isPending = true })
         return if (optReceipt.isPresent) {
             val newReceipt = optReceipt.get()
@@ -42,12 +44,16 @@ class ImageProcessingService(
 
             val ocrOutput = ocrService.processImage(fileName, ocrParams, newReceipt.id)
 
-            parseResponse(newReceipt, ocrOutput)
+            parseResponse(householdId, newReceipt, ocrOutput)
 
-            receiptService.saveAndAssignOcrEntity(household,newReceipt.id, OcrEntity.fromOcrResponse(ocrOutput, newReceipt.dateOfPurchase))
+            receiptService.saveAndAssignOcrEntity(
+                householdId,
+                newReceipt.id,
+                OcrEntity.fromOcrResponse(ocrOutput, newReceipt.dateOfPurchase)
+            )
             imageService.saveImage(newReceipt, fileName)
 
-            receiptService.updateReceipt(household,newReceipt.also {
+            receiptService.updateReceipt(householdId, newReceipt.also {
                 it.isPending = false
             })
             ocrOutput
@@ -66,15 +72,16 @@ class ImageProcessingService(
             }
      */
 
-    private fun parseResponse(newReceipt: Receipt, ocrOutput: OcrResponse) {
+    private fun parseResponse(householdId: UUID, newReceipt: Receipt, ocrOutput: OcrResponse) {
         ocrOutput.processedReceipt.let {
             var parsedItemCost = 0
             for (item in it.toItemList()) {
                 parsedItemCost += item.totalCost
-                itemService.saveItem(newReceipt.id, item)
+                itemService.saveItem(householdId, newReceipt.id, item)
             }
             if (parsedItemCost != it.total_cost) {
                 itemService.saveItem(
+                    householdId,
                     newReceipt.id,
                     Item(name = "Parse Correction", quantity = 1, totalCost = it.total_cost - parsedItemCost)
                 )

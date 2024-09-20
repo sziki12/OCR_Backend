@@ -13,7 +13,7 @@ data class HouseholdUser(
 ) {
     @Column(name = "household_user_id")
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     lateinit var id: UUID
 
     @ManyToOne

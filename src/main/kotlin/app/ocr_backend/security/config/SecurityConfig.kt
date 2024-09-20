@@ -26,7 +26,6 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @EnableWebSecurity
 class SecurityConfig(
     val userAuthProvider: UserAuthProvider,
-    val rsaKeys: RsaKeyProperties,
 ) {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -46,22 +45,9 @@ class SecurityConfig(
                 it.anyRequest().authenticated()
             }
             .oauth2ResourceServer {
-                it.jwt {  }
+                it.jwt { }
             }
             .build()
     }
-
-    @Bean
-    fun jwtDecoder(): JwtDecoder {
-        return NimbusJwtDecoder.withPublicKey(rsaKeys.publicKey).build()
-    }
-
-    @Bean
-    fun jwtEncoder(): JwtEncoder {
-        val jwk = RSAKey.Builder(rsaKeys.publicKey).privateKey(rsaKeys.privateKey).build()
-        val jwks: JWKSource<SecurityContext> = ImmutableJWKSet(JWKSet(jwk))
-        return NimbusJwtEncoder(jwks)
-    }
-
 }
 
