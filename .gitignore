@@ -41,3 +41,5 @@ out/
 /src/main/resources/image
 *.pyc
 *.jpg
+*.pem
+/src/main/resources/certs

@@ -54,7 +54,7 @@ data class Item(
         var result = name.hashCode()
         result = 31 * result + quantity
         result = 31 * result + totalCost
-        result = 31 * result + (id?.hashCode() ?: 0)
+        result = 31 * result + (id.hashCode() ?: 0)
         return result
     }
 

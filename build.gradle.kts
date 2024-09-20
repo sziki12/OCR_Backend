@@ -58,6 +58,12 @@ dependencies {
     // https://mvnrepository.com/artifact/com.auth0/java-jwt
     implementation("com.auth0:java-jwt:4.4.0")
 
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-resource-server
+    implementation("org.springframework.security:spring-security-oauth2-resource-server:6.3.3")
+
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-jose
+    implementation("org.springframework.security:spring-security-oauth2-jose:6.3.3")
+
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
 

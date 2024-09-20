@@ -3,18 +3,20 @@ package app.ocr_backend.user
 import app.ocr_backend.user.User
 
 data class UserDTO (
-    val userName:String,
+    val name:String,
+    val email:String,
     var token:String,
     var salt:String,
 )
 {
     fun toUser(): User {
         return User(
-            userName,
+            name,
+            email,
             token,
             salt
         )
     }
 
-    constructor(user: User):this(user.userName,"",user.salt)
+    constructor(user: User):this(user.name, user.email,"",user.salt)
 }

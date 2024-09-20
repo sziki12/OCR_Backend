@@ -5,7 +5,12 @@ import app.ocr_backend.receipt.Receipt
 import app.ocr_backend.db_service.DBService
 import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
 import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
+import app.ocr_backend.ai.ocr.ocr_entity.OcrEntityService
+import app.ocr_backend.household.Household
 import app.ocr_backend.item.Item
+import app.ocr_backend.item.ItemService
+import app.ocr_backend.receipt.ReceiptService
+import app.ocr_backend.receipt_image.ImageService
 import app.ocr_backend.util.PathHandler
 import com.google.gson.Gson
 import org.springframework.stereotype.Service
@@ -19,14 +24,18 @@ import kotlin.io.path.pathString
 @Service
 class ImageProcessingService(
     val ocrService: OcrService,
+    val imageService: ImageService,
+    val receiptService: ReceiptService,
+    val ocrEntityService: OcrEntityService,
+    val itemService: ItemService,
     //val llamaService: LlamaService,
-    val service: DBService
+    //val service: DBService
 ) {
-    fun processImage(image: MultipartFile, ocrParams: OcrParams): OcrResponse? {
-        val optReceipt = service.saveReceipt(Receipt().also { it.isPending = true })
+    fun processImage(household: Household, image: MultipartFile, ocrParams: OcrParams): OcrResponse? {
+        val optReceipt = receiptService.saveReceipt(Receipt().also { it.isPending = true })
         return if (optReceipt.isPresent) {
             val newReceipt = optReceipt.get()
-            val fileName = service.generateImageName(newReceipt, image)
+            val fileName = imageService.generateImageName(newReceipt, image)
             val file = File(PathHandler.getImageDir().pathString + File.separator + fileName)
 
             image.transferTo(file)
@@ -35,10 +44,10 @@ class ImageProcessingService(
 
             parseResponse(newReceipt, ocrOutput)
 
-            service.saveOcrEntity(newReceipt.id, OcrEntity.fromOcrResponse(ocrOutput, newReceipt.dateOfPurchase))
-            service.saveImage(newReceipt.id, fileName)
+            receiptService.saveAndAssignOcrEntity(household,newReceipt.id, OcrEntity.fromOcrResponse(ocrOutput, newReceipt.dateOfPurchase))
+            imageService.saveImage(newReceipt, fileName)
 
-            service.updateReceipt(newReceipt.also {
+            receiptService.updateReceipt(household,newReceipt.also {
                 it.isPending = false
             })
             ocrOutput
@@ -62,10 +71,10 @@ class ImageProcessingService(
             var parsedItemCost = 0
             for (item in it.toItemList()) {
                 parsedItemCost += item.totalCost
-                service.saveItem(newReceipt.id, item)
+                itemService.saveItem(newReceipt.id, item)
             }
             if (parsedItemCost != it.total_cost) {
-                service.saveItem(
+                itemService.saveItem(
                     newReceipt.id,
                     Item(name = "Parse Correction", quantity = 1, totalCost = it.total_cost - parsedItemCost)
                 )

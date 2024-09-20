@@ -1,22 +1,32 @@
 package app.ocr_backend.item
 
 import app.ocr_backend.receipt.Receipt
+import app.ocr_backend.receipt.ReceiptService
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class ItemService(val itemRepository: ItemDBRepository) {
+class ItemService(
+    val itemRepository: ItemRepository,
+    val receiptService: ReceiptService,
+    ) {
 
-    fun createNewItem(receipt: Receipt): Item {
-        val newItem  = Item("",1,0)
-        newItem.receipt = receipt
-        itemRepository.save(newItem)
-        return newItem
+    fun createNewItem(receiptId: Long): Optional<Item> {
+        val receipt = receiptService.getReceipt(receiptId)
+        if(receipt.isPresent){
+            val newItem  = Item("",1,0)
+            newItem.receipt = receipt.get()
+            itemRepository.save(newItem)
+        }
+        return Optional.empty()
     }
-    fun saveItem(receipt: Receipt, item: Item)
-    {
-        item.receipt = receipt
-        itemRepository.save(item)
+    fun saveItem(receiptId: Long, item: Item): Optional<Item>
+    {   val receipt = receiptService.getReceipt(receiptId)
+        if(receipt.isPresent){
+            item.receipt = receipt.get()
+            return Optional.of(itemRepository.save(item))
+        }
+        return Optional.empty()
     }
     fun getItem(itemId:Long): Optional<Item> {
         return itemRepository.getItemById(itemId)
@@ -37,8 +47,11 @@ class ItemService(val itemRepository: ItemDBRepository) {
         itemRepository.deleteById(itemId)
     }
 
-    fun deleteAllByReceipt(receipt: Receipt)
+    fun deleteAllByReceipt(receiptId: Long)
     {
-        itemRepository.deleteAllByReceipt(receipt)
+        val receipt = receiptService.getReceipt(receiptId)
+        if(receipt.isPresent){
+            itemRepository.deleteAllByReceipt(receipt.get())
+        }
     }
 }

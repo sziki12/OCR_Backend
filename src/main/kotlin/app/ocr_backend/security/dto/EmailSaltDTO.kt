@@ -1,6 +1,6 @@
 package app.ocr_backend.security.dto
 
-data class UserNameSaltDTO(
-    var userName:String,
+data class EmailSaltDTO(
+    var email:String,
     var salt:String) {
 }

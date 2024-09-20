@@ -1,6 +1,8 @@
 package app.ocr_backend.receipt
 
 import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
+import app.ocr_backend.household.Household
+import app.ocr_backend.household.household_user.HouseholdUser
 import app.ocr_backend.item.Item
 import app.ocr_backend.place.Place
 import app.ocr_backend.receipt_image.ReceiptImage
@@ -32,8 +34,8 @@ data class Receipt(
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="user_id")
-    lateinit var user: User
+    @JoinColumn(name="household_id")
+    lateinit var household: Household
 
     @JsonIgnore
     @ManyToOne

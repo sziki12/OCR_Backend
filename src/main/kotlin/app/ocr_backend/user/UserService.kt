@@ -1,8 +1,6 @@
 package app.ocr_backend.user
 import app.ocr_backend.security.dto.CredentialsDTO
 import app.ocr_backend.security.dto.SignUpDTO
-import app.ocr_backend.user.User
-import app.ocr_backend.user.UserDBRepository
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -11,15 +9,13 @@ import java.util.*
 
 @Service
 class UserService(
-    val repository: UserDBRepository,
+    val repository: UserRepository,
     val passwordEncoder: PasswordEncoder,
 ) {
 
-    //val passwordEncoder = BCryptPasswordEncoder()
-
     fun registerUser(signUpDto: SignUpDTO): User
     {
-        val existingUSer = repository.findByUserName(signUpDto.userName)
+        val existingUSer = repository.findByEmail(signUpDto.email)
         if(existingUSer.isPresent)
         {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST,"User Already Exists")
@@ -34,7 +30,7 @@ class UserService(
 
     fun loginUser(credentials: CredentialsDTO): User
     {
-        val user = repository.findByUserName(credentials.userName).orElseThrow{
+        val user = repository.findByEmail(credentials.email).orElseThrow{
             ResponseStatusException(HttpStatus.NOT_FOUND,"User Not Exists")
         }
 
@@ -57,7 +53,7 @@ class UserService(
 
     }
 
-    fun findByUserName(userName:String): Optional<User> {
-        return repository.findByUserName(userName)
+    fun findByEmail(email:String): Optional<User> {
+        return repository.findByEmail(email)
     }
 }

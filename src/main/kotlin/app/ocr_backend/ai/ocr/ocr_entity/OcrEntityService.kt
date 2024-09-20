@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class OcrEntityService(private val repository: OcrEntityDBRepository) {
+class OcrEntityService(private val repository: OcrEntityRepository) {
     fun saveOcrEntity(entity: OcrEntity): OcrEntity {
         return repository.save(entity)
     }

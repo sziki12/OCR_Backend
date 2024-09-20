@@ -1,5 +1,6 @@
 package app.ocr_backend.user
 
+import app.ocr_backend.household.household_user.HouseholdUser
 import app.ocr_backend.place.Place
 import app.ocr_backend.receipt.Receipt
 import jakarta.persistence.*
@@ -7,8 +8,9 @@ import jakarta.persistence.*
 @Entity
 @Table(name = "App_User")
 data class User(
-    @Column(name="user_name")
-    var userName:String,
+    @Column(name="name")
+    var name:String,
+    var email:String,
     var password:String,
     var salt:String
     )
@@ -19,19 +21,16 @@ data class User(
     val id:Long = -1
 
     @OneToMany(mappedBy = "user")
-    lateinit var receipts:MutableList<Receipt>
-
-    @OneToMany(mappedBy = "user")
     var places:MutableList<Place> = mutableListOf()
 
-    @Column(name = "is_admin")
-    var isAdmin = false
+    @OneToMany(mappedBy = "user")
+    var householdUsers:MutableList<HouseholdUser> = mutableListOf()
 
     override fun toString(): String {
-        return "User(id: $id, userName: $userName isAdmin: $isAdmin)"
+        return "User(id: $id, name: $name)"
     }
 
     fun toDetailedString(): String {
-        return "User(id: $id, userName: $userName isAdmin: $isAdmin, places: $places, receipts: $receipts)"
+        return "User(id: $id, name: $name, places: $places)"
     }
 }
