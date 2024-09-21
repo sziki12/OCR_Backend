@@ -34,7 +34,7 @@ class ImageProcessingService(
     //val service: DBService
 ) {
     fun processImage(householdId: UUID, image: MultipartFile, ocrParams: OcrParams): OcrResponse? {
-        val optReceipt = receiptService.saveReceipt(Receipt().also { it.isPending = true })
+        val optReceipt = receiptService.saveReceipt(householdId, Receipt().also { it.isPending = true })
         return if (optReceipt.isPresent) {
             val newReceipt = optReceipt.get()
             val fileName = imageService.generateImageName(newReceipt, image)

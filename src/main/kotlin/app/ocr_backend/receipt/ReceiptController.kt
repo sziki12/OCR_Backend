@@ -36,9 +36,9 @@ class ReceiptController(
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("receipt")
-    fun createReceipt(@RequestBody receiptData: ReceiptDTO, @PathVariable householdId: UUID)//TODO Household
+    fun createReceipt(@RequestBody receiptData: ReceiptDTO, @PathVariable householdId: UUID)
     {
-        receiptService.saveReceipt(Receipt(receiptData))
+        receiptService.saveReceipt(householdId, Receipt(receiptData))
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)

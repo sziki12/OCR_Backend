@@ -1,5 +1,6 @@
 package app.ocr_backend.security.auth
 
+import app.ocr_backend.household.HouseholdService
 import app.ocr_backend.security.dto.CredentialsDTO
 import app.ocr_backend.security.dto.EmailSaltDTO
 import app.ocr_backend.security.dto.SignUpDTO
@@ -13,9 +14,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @CrossOrigin
 class AuthController(
-    val userService: UserService,
-    val userAuthProvider: UserAuthProvider,
-    val tokenService: TokenService,
+    private val userService: UserService,
+    private val userAuthProvider: UserAuthProvider,
+    private val tokenService: TokenService,
+    private val householdService: HouseholdService,
     ) {
 
     val gson = Gson()
@@ -25,7 +27,7 @@ class AuthController(
         println("CREDENTIALS $credentials")
         val user = userService.loginUser(credentials)
         val userDto = UserDTO(user).also {
-            it.token = tokenService.generateToken(it.email) ?: ""
+            it.token = tokenService.generateToken(user) ?: ""
         }
         val json = gson.toJson(userDto)
         println("LOGIN $userDto")
@@ -36,10 +38,11 @@ class AuthController(
     @PostMapping("/register")
     fun register(@RequestBody signUpDto: SignUpDTO):ResponseEntity<String>
     {
-        val user = userService.registerUser(signUpDto)
-
+        var user = userService.registerUser(signUpDto)
+        val household = householdService.createHouseholdByUser(user,"My Household")
+        user = user.also { it.householdUsers.add(household.householdUsers.single()) }
         val userDto = UserDTO(user).also {
-            it.token = tokenService.generateToken(it.email) ?: ""
+            it.token = tokenService.generateToken(user) ?: ""
         }
         val json = gson.toJson(userDto)
         println("REGISTER $userDto")

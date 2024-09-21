@@ -25,22 +25,20 @@ class ReceiptService(
     val authService: AuthService,
 ) {
     //TODO fix user
-    fun saveReceipt(receipt: Receipt): Optional<Receipt> {
-        val optUser = authService.getCurrentUser()
-        if (optUser.isPresent) {
-            //receipt.user = optUser.get()
-            return Optional.of(receiptRepository.save(receipt))
-        }
-        return Optional.empty()
+    fun saveReceipt(householdId: UUID,receipt: Receipt): Optional<Receipt> {
+        val optHUser = authService.getCurrentHouseholdUser(householdId)
+        if(optHUser.isPresent.not())
+            return Optional.empty<Receipt>()
+        //TODO Save items TOO
+        return Optional.of(receiptRepository.save(receipt.also { it.household = optHUser.get().household }))
+
     }
 
-    //TODO change household
     fun getReceipt(householdId: UUID, receiptId: Long): Optional<Receipt> {
-        val optHousehold = householdService.getHousehold(householdId)
         val optHUser = authService.getCurrentHouseholdUser(householdId)
-        if(optHousehold.isPresent.not() || optHUser.isPresent.not())
+        if(optHUser.isPresent.not())
             return Optional.empty<Receipt>()
-        val household = optHousehold.get()
+        val household = optHUser.get().household
         return household.receipts.find { it.id == receiptId }?.let { Optional.of(it) } ?: Optional.empty<Receipt>()
     }
 
@@ -84,10 +82,10 @@ class ReceiptService(
     }*/
 
     fun getReceiptsByHousehold(householdId: UUID): List<Receipt> {
-        val optHousehold = householdService.getHousehold(householdId)
-        if(optHousehold.isPresent.not())
+        val optHUser = authService.getCurrentHouseholdUser(householdId)
+        if(optHUser.isPresent.not())
             return listOf()
-        val household = optHousehold.get()
+        val household = optHUser.get().household
         return receiptRepository.getByHousehold(household)
     }
 

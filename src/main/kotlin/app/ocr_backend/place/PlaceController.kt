@@ -44,7 +44,7 @@ class PlaceController(
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/merge/{partId}/into/{holderId}")
     fun margePlaces(@PathVariable holderId: Long, @PathVariable partId: Long, @PathVariable householdId: UUID) {
-        placeService.mergePlaces(holderId, partId)//TODO householdId
+        placeService.mergePlaces(householdId, holderId, partId)
     }
 
     @ResponseStatus(HttpStatus.OK)

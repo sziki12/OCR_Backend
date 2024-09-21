@@ -19,11 +19,13 @@ class AuthService(
         return userService.findByEmail(email)
     }
 
+    /***
+     * Function can be used to check that is the current user able to access the given household
+     */
     fun getCurrentHouseholdUser(householdId: UUID): Optional<HouseholdUser> {
         val currentUser = getCurrentUser()
-        val household = householdService.getHousehold(householdId)
-        if (currentUser.isPresent&&household.isPresent) {
-            return householdService.getHouseholdUser(currentUser.get(), household.get())
+        if (currentUser.isPresent) {
+            return householdService.getHouseholdUser(currentUser.get(), householdId)
         }
         return Optional.empty()
     }

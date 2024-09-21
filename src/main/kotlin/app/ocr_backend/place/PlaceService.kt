@@ -38,13 +38,13 @@ class PlaceService(
         }
     }
 
-    fun mergePlaces(holderId: Long, partId: Long) {
+    fun mergePlaces(householdId: UUID, holderId: Long, partId: Long) {
         val holder = repository.findById(holderId)
         val part = repository.findById(partId)
         if (holder.isPresent && part.isPresent) {
             for (receipt in part.get().receipts) {
                 receipt.place = holder.get()
-                receiptService.saveReceipt(receipt)
+                receiptService.saveReceipt(householdId, receipt)
             }
             repository.deleteById(partId)
         }

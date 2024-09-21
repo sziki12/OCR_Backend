@@ -27,6 +27,15 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 class SecurityConfig(
     val userAuthProvider: UserAuthProvider,
 ) {
+
+    private val swaggerWhitelist = listOf(
+        "/api/swagger-ui/**",
+        "/api/swagger-ui.html",
+        "/api/api-docs",
+        "/api/api-docs.yaml",
+        "/api/swagger-resources/**",
+        "/api/swagger-resources"
+    )
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
@@ -41,6 +50,7 @@ class SecurityConfig(
             }
             .authorizeHttpRequests()
             {
+                it.requestMatchers(HttpMethod.GET,*swaggerWhitelist.toTypedArray()).permitAll()
                 it.requestMatchers(HttpMethod.POST, "/login", "/register", "/salt").permitAll()
                 it.anyRequest().authenticated()
             }

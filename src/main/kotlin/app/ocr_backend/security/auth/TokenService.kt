@@ -2,6 +2,7 @@ package app.ocr_backend.security.auth
 
 
 import app.ocr_backend.security.config.RsaKeyProperties
+import app.ocr_backend.user.User
 import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet
@@ -21,16 +22,17 @@ class TokenService(
     private val encoder: JwtEncoder,
 ) {
     //authentication: Authentication
-    fun generateToken(subject: String): String {
+    fun generateToken(user: User): String {
         val now = Instant.now()
-        val scope = "user"/*authentication.authorities.stream()
+        val scope = user.householdUsers.map { it.household.id }
+        /*authentication.authorities.stream()
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.joining(" "))*/
         val claims = JwtClaimsSet.builder()
             .issuer("self")
             .issuedAt(now)
             .expiresAt(now.plus(1, ChronoUnit.HOURS))
-            .subject(subject)
+            .subject(user.email)
             .claim("scope", scope)
             .build()
         return encoder.encode(JwtEncoderParameters.from(claims)).tokenValue

@@ -8,15 +8,15 @@ import java.util.UUID
 
 @Entity
 @Table(name = "Household")
-class Household() {
+data class Household(var name: String) {
     @Column(name = "household_id")
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     lateinit var id: UUID
 
     @OneToMany(mappedBy = "household")
-    var householdUser:MutableSet<HouseholdUser> = mutableSetOf()
+    var householdUsers: MutableSet<HouseholdUser> = mutableSetOf()
 
     @OneToMany(mappedBy = "household")
-    var receipts:MutableList<Receipt> = mutableListOf()
+    var receipts: MutableList<Receipt> = mutableListOf()
 }
