@@ -1,7 +1,7 @@
 package app.ocr_backend.item
 
 import app.ocr_backend.ai.llama.ItemCategorisingService
-import com.google.gson.Gson
+import app.ocr_backend.item.dto.ReceiptItemResponse
 import enumeration.Category
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,20 +16,17 @@ class ItemController(
     private val itemService: ItemService,
     private val categorisingService: ItemCategorisingService
 ) {
-
-    val gson = Gson()
-
     @GetMapping("/{receiptId}/item/{itemId}")
     fun getItemById(
         @PathVariable receiptId: Long,
         @PathVariable itemId: Long, @PathVariable householdId: UUID
-    ): Item =
+    ): ReceiptItemResponse =
         itemService.getItem(itemId).orElseThrow {//TODO householdId
             ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Item with the $itemId Id not exists int the Receipt with $receiptId Id"
             )
-        }
+        }.toResponse()
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/{receiptId}/item")
@@ -38,15 +35,12 @@ class ItemController(
     }
 
     @PostMapping("/{receiptId}/new/item")
-    fun addItemToReceipt(@PathVariable receiptId: Long, @PathVariable householdId: UUID): ResponseEntity<String> {
+    fun addItemToReceipt(@PathVariable receiptId: Long, @PathVariable householdId: UUID): ResponseEntity<ReceiptItemResponse> {
         val newItem = itemService.createNewItem(householdId, receiptId)
         if (newItem.isPresent) {
-            newItem.get().let {
-                val json: String = gson.toJson(ItemDTO(it.id, it.name, it.quantity, it.totalCost, it.category.name))
-                return ResponseEntity.ok().body(json)
-            }
+            return ResponseEntity.ok().body(newItem.get().toResponse())
         }
-        return ResponseEntity.internalServerError().body("ERROR")
+        return ResponseEntity.notFound().build()
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -61,10 +55,10 @@ class ItemController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{receiptId}/item/{itemId}")
     fun updateItem(
-        @PathVariable receiptId: Long, @PathVariable itemId: Long, @RequestBody itemData: ItemDTO,
+        @PathVariable receiptId: Long, @PathVariable itemId: Long, @RequestBody itemData: ReceiptItemResponse,
         @PathVariable householdId: UUID
     ) {
-        itemService.updateItem(Item(itemId, itemData))//TODO householdId
+        itemService.updateItem(itemData.also { it.id = itemId }.toItem())//TODO householdId
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -75,8 +69,8 @@ class ItemController(
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/item/categories")
-    fun getCategories(@PathVariable householdId: UUID): ResponseEntity<String> {
-        val json: String = gson.toJson(Category.getValidCategoryNames())//TODO householdId
-        return ResponseEntity.ok().body(json)
+    fun getCategories(@PathVariable householdId: UUID): ResponseEntity<List<String>> {
+        val categories = Category.getValidCategoryNames()//TODO householdId
+        return ResponseEntity.ok().body(categories)
     }
 }

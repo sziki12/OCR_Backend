@@ -2,7 +2,7 @@ package app.ocr_backend.security.dto
 
 import app.ocr_backend.user.User
 
-data class SignUpDTO(
+data class SignUpDto(
     val name:String,
     val email:String,
     val password:String,

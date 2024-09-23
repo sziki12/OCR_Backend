@@ -1,14 +1,15 @@
-package app.ocr_backend.receipt
+package app.ocr_backend.receipt.dto
 
-import app.ocr_backend.item.ItemDTO
 import app.ocr_backend.item.Item
+import app.ocr_backend.item.dto.ReceiptItemResponse
+import app.ocr_backend.item.toItem
+import app.ocr_backend.receipt.Receipt
 import java.time.LocalDate
-import kotlin.collections.ArrayList
 
-data class ReceiptDTO(
+data class ReceiptResponse(
     var dateOfPurchase: LocalDate,
     var name:String,
-    var items:MutableList<ItemDTO>,
+    var items: List<ReceiptItemResponse>,
     var isPending:Boolean,
 )
 {
@@ -20,13 +21,13 @@ data class ReceiptDTO(
         )
 
     companion object{
-        private fun dtoFromItems(items:MutableList<Item>):MutableList<ItemDTO>
+        private fun dtoFromItems(items:MutableList<Item>):MutableList<ReceiptItemResponse>
         {
-            val list =  ArrayList<ItemDTO>()
+            val list =  ArrayList<ReceiptItemResponse>()
 
             for(item in items)
             {
-                list.add(ItemDTO(item))
+                list.add(ReceiptItemResponse(item))
             }
 
             return list
@@ -39,7 +40,7 @@ data class ReceiptDTO(
 
         for(itemDto in this.items)
         {
-            list.add(Item(itemDto))
+            list.add(itemDto.toItem())
         }
 
         return list

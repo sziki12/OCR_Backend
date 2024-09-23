@@ -2,11 +2,10 @@ package app.ocr_backend.receipt
 
 import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
 import app.ocr_backend.household.Household
-import app.ocr_backend.household.household_user.HouseholdUser
 import app.ocr_backend.item.Item
 import app.ocr_backend.place.Place
+import app.ocr_backend.receipt.dto.ReceiptResponse
 import app.ocr_backend.receipt_image.ReceiptImage
-import app.ocr_backend.user.User
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.time.LocalDate
@@ -58,12 +57,12 @@ data class Receipt(
         }
 
     constructor():this(LocalDate.now(),"")
-    constructor(receiptId:Long,receiptData: ReceiptDTO):this(receiptData)
+    constructor(receiptId:Long,receiptData: ReceiptResponse):this(receiptData)
     {
         this.id = receiptId
     }
 
-    constructor(receiptData: ReceiptDTO):
+    constructor(receiptData: ReceiptResponse):
             this(receiptData.dateOfPurchase,receiptData.name)
     {
         this.items = receiptData.toItemsArray()

@@ -1,11 +1,11 @@
 package app.ocr_backend.security.auth
 
 import app.ocr_backend.household.HouseholdService
-import app.ocr_backend.security.dto.CredentialsDTO
-import app.ocr_backend.security.dto.EmailSaltDTO
-import app.ocr_backend.security.dto.SignUpDTO
-import app.ocr_backend.user.UserService
+import app.ocr_backend.security.dto.CredentialsDto
+import app.ocr_backend.security.dto.EmailSaltDto
+import app.ocr_backend.security.dto.SignUpDto
 import app.ocr_backend.user.UserDTO
+import app.ocr_backend.user.UserService
 import com.google.gson.Gson
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -22,7 +22,7 @@ class AuthController(
 
     val gson = Gson()
     @PostMapping("/login")
-    fun login(@RequestBody credentials: CredentialsDTO):ResponseEntity<String>
+    fun login(@RequestBody credentials: CredentialsDto):ResponseEntity<String>
     {
         println("CREDENTIALS $credentials")
         val user = userService.loginUser(credentials)
@@ -36,7 +36,7 @@ class AuthController(
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/register")
-    fun register(@RequestBody signUpDto: SignUpDTO):ResponseEntity<String>
+    fun register(@RequestBody signUpDto: SignUpDto):ResponseEntity<String>
     {
         var user = userService.registerUser(signUpDto)
         val household = householdService.createHouseholdByUser(user,"My Household")
@@ -50,13 +50,13 @@ class AuthController(
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PostMapping("/salt")
-    fun getSalt(@RequestBody usernameDto: EmailSaltDTO):ResponseEntity<String> {
+    @PostMapping("/salt")//TODO add email in path
+    fun getSalt(@RequestBody usernameDto: EmailSaltDto):ResponseEntity<EmailSaltDto> {
 
         val user = userService.findByEmail(usernameDto.email)
         return if(user.isPresent)
         {
-            val json = gson.toJson(EmailSaltDTO(usernameDto.email,user.get().salt))
+            val json = EmailSaltDto(usernameDto.email,user.get().salt)
             ResponseEntity.ok().body(json)
         }
         else

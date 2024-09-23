@@ -3,7 +3,6 @@ package app.ocr_backend.receipt
 import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
 import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
 import app.ocr_backend.ai.ocr.ocr_entity.OcrEntityRepository
-import app.ocr_backend.household.Household
 import app.ocr_backend.household.HouseholdService
 import app.ocr_backend.item.Item
 import app.ocr_backend.item.ItemRepository
@@ -24,19 +23,24 @@ class ReceiptService(
     val householdService: HouseholdService,
     val authService: AuthService,
 ) {
-    //TODO fix user
-    fun saveReceipt(householdId: UUID,receipt: Receipt): Optional<Receipt> {
+    fun saveReceipt(householdId: UUID, receipt: Receipt): Optional<Receipt> {
         val optHUser = authService.getCurrentHouseholdUser(householdId)
-        if(optHUser.isPresent.not())
+        if (optHUser.isPresent.not())
             return Optional.empty<Receipt>()
-        //TODO Save items TOO
-        return Optional.of(receiptRepository.save(receipt.also { it.household = optHUser.get().household }))
-
+        //TODO Saving exisiting item id
+        for (item in receipt.items) {
+            itemRepository.save(item)
+        }
+        val savedReceipt = receiptRepository.save(receipt.also { it.household = optHUser.get().household })
+        for (item in receipt.items) {
+            itemRepository.save(item.also { it.receipt = savedReceipt })
+        }
+        return Optional.of(savedReceipt)
     }
 
     fun getReceipt(householdId: UUID, receiptId: Long): Optional<Receipt> {
         val optHUser = authService.getCurrentHouseholdUser(householdId)
-        if(optHUser.isPresent.not())
+        if (optHUser.isPresent.not())
             return Optional.empty<Receipt>()
         val household = optHUser.get().household
         return household.receipts.find { it.id == receiptId }?.let { Optional.of(it) } ?: Optional.empty<Receipt>()
@@ -83,7 +87,7 @@ class ReceiptService(
 
     fun getReceiptsByHousehold(householdId: UUID): List<Receipt> {
         val optHUser = authService.getCurrentHouseholdUser(householdId)
-        if(optHUser.isPresent.not())
+        if (optHUser.isPresent.not())
             return listOf()
         val household = optHUser.get().household
         return receiptRepository.getByHousehold(household)

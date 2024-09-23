@@ -49,4 +49,8 @@ class HouseholdService(
         householdUserRepository.save(householdUser)
         return household
     }
+
+    fun getHouseholdsByUser(user: User):List<Household>{
+        return user.householdUsers.map { it.household }
+    }
 }

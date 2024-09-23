@@ -1,10 +1,10 @@
 package app.ocr_backend.household
 
 import app.ocr_backend.household.household_user.HouseholdUser
-import app.ocr_backend.item.Item
+import app.ocr_backend.place.Place
 import app.ocr_backend.receipt.Receipt
 import jakarta.persistence.*
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "Household")
@@ -19,4 +19,7 @@ data class Household(var name: String) {
 
     @OneToMany(mappedBy = "household")
     var receipts: MutableList<Receipt> = mutableListOf()
+
+    @OneToMany(mappedBy = "household")
+    var places: MutableList<Place> = mutableListOf()
 }
