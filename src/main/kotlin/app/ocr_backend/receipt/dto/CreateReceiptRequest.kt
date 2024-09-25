@@ -1,14 +1,11 @@
 package app.ocr_backend.receipt.dto
 
 import app.ocr_backend.item.dto.ReceiptResponseItem
-import app.ocr_backend.place.dto.ReceiptResponsePlace
 import java.time.LocalDate
 
-data class ReceiptResponse(
-    var id: Long,
+data class CreateReceiptRequest(
     var dateOfPurchase: LocalDate,
     var name: String,
     var items: List<ReceiptResponseItem>,
     var isPending: Boolean,
-    var place: ReceiptResponsePlace?,
 )

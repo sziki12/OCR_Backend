@@ -1,8 +1,6 @@
 package app.ocr_backend.user
 
 import app.ocr_backend.household.household_user.HouseholdUser
-import app.ocr_backend.place.Place
-import app.ocr_backend.receipt.Receipt
 import jakarta.persistence.*
 
 @Entity
@@ -20,8 +18,8 @@ data class User(
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     val id:Long = -1
 
-    @OneToMany(mappedBy = "user")
-    var places:MutableList<Place> = mutableListOf()
+    /*@OneToMany(mappedBy = "user")
+    var places:MutableList<Place> = mutableListOf()*/
 
     @OneToMany(mappedBy = "user")
     var householdUsers:MutableList<HouseholdUser> = mutableListOf()
@@ -31,6 +29,6 @@ data class User(
     }
 
     fun toDetailedString(): String {
-        return "User(id: $id, name: $name, places: $places)"
+        return "User(id: $id, name: $name)"
     }
 }

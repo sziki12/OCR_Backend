@@ -1,6 +1,5 @@
 package app.ocr_backend.place
 
-import app.ocr_backend.household.Household
 import app.ocr_backend.receipt.ReceiptService
 import app.ocr_backend.security.auth.AuthService
 import org.springframework.stereotype.Service
@@ -21,7 +20,7 @@ class PlaceService(
         repository.deleteById(placeId)
     }
 
-    fun getPlaces(): List<Place> {
+    fun getPlaces(): List<Place> {//TODO householdUser
         return repository.findAll()
     }
 

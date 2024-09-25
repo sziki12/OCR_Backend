@@ -15,7 +15,7 @@ data class Place(
     @Column(name = "place_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = -1
+    var id: Long = -1
 
     @OneToMany(mappedBy = "place")
     var receipts: MutableList<Receipt> = mutableListOf()

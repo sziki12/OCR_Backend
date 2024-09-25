@@ -1,5 +1,6 @@
 package app.ocr_backend.place
 
+import app.ocr_backend.place.dto.PlaceCreateRequest
 import app.ocr_backend.place.dto.PlaceResponse
 import app.ocr_backend.receipt.ReceiptService
 import org.springframework.http.HttpStatus
@@ -18,7 +19,7 @@ class PlaceController(
     fun getPlaceByReceiptId(@PathVariable receiptId: Long, @PathVariable householdId: UUID): PlaceResponse? {
         val optReceipt = receiptService.getReceipt(householdId, receiptId)
         if (optReceipt.isPresent) {
-            return optReceipt.get().place
+            return optReceipt.get().place?.toResponse()
         }
 
         return null
@@ -26,8 +27,8 @@ class PlaceController(
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/save")
-    fun savePlace(@RequestBody place: Place, @PathVariable householdId: UUID): PlaceResponse {
-        return placeService.savePlace(place)//TODO householdId
+    fun savePlace(@RequestBody createRequest: PlaceCreateRequest, @PathVariable householdId: UUID): PlaceResponse {
+        return placeService.savePlace(createRequest.toPlace()).toResponse()//TODO householdId
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -57,6 +58,6 @@ class PlaceController(
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     fun getPlaces(@PathVariable householdId: UUID): List<PlaceResponse> {
-        return placeService.getPlaces()//TODO householdId
+        return placeService.getPlaces().map { it.toResponse() }//TODO householdId
     }
 }

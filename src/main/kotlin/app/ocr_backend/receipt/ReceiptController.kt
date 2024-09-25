@@ -1,7 +1,7 @@
 package app.ocr_backend.receipt
 
+import app.ocr_backend.receipt.dto.CreateReceiptRequest
 import app.ocr_backend.receipt.dto.ReceiptResponse
-import com.google.gson.Gson
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
@@ -11,10 +11,8 @@ import java.util.*
 @RequestMapping("/api/household/{householdId}")
 @CrossOrigin
 class ReceiptController(
-    private val receiptService: ReceiptService
+    private val receiptService: ReceiptService,
 ) {
-
-    val gson = Gson()
 
     @GetMapping("/receipt")
     fun getAllReceipts(@PathVariable householdId: UUID): List<ReceiptResponse> {
@@ -29,9 +27,8 @@ class ReceiptController(
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("receipt")
-    fun createReceipt(@RequestBody receiptData: ReceiptResponse, @PathVariable householdId: UUID)
-    {
-        receiptService.saveReceipt(householdId, Receipt(receiptData))
+    fun createReceipt(@RequestBody createRequest: CreateReceiptRequest, @PathVariable householdId: UUID) {
+        receiptService.saveReceipt(householdId, createRequest.toReceipt())
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -41,11 +38,12 @@ class ReceiptController(
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PutMapping("receipt/{receiptId}")
+    @PutMapping("receipt")
     fun updateReceipt(
-        @PathVariable receiptId: Long, @RequestBody receiptData: ReceiptResponse,
+        @RequestBody receiptData: ReceiptResponse,
         @PathVariable householdId: UUID
     ) {
-        receiptService.updateReceipt(householdId, Receipt(receiptId, receiptData))
+        val receipts = receiptService.getReceiptsByPlace(householdId, receiptData.place?.id ?: -1)
+        receiptService.updateReceipt(householdId, receiptData.toReceipt(receipts))
     }
 }

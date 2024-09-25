@@ -1,7 +1,7 @@
 package app.ocr_backend.item
 
 import app.ocr_backend.ai.llama.ItemCategorisingService
-import app.ocr_backend.item.dto.ReceiptItemResponse
+import app.ocr_backend.item.dto.ReceiptResponseItem
 import enumeration.Category
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -20,7 +20,7 @@ class ItemController(
     fun getItemById(
         @PathVariable receiptId: Long,
         @PathVariable itemId: Long, @PathVariable householdId: UUID
-    ): ReceiptItemResponse =
+    ): ReceiptResponseItem =
         itemService.getItem(itemId).orElseThrow {//TODO householdId
             ResponseStatusException(
                 HttpStatus.NOT_FOUND,
@@ -30,12 +30,12 @@ class ItemController(
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/{receiptId}/item")
-    fun addItemToReceipt(@PathVariable receiptId: Long, @RequestBody item: Item, @PathVariable householdId: UUID) {
-        itemService.saveItem(householdId, receiptId, item)
+    fun addItemToReceipt(@PathVariable receiptId: Long, @RequestBody itemData: ReceiptResponseItem, @PathVariable householdId: UUID): Optional<Item> {
+        return itemService.saveItem(householdId, receiptId, itemData.toItem())
     }
 
     @PostMapping("/{receiptId}/new/item")
-    fun addItemToReceipt(@PathVariable receiptId: Long, @PathVariable householdId: UUID): ResponseEntity<ReceiptItemResponse> {
+    fun addItemToReceipt(@PathVariable receiptId: Long, @PathVariable householdId: UUID): ResponseEntity<ReceiptResponseItem> {
         val newItem = itemService.createNewItem(householdId, receiptId)
         if (newItem.isPresent) {
             return ResponseEntity.ok().body(newItem.get().toResponse())
@@ -55,7 +55,7 @@ class ItemController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{receiptId}/item/{itemId}")
     fun updateItem(
-        @PathVariable receiptId: Long, @PathVariable itemId: Long, @RequestBody itemData: ReceiptItemResponse,
+        @PathVariable receiptId: Long, @PathVariable itemId: Long, @RequestBody itemData: ReceiptResponseItem,
         @PathVariable householdId: UUID
     ) {
         itemService.updateItem(itemData.also { it.id = itemId }.toItem())//TODO householdId

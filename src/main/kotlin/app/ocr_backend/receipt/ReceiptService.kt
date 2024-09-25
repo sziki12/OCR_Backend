@@ -46,6 +46,14 @@ class ReceiptService(
         return household.receipts.find { it.id == receiptId }?.let { Optional.of(it) } ?: Optional.empty<Receipt>()
     }
 
+    fun getReceiptsByPlace(householdId: UUID, placeId: Long): List<Receipt> {
+        val optHUser = authService.getCurrentHouseholdUser(householdId)
+        val place= placeRepository.findById(placeId)
+        if (optHUser.isPresent.not() ||place.isPresent.not())
+            return listOf()
+        return place.get().receipts
+    }
+
     fun updateReceipt(householdId: UUID, receipt: Receipt): Optional<Receipt> {
         val optReceipt = this.getReceipt(householdId, receipt.id)
         for (item in receipt.items) {

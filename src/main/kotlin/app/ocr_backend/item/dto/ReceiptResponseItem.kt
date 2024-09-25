@@ -1,7 +1,7 @@
 package app.ocr_backend.item.dto
 
 
-data class ReceiptItemResponse(
+data class ReceiptResponseItem(
     var id: Long,
     var name: String,
     var quantity: Int,

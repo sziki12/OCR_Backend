@@ -1,9 +1,9 @@
 package app.ocr_backend.item
 
-import app.ocr_backend.item.dto.ReceiptItemResponse
+import app.ocr_backend.item.dto.ReceiptResponseItem
 import enumeration.Category
 
-fun Item.toResponse() = ReceiptItemResponse(
+fun Item.toResponse() = ReceiptResponseItem(
     id = this.id,
     name = this.name,
     quantity = this.quantity,
@@ -11,7 +11,7 @@ fun Item.toResponse() = ReceiptItemResponse(
     category = this.category.name,
 )
 
-fun ReceiptItemResponse.toItem() = Item(
+fun ReceiptResponseItem.toItem() = Item(
     name = this.name,
     quantity = this.quantity,
     totalCost = this.totalCost,

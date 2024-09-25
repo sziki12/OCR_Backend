@@ -3,6 +3,7 @@ package app.ocr_backend.household
 import app.ocr_backend.security.auth.AuthService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 class HouseholdController(
     private val householdService: HouseholdService,
     private val authService: AuthService,) {
+    @GetMapping
     fun getHouseholds(): ResponseEntity<List<Household>>{
         val user = authService.getCurrentUser()
         if(user.isPresent.not())

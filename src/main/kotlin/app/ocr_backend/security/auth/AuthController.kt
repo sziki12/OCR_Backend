@@ -6,7 +6,6 @@ import app.ocr_backend.security.dto.EmailSaltDto
 import app.ocr_backend.security.dto.SignUpDto
 import app.ocr_backend.user.UserDTO
 import app.ocr_backend.user.UserService
-import com.google.gson.Gson
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -20,23 +19,21 @@ class AuthController(
     private val householdService: HouseholdService,
     ) {
 
-    val gson = Gson()
     @PostMapping("/login")
-    fun login(@RequestBody credentials: CredentialsDto):ResponseEntity<String>
+    fun login(@RequestBody credentials: CredentialsDto):ResponseEntity<UserDTO>
     {
         println("CREDENTIALS $credentials")
         val user = userService.loginUser(credentials)
         val userDto = UserDTO(user).also {
             it.token = tokenService.generateToken(user) ?: ""
         }
-        val json = gson.toJson(userDto)
         println("LOGIN $userDto")
-        return ResponseEntity.ok().body(json)
+        return ResponseEntity.ok().body(userDto)
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/register")
-    fun register(@RequestBody signUpDto: SignUpDto):ResponseEntity<String>
+    fun register(@RequestBody signUpDto: SignUpDto):ResponseEntity<UserDTO>
     {
         var user = userService.registerUser(signUpDto)
         val household = householdService.createHouseholdByUser(user,"My Household")
@@ -44,9 +41,8 @@ class AuthController(
         val userDto = UserDTO(user).also {
             it.token = tokenService.generateToken(user) ?: ""
         }
-        val json = gson.toJson(userDto)
         println("REGISTER $userDto")
-        return ResponseEntity.ok().body(json)
+        return ResponseEntity.ok().body(userDto)
     }
 
     @ResponseStatus(HttpStatus.OK)

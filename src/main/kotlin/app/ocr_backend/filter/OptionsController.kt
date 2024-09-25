@@ -8,7 +8,7 @@ import java.util.*
 @RestController
 @RequestMapping("/api/household/{householdId}")
 @CrossOrigin
-class FilterController(
+class OptionsController(
     private val receiptService: ReceiptService,
 ) {
     @ResponseStatus(HttpStatus.OK)
