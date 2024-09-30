@@ -1,6 +1,5 @@
 package app.ocr_backend.security.auth
 
-import app.ocr_backend.household.Household
 import app.ocr_backend.household.HouseholdService
 import app.ocr_backend.household.household_user.HouseholdUser
 import app.ocr_backend.user.User
@@ -16,6 +15,7 @@ class AuthService(
 ) {
     fun getCurrentUser(): Optional<User> {
         val email = SecurityContextHolder.getContext().authentication.principal.toString()
+        println("email: $email")
         return userService.findByEmail(email)
     }
 
@@ -24,6 +24,7 @@ class AuthService(
      */
     fun getCurrentHouseholdUser(householdId: UUID): Optional<HouseholdUser> {
         val currentUser = getCurrentUser()
+        println("user: $currentUser")
         if (currentUser.isPresent) {
             return householdService.getHouseholdUser(currentUser.get(), householdId)
         }

@@ -1,5 +1,6 @@
 package app.ocr_backend.receipt
 
+import app.ocr_backend.household.Household
 import app.ocr_backend.item.toItem
 import app.ocr_backend.item.toResponse
 import app.ocr_backend.place.toPlace
@@ -16,10 +17,12 @@ fun Receipt.toResponse() = ReceiptResponse(
     place = this.place?.toReceiptResponse()
 )
 
-fun ReceiptResponse.toReceipt(placeReceipts: List<Receipt>) = Receipt(
+fun ReceiptResponse.toReceipt(household: Household, placeReceipts: List<Receipt>) = Receipt(
     name = this.name,
     dateOfPurchase = this.dateOfPurchase,
 ).also { receipt ->
+    receipt.id = this.id
+    receipt.household = household
     receipt.items.addAll(this.items.map { it.toItem() })
     receipt.isPending = this.isPending
     receipt.place = this.place?.toPlace(placeReceipts)

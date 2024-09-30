@@ -53,4 +53,8 @@ class HouseholdService(
     fun getHouseholdsByUser(user: User):List<Household>{
         return user.householdUsers.map { it.household }
     }
+
+    fun getHouseholdById(householdId: UUID): Optional<Household> {
+        return householdRepository.findById(householdId)
+    }
 }

@@ -23,12 +23,4 @@ data class User(
 
     @OneToMany(mappedBy = "user")
     var householdUsers:MutableList<HouseholdUser> = mutableListOf()
-
-    override fun toString(): String {
-        return "User(id: $id, name: $name)"
-    }
-
-    fun toDetailedString(): String {
-        return "User(id: $id, name: $name)"
-    }
 }

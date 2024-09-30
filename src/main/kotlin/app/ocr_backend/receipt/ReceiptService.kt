@@ -40,9 +40,15 @@ class ReceiptService(
 
     fun getReceipt(householdId: UUID, receiptId: Long): Optional<Receipt> {
         val optHUser = authService.getCurrentHouseholdUser(householdId)
+        println(optHUser)
         if (optHUser.isPresent.not())
             return Optional.empty<Receipt>()
         val household = optHUser.get().household
+        print("receiptId")
+        print(receiptId)
+        print("HouseholdReceipts")
+        println(household.receipts)
+        println(household.receipts.find { it.id == receiptId })
         return household.receipts.find { it.id == receiptId }?.let { Optional.of(it) } ?: Optional.empty<Receipt>()
     }
 
@@ -55,11 +61,15 @@ class ReceiptService(
     }
 
     fun updateReceipt(householdId: UUID, receipt: Receipt): Optional<Receipt> {
+        println("in receipt")
+        println(receipt)
         val optReceipt = this.getReceipt(householdId, receipt.id)
+        println("optReceipt")
+        println(optReceipt)
         for (item in receipt.items) {
-            itemRepository.save(item)
+            println(itemRepository.save(item))
         }
-
+        //TODO Frontend last item resets if others are edited
         if (optReceipt.isPresent) {
             val originalReceipt = optReceipt.get()
             val itemsToRemove = ArrayList<Item>()
@@ -68,7 +78,12 @@ class ReceiptService(
             for (item in itemsToRemove) {
                 itemRepository.deleteById(item.id)
             }
-            return Optional.of(receiptRepository.save(receipt))
+            println("---")
+            val updatedReceipt = receiptRepository.save(receipt)
+            for (item in receipt.items) {
+                println(itemRepository.save(item.also { it.receipt =  updatedReceipt}))
+            }
+            return Optional.of(updatedReceipt)
         }
         return Optional.empty()
     }

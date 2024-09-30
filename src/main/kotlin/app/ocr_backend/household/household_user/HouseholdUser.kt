@@ -23,4 +23,8 @@ data class HouseholdUser(
     @ManyToOne
     @JoinColumn(name = "household_id")
     lateinit var household: Household
+
+    override fun toString(): String {
+        return "HouseholdUser(id=${id}, isAdmin=$isAdmin)"
+    }
 }

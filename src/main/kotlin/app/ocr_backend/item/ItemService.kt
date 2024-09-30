@@ -1,6 +1,5 @@
 package app.ocr_backend.item
 
-import app.ocr_backend.receipt.Receipt
 import app.ocr_backend.receipt.ReceiptService
 import org.springframework.stereotype.Service
 import java.util.*
@@ -16,7 +15,7 @@ class ItemService(
         if (receipt.isPresent) {
             val newItem = Item("", 1, 0)
             newItem.receipt = receipt.get()
-            itemRepository.save(newItem)
+            return Optional.of(itemRepository.save(newItem))
         }
         return Optional.empty()
     }

@@ -1,5 +1,6 @@
 package app.ocr_backend.receipt
 
+import app.ocr_backend.household.HouseholdService
 import app.ocr_backend.receipt.dto.CreateReceiptRequest
 import app.ocr_backend.receipt.dto.ReceiptResponse
 import org.springframework.http.HttpStatus
@@ -12,6 +13,7 @@ import java.util.*
 @CrossOrigin
 class ReceiptController(
     private val receiptService: ReceiptService,
+    private val householdService: HouseholdService,
 ) {
 
     @GetMapping("/receipt")
@@ -43,7 +45,10 @@ class ReceiptController(
         @RequestBody receiptData: ReceiptResponse,
         @PathVariable householdId: UUID
     ) {
+        println("------updateReceipt-----")
+        println(receiptData)
         val receipts = receiptService.getReceiptsByPlace(householdId, receiptData.place?.id ?: -1)
-        receiptService.updateReceipt(householdId, receiptData.toReceipt(receipts))
+        val household = householdService.getHouseholdById(householdId)
+        receiptService.updateReceipt(householdId, receiptData.toReceipt(household.get(), receipts))
     }
 }
