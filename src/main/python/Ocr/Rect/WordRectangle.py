@@ -61,9 +61,11 @@ class WordRectangle:
         d = (det(self.right_midpoint, self.left_midpoint), det(otherRect.right_top, otherRect.right_bot))
         x = det(d, xdiff) / div
         y = det(d, ydiff) / div """
-
-        (x,y) = intersection(line(self.right_midpoint, self.left_midpoint),  line(otherRect.right_top, otherRect.right_bot))
-#TODO Print all point and assert calculation
+        if(self.right_midpoint[0] <= otherRect.right_midpoint[0]):
+            (x,y) = intersection(line(self.right_midpoint, self.left_midpoint),  line(otherRect.left_top, otherRect.left_bot))
+        else:
+            (x,y) = intersection(line(self.right_midpoint, self.left_midpoint),  line(otherRect.right_top, otherRect.right_bot))    
+        #TODO Print all point and assert calculation
         """ print("\n")
         print("Self")
         print("Top: "+str(self.right_top)+" "+str(self.left_top))

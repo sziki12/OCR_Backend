@@ -7,6 +7,7 @@ import app.ocr_backend.place.toPlace
 import app.ocr_backend.place.toReceiptResponse
 import app.ocr_backend.receipt.dto.CreateReceiptRequest
 import app.ocr_backend.receipt.dto.ReceiptResponse
+import app.ocr_backend.receipt_image.toResponse
 
 fun Receipt.toResponse() = ReceiptResponse(
     id = this.id,
@@ -16,6 +17,8 @@ fun Receipt.toResponse() = ReceiptResponse(
     items = this.items.map { it.toResponse() },
     place = this.place?.toReceiptResponse(),
     totalCost = this.totalCost,
+    images = this.images.map { it.toResponse() },
+    ocrEntity = this.ocrEntity
 )
 
 fun ReceiptResponse.toReceipt(household: Household, placeReceipts: List<Receipt>) = Receipt(

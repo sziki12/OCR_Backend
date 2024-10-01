@@ -12,10 +12,10 @@ class OcrRow:
         if(row_marker.is_in_same_line(new_word) or new_word.is_in_same_line(row_marker)):
             return WordRelation.SAME
         
-        elif (row_marker.middle_point[1] < new_word.middle_point[0]):
+        elif (row_marker.middle_point[1] < new_word.middle_point[1]):
             return WordRelation.ABOVE
         
-        elif (row_marker.middle_point[1] > new_word.middle_point[0]):
+        elif (row_marker.middle_point[1] > new_word.middle_point[1]):
             return WordRelation.BELOW
 
     def add_word(self, new_word):

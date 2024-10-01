@@ -2,12 +2,8 @@ from paddleocr import PaddleOCR,draw_ocr
 import Ocr.ImageProcessing as ip
 import cv2
 import imutils
-import json
 from PIL import Image,ImageFont,ImageDraw
-from Ocr.Rect.WordRectangle import WordRectangle
 from Ocr.Rect.OcrDocument import OcrDocument
-from Ocr.ManualReceiptProcessor import ManualReceiptProcessor
-from Ocr.ChatGptReceiptProcessor import ChatGptReceiptProcessor
 import Ocr.ImageProcessing as ip
 from Ocr.Debug.Debugger import Debugger
 
@@ -84,14 +80,7 @@ class PaddleOcrProcessor:
         document = OcrDocument(boxes, texts, scores)
         receipt_text = document.get_text()
 
-        receipt_text_processor =  ChatGptReceiptProcessor(receipt_text,  self.args["parse_model"], self.args["openai_api_key"])#ManualReceiptProcessor("---","///",0)
-        processed_text = receipt_text_processor.process()
-
         if self.args["debug"] > 0:
             self.save_processed_image(image_path, self.args["image"], results)
 
-        response_json = {
-            "processed_receipt": json.loads(processed_text),
-            "receipt_text": receipt_text
-        }
-        return json.dumps(response_json)
+        return receipt_text

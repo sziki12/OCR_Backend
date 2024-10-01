@@ -44,7 +44,8 @@ class OcrDocument:
                         #print(word.text+ " BELOW "+self.rows[row_index].get_text())
                 if has_row == False:
                      self.rows.insert(0, OcrRow(word))  
-                #TODO Fix duplicated entity error, word order and word row prediction      
+                #TODO Fix duplicated entity error, word order and word row prediction
+        print(self.get_text())               
 
     def get_text(self):
         text = ""
