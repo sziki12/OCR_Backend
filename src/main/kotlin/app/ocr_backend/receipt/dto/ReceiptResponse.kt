@@ -7,6 +7,7 @@ import java.time.LocalDate
 data class ReceiptResponse(
     var id: Long,
     var dateOfPurchase: LocalDate,
+    var totalCost: Int,
     var name: String,
     var items: List<ReceiptResponseItem>,
     var isPending: Boolean,

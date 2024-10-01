@@ -31,7 +31,6 @@ class ImageProcessingService(
     val ocrEntityService: OcrEntityService,
     val itemService: ItemService,
     //val llamaService: LlamaService,
-    //val service: DBService
 ) {
     fun processImage(householdId: UUID, image: MultipartFile, ocrParams: OcrParams): OcrResponse? {
         val optReceipt = receiptService.saveReceipt(householdId, Receipt().also { it.isPending = true })
@@ -74,6 +73,7 @@ class ImageProcessingService(
 
     private fun parseResponse(householdId: UUID, newReceipt: Receipt, ocrOutput: OcrResponse) {
         ocrOutput.processedReceipt.let {
+            newReceipt.name = it.store_name ?: "Unknown ${newReceipt.id}"
             var parsedItemCost = 0
             for (item in it.toItemList()) {
                 parsedItemCost += item.totalCost

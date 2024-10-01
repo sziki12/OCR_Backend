@@ -14,7 +14,8 @@ fun Receipt.toResponse() = ReceiptResponse(
     dateOfPurchase = this.dateOfPurchase,
     isPending = this.isPending,
     items = this.items.map { it.toResponse() },
-    place = this.place?.toReceiptResponse()
+    place = this.place?.toReceiptResponse(),
+    totalCost = this.totalCost,
 )
 
 fun ReceiptResponse.toReceipt(household: Household, placeReceipts: List<Receipt>) = Receipt(
@@ -31,7 +32,7 @@ fun ReceiptResponse.toReceipt(household: Household, placeReceipts: List<Receipt>
 fun CreateReceiptRequest.toReceipt() = Receipt(
     name = this.name,
     dateOfPurchase = this.dateOfPurchase,
-).also {
-    it.items.addAll(this.items.map { it.toItem() })
-    it.isPending = this.isPending
+).also { receipt ->
+    receipt.items.addAll(this.items.map { it.toItem() })
+    receipt.isPending = this.isPending
 }
