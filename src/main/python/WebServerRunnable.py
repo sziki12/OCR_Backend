@@ -6,11 +6,49 @@ from Ocr.Paddle.PaddleOcrProcessor import PaddleOcrProcessor
 from Llm.MistralReceiptProcessor import MistralReceiptProcessor
 from Llm.ChatGptReceiptProcessor import ChatGptReceiptProcessor
 from Llm.GeminiReceiptProcessor import GeminiReceiptProcessor
+from Llm.OcrResponse import OcrResposne
+from Llm.LlamaReceiptProcessor import LlamaReceiptProcessor
 
 hostName = "localhost"
 serverPort = 9090
 
 class PythonWebServer(BaseHTTPRequestHandler):
+
+    def do_POST(self):
+        self.init_params()
+
+        if self.path == "/ocr":
+            self.ocr_request()
+
+        if self.path == "/categorise":
+            self.categorise_request() 
+
+    def ocr_request(self):
+        #Process Image with Ocr model
+        ocr_response = self.process_ocr_request()
+        
+        #Process extracted text with Llm
+        if(ocr_response.response_json == None):
+            ocr_response = self.process_data_extraction()
+            #Construct response
+            response_json = json.dumps({
+                "processed_receipt": json.loads(ocr_response.processed_text),
+                "receipt_text": ocr_response.receipt_text
+            })        
+
+        self.send_response(200)
+        self.send_header("Content-type", "text/json")
+        self.end_headers() 
+        self.wfile.write(bytes(response_json, 'utf-8'))
+
+    def categorise_request(self):
+        response_json = self.process_categorise_request()
+
+        self.send_response(200)
+        self.send_header("Content-type", "text/json")
+        self.end_headers() 
+        self.wfile.write(bytes(response_json, 'utf-8'))            
+
     def init_params(self):
         self.args = {}
         content_len = int(self.headers.get('Content-Length'))
@@ -41,6 +79,18 @@ class PythonWebServer(BaseHTTPRequestHandler):
         except:
             pass
         try:
+            self.args["items"] = parsed_body.items
+        except:
+            pass
+        try:
+            self.args["categories"] = parsed_body.categories
+        except:
+            pass
+        try:
+            self.args["categorise_model"] = parsed_body.categorise_model
+        except:
+            pass
+        """try:
             self.args["separator"] = parsed_body.separator
         except:
             self.args["separator"] = "///"
@@ -48,6 +98,7 @@ class PythonWebServer(BaseHTTPRequestHandler):
             self.args["itemseparator"] = parsed_body.itemseparator
         except:
             self.args["itemseparator"] = "---"
+            """
         try:
             self.args["debug"] = int(parsed_body.debug)
         except:
@@ -55,58 +106,72 @@ class PythonWebServer(BaseHTTPRequestHandler):
 
         print("ARGS:\n"+str(self.args)+"\n")  
 
-    def do_POST(self):
-        self.init_params()
-        
-        if self.path == "/ocr":
-            ocr_type = self.args["ocr_type"]
-            parse_model = self.args["parse_model"]
-            api_key = self.args["api_key"]
-            image_path = self.args["path"]+"/"+self.args["image"]
-            response_json = None
-            #Process Image with Ocr model
-            match ocr_type:
-                case "tesseract":
-                    ocr = TesseractOcrProcessor(self.args)
-                    receipt_text = ocr.read_receipt_with_tesseract() 
-                case "paddle":	    
-                    ocr = PaddleOcrProcessor(self.args)
-                    receipt_text = ocr.read_receipt_with_paddle()
+    
+
+    def process_ocr_request(self):
+        api_key = self.args["api_key"]
+        image_path = self.args["path"]+"/"+self.args["image"]
+        ocr_type = self.args["ocr_type"]
+        receipt_text = None
+        response_json = None
+        match ocr_type:
+            case "tesseract":
+                ocr = TesseractOcrProcessor(self.args)
+                receipt_text = ocr.read_receipt_with_tesseract() 
+            case "paddle":	    
+                ocr = PaddleOcrProcessor(self.args)
+                receipt_text = ocr.read_receipt_with_paddle()
+            case "mistral":
+                processor = MistralReceiptProcessor(api_key)
+                response_json = processor.process_from_image(image_path)
+            case "gemini":
+                processor = GeminiReceiptProcessor(api_key)
+                response_json = processor.process_from_image(image_path)   
+
+        return OcrResposne(receipt_text, None, response_json)  
+
+    def process_data_extraction(self, ocr_response):
+        parse_model = self.args["parse_model"]
+        api_key = self.args["api_key"]
+        if("gpt" in parse_model):
+                processor = ChatGptReceiptProcessor(api_key,parse_model)
+        elif("llama" in parse_model):
+            processor = LlamaReceiptProcessor(parse_model)
+        else:
+            match parse_model:
                 case "mistral":
                     processor = MistralReceiptProcessor(api_key)
-                    response_json = processor.process_from_image(image_path)
                 case "gemini":
                     processor = GeminiReceiptProcessor(api_key)
-                    response_json = processor.process_from_image(image_path)         
-            print(response_json)
-            
-            #Process extracted text with Llm
-            if(response_json == None):
-                if("gpt" in parse_model):
-                    processor = ChatGptReceiptProcessor(api_key,parse_model)
-                else:
-                    match parse_model:
-                        case "mistral":
-                            processor = MistralReceiptProcessor(api_key)
-                        case "gemini":
-                            processor = GeminiReceiptProcessor(api_key)
-                        case "llama":    
-                            pass
-                        case "gorilla":
-                            pass
-                processed_text = processor.process(receipt_text)
-                print("#####PROCESSED#########")
-                print(processed_text)
-                #Construct response
-                response_json = json.dumps({
-                    "processed_receipt": json.loads(processed_text),
-                    "receipt_text": receipt_text
-                })        
+                case "gorilla":
+                    pass
+        processed_text = processor.process(ocr_response.receipt_text)
+        print("#####PROCESSED#########")
+        print(processed_text)
+        ocr_response.processed_text = processed_text
+        return ocr_response
 
-            self.send_response(200)
-            self.send_header("Content-type", "text/json")
-            self.end_headers() 
-            self.wfile.write(bytes(response_json, 'utf-8'))
+    def process_categorise_request(self):
+        api_key = self.args["api_key"]
+        items = self.args["items"]
+        categories = self.args["categories"]
+        categorise_model = self.args["categorise_model"]
+        if("gpt" in categorise_model):
+            processor = ChatGptReceiptProcessor(api_key, categorise_model)
+        elif("llama" in categorise_model):
+            processor = LlamaReceiptProcessor(categorise_model)
+        else:
+            match categorise_model:
+                case "mistral":
+                    processor = MistralReceiptProcessor(api_key)
+                case "gemini":
+                    processor = GeminiReceiptProcessor(api_key)
+                case "gorilla":
+                    pass
+        categorised_items = processor.categorise(items, categories)
+        return categorised_items
+
+       
 
 if __name__ == "__main__":        
     webServer = HTTPServer((hostName, serverPort), PythonWebServer)

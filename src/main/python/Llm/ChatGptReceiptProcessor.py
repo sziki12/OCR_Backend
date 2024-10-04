@@ -17,7 +17,7 @@ class ChatGptReceiptProcessor(LlmBase):
             response_format = { "type": "json_object" }
         )
         reply = completion.choices[0].message.content
-        return reply
+        return super().parse_json(reply)
     
     def categorise(self, items, categorires):
         completion = self.client.chat.completions.create(
@@ -28,6 +28,6 @@ class ChatGptReceiptProcessor(LlmBase):
             response_format = { "type": "json_object" }
         )
         reply = completion.choices[0].message.content
-        return reply
+        return super().parse_json(reply)
 
 
