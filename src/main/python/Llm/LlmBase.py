@@ -26,14 +26,15 @@ class LlmBase:
             return None
         
     def parse_json(self, response):
-        print("_____")
-        print(response)
-        print("_____")
         if("```json" in response):
             json = response.split("```json")[1]
             json = json.split("```")[0]
         elif("```" in response):
             json = response.split("```")[1]
         else:
-            json = response    
+            json = response 
+
+        print("_____")
+        print(json)
+        print("_____")       
         return json    

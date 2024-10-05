@@ -1,3 +1,7 @@
+
+from torch import Tensor
+
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from types import SimpleNamespace
@@ -8,6 +12,9 @@ from Llm.ChatGptReceiptProcessor import ChatGptReceiptProcessor
 from Llm.GeminiReceiptProcessor import GeminiReceiptProcessor
 from Llm.OcrResponse import OcrResposne
 from Llm.LlamaReceiptProcessor import LlamaReceiptProcessor
+from Llm.LlavaReceiptProcessor import LlavaReceiptProcessor
+from Llm.T5ReceptProcessor import T5ReceiptProcessor
+from Llm.ClaudeReceiptProcessor import ClaudeReceiptProcessor
 
 hostName = "localhost"
 serverPort = 9090
@@ -29,12 +36,14 @@ class PythonWebServer(BaseHTTPRequestHandler):
         
         #Process extracted text with Llm
         if(ocr_response.response_json == None):
-            ocr_response = self.process_data_extraction()
+            ocr_response = self.process_data_extraction(ocr_response)
             #Construct response
             response_json = json.dumps({
                 "processed_receipt": json.loads(ocr_response.processed_text),
                 "receipt_text": ocr_response.receipt_text
-            })        
+            })  
+        else:
+            response_json = ocr_response.response_json 
 
         self.send_response(200)
         self.send_header("Content-type", "text/json")
@@ -63,21 +72,21 @@ class PythonWebServer(BaseHTTPRequestHandler):
         except:
             pass    
         try:
-            self.args["ocr_type"] = parsed_body.ocr_type
+            self.args["ocr_type"] = parsed_body.ocr_type.lower()
         except:
             pass
         try:
-            self.args["orientation"] = parsed_body.orientation
+            self.args["orientation"] = parsed_body.orientation.lower()
         except:
             self.args["orientation"] = "portrait"
         try:
-            self.args["parse_model"] = parsed_body.parse_model
+            self.args["parse_model"] = parsed_body.parse_model.lower()
         except:
             pass
         try:
             self.args["api_key"] = parsed_body.api_key
         except:
-            pass
+            self.args["api_key"] = ""
         try:
             self.args["items"] = parsed_body.items
         except:
@@ -87,18 +96,9 @@ class PythonWebServer(BaseHTTPRequestHandler):
         except:
             pass
         try:
-            self.args["categorise_model"] = parsed_body.categorise_model
+            self.args["categorise_model"] = parsed_body.categorise_model.lower()
         except:
             pass
-        """try:
-            self.args["separator"] = parsed_body.separator
-        except:
-            self.args["separator"] = "///"
-        try:
-            self.args["itemseparator"] = parsed_body.itemseparator
-        except:
-            self.args["itemseparator"] = "---"
-            """
         try:
             self.args["debug"] = int(parsed_body.debug)
         except:
@@ -114,6 +114,7 @@ class PythonWebServer(BaseHTTPRequestHandler):
         ocr_type = self.args["ocr_type"]
         receipt_text = None
         response_json = None
+
         match ocr_type:
             case "tesseract":
                 ocr = TesseractOcrProcessor(self.args)
@@ -126,7 +127,10 @@ class PythonWebServer(BaseHTTPRequestHandler):
                 response_json = processor.process_from_image(image_path)
             case "gemini":
                 processor = GeminiReceiptProcessor(api_key)
-                response_json = processor.process_from_image(image_path)   
+                response_json = processor.process_from_image(image_path)
+            case "llava":
+                processor = LlavaReceiptProcessor()
+                response_json = processor.process_from_image(image_path)          
 
         return OcrResposne(receipt_text, None, response_json)  
 
@@ -143,8 +147,14 @@ class PythonWebServer(BaseHTTPRequestHandler):
                     processor = MistralReceiptProcessor(api_key)
                 case "gemini":
                     processor = GeminiReceiptProcessor(api_key)
+                case "llava":
+                    processor = LlavaReceiptProcessor(api_key)    
                 case "gorilla":
                     pass
+                case "t5":
+                    processor = T5ReceiptProcessor()
+                case "claude":
+                    processor = ClaudeReceiptProcessor()    
         processed_text = processor.process(ocr_response.receipt_text)
         print("#####PROCESSED#########")
         print(processed_text)
@@ -156,6 +166,7 @@ class PythonWebServer(BaseHTTPRequestHandler):
         items = self.args["items"]
         categories = self.args["categories"]
         categorise_model = self.args["categorise_model"]
+
         if("gpt" in categorise_model):
             processor = ChatGptReceiptProcessor(api_key, categorise_model)
         elif("llama" in categorise_model):
@@ -166,6 +177,8 @@ class PythonWebServer(BaseHTTPRequestHandler):
                     processor = MistralReceiptProcessor(api_key)
                 case "gemini":
                     processor = GeminiReceiptProcessor(api_key)
+                case "llava":
+                    processor = LlavaReceiptProcessor(api_key)     
                 case "gorilla":
                     pass
         categorised_items = processor.categorise(items, categories)

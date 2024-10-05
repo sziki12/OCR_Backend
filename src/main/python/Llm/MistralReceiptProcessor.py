@@ -55,4 +55,4 @@ class MistralReceiptProcessor(LlmBase):
             ]
         )
         reply = chat_response.choices[0].message.content
-        return reply
+        return super().parse_json(reply)
