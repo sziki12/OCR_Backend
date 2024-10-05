@@ -23,4 +23,4 @@ class ClaudeReceiptProcessor(LlmBase):
                 }
             ]
         )
-        return super().parse_json(message.content)
+        return super().parse_json(message.content[0].text)
