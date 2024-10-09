@@ -9,6 +9,8 @@ import jakarta.persistence.*
 @Table(name = "Place")
 data class Place(
     var name: String,
+    @Column(columnDefinition = "TEXT")
+    var description: String,
     var lat: Double,
     var lng: Double
 ) {
@@ -19,12 +21,6 @@ data class Place(
 
     @OneToMany(mappedBy = "place")
     var receipts: MutableList<Receipt> = mutableListOf()
-
-    /*@JsonIgnore
-    @ManyToOne
-    @JoinColumn(name="user_id")
-    lateinit var user: User*/
-    //TODO Replace with household
 
     @JsonIgnore
     @ManyToOne

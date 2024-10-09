@@ -2,6 +2,7 @@ package app.ocr_backend.place
 
 import app.ocr_backend.place.dto.PlaceCreateRequest
 import app.ocr_backend.place.dto.PlaceResponse
+import app.ocr_backend.place.dto.ReceiptResponsePlace
 import app.ocr_backend.receipt.ReceiptService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -26,9 +27,16 @@ class PlaceController(
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/save")
-    fun savePlace(@RequestBody createRequest: PlaceCreateRequest, @PathVariable householdId: UUID): PlaceResponse {
+    @PostMapping("/create")
+    fun createPlace(@RequestBody createRequest: PlaceCreateRequest, @PathVariable householdId: UUID): PlaceResponse {
         return placeService.savePlace(createRequest.toPlace()).toResponse()//TODO householdId
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/update")
+    fun updatePlace(@RequestBody updatedPlace: ReceiptResponsePlace, @PathVariable householdId: UUID): PlaceResponse {
+        val receiptPlaces = receiptService.getReceiptsByPlace(householdId,updatedPlace.id)
+        return placeService.savePlace(updatedPlace.toPlace(receiptPlaces)).toResponse()
     }
 
     @ResponseStatus(HttpStatus.OK)

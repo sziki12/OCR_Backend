@@ -9,6 +9,7 @@ import app.ocr_backend.receipt.toResponse
 fun Place.toResponse() = PlaceResponse(
     id = this.id,
     name = this.name,
+    description = this.description,
     lat = this.lat,
     lng = this.lng,
     receipts = this.receipts.map { it.toResponse() },
@@ -18,6 +19,7 @@ fun Place.toResponse() = PlaceResponse(
 fun Place.toReceiptResponse() = ReceiptResponsePlace(
     id = this.id,
     name = this.name,
+    description = this.description,
     lat = this.lat,
     lng = this.lng,
     isValidated = this.isValidated,
@@ -25,6 +27,7 @@ fun Place.toReceiptResponse() = ReceiptResponsePlace(
 
 fun ReceiptResponsePlace.toPlace(receipts: List<Receipt>) = Place(
     name = this.name,
+    description = this.description,
     lat = this.lat,
     lng = this.lng,
 ).also {
@@ -34,6 +37,7 @@ fun ReceiptResponsePlace.toPlace(receipts: List<Receipt>) = Place(
 
 fun PlaceCreateRequest.toPlace() = Place(
     name = this.name,
+    description = this.description,
     lat = this.lat,
     lng = this.lng,
 )
