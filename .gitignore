@@ -43,3 +43,4 @@ out/
 *.jpg
 *.pem
 /src/main/resources/certs
+src/main/python/environment_variables.env

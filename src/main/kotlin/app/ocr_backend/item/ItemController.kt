@@ -1,6 +1,6 @@
 package app.ocr_backend.item
 
-import app.ocr_backend.ai.llama.ItemCategorisingService
+import app.ocr_backend.ai.categorisation.ItemCategorisingService
 import app.ocr_backend.item.dto.ReceiptResponseItem
 import enumeration.Category
 import org.springframework.http.HttpStatus
@@ -62,9 +62,9 @@ class ItemController(
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PutMapping("/{receiptId}/categorise")
-    fun categoriseItems(@PathVariable receiptId: Long, @PathVariable householdId: UUID) {
-        categorisingService.categoriseItems(householdId, receiptId)
+    @PutMapping("/{receiptId}/item/categorise")
+    fun categoriseItems(@PathVariable receiptId: Long, @PathVariable householdId: UUID, @RequestParam categoriseModel: String) {
+        categorisingService.categoriseItems(householdId, receiptId,categoriseModel)
     }
 
     @ResponseStatus(HttpStatus.OK)

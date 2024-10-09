@@ -1,10 +1,12 @@
 import google.generativeai as genai
 import pathlib
 from Llm.LlmBase import LlmBase
+import os
 
 class GeminiReceiptProcessor(LlmBase):
-    def __init__(self,api_key) -> None:
-        genai.configure(api_key=api_key)
+    def __init__(self) -> None:
+        self.api_key = os.getenv("GEMINI_API_KEY")
+        genai.configure(api_key=self.api_key)
         self.model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 
     def process(self,receipt_text):

@@ -1,7 +1,7 @@
 
 import argparse
-from Ocr.Tesseract.TesseractOcrProcessor import TesseractOcrProcessor
-from Ocr.Paddle.PaddleOcrProcessor import PaddleOcrProcessor
+from Ocr.TesseractOcrProcessor import TesseractOcrProcessor
+from Ocr.PaddleOcrProcessor import PaddleOcrProcessor
 
 ap = argparse.ArgumentParser()
 

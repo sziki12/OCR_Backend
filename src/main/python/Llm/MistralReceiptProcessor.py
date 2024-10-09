@@ -3,8 +3,8 @@ from mistralai import Mistral
 from Llm.LlmBase import LlmBase
 
 class MistralReceiptProcessor(LlmBase):
-    def __init__(self, api_key) -> None:
-        self.api_key = api_key
+    def __init__(self) -> None:
+        self.api_key = os.getenv("MISTRAL_API_KEY")
         self.client = Mistral(api_key=self.api_key)
     def process(self,receipt_text):
         chat_response = self.client.chat.complete(

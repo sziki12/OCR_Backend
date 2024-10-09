@@ -5,7 +5,7 @@ import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import java.util.UUID
+import java.util.*
 
 @RestController
 @RequestMapping("/api/household/{householdId}")
@@ -26,7 +26,6 @@ class ImageProcessingController(
             parse_model = parseModel,
             image = "",
             path = "",
-            openai_api_key = "",
         )
         val response = imageProcessingService.processImage(householdId, image, ocrParams)
         return ResponseEntity.ok().body(response)

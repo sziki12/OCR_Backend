@@ -1,19 +1,17 @@
 package app.ocr_backend.ai.ocr
 
 import app.ocr_backend.ai.ocr.backend_dto.OcrParams
-import app.ocr_backend.ai.ocr.backend_dto.ProcessedReceipt
 import app.ocr_backend.ai.ocr.backend_dto.ReceiptOcrResponse
 import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
 import app.ocr_backend.util.PathHandler
 import com.google.gson.Gson
-import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.pathString
 
@@ -22,10 +20,8 @@ import kotlin.io.path.pathString
 class OcrService {
 
     //private val execPythonPath = PathHandler.getOcrStartDir().pathString+"${File.separator}OcrRunnable.py"
-    private val url = "http://localhost:9090/ocr"
+    private val url = "http://localhost:9090/ocr/process"
 
-    @Value("\${openai_api_key}")
-    private lateinit var openaiApiKey: String
     private val imagePath = PathHandler.getImageDir().pathString
 
     //private var mainSeparator = OcrEntity.mainSeparator
@@ -82,7 +78,6 @@ class OcrService {
                 parse_model = ocrParams.parse_model,
                 path = imagePath,
                 image = imageName,
-                openai_api_key = openaiApiKey
             )
         )
         val body = json.toRequestBody(jsoType)

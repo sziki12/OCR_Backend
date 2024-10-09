@@ -1,4 +1,4 @@
-package app.ocr_backend.ai.llama
+package app.ocr_backend.legacy
 
 import app.ocr_backend.item.Item
 

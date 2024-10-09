@@ -1,10 +1,11 @@
 from openai import OpenAI
 from Llm.LlmBase import LlmBase
+import os
 
 class ChatGptReceiptProcessor(LlmBase):
-    def __init__(self, parse_model, api_key):
+    def __init__(self, parse_model):
         super().__init__()
-        self.api_key = api_key
+        self.api_key = os.getenv("GPT_API_KEY")
         self.parse_model = parse_model
         self.client = OpenAI(api_key = self.api_key)
         
