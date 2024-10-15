@@ -1,5 +1,6 @@
 package app.ocr_backend.place
 
+import app.ocr_backend.receipt.Receipt
 import app.ocr_backend.receipt.ReceiptService
 import app.ocr_backend.security.auth.AuthService
 import org.springframework.stereotype.Service
@@ -12,16 +13,23 @@ class PlaceService(
     val authService: AuthService
 ) {
 
-    fun savePlace(place: Place): Place {
-        return repository.save(place)
+    fun savePlace(householdId: UUID,place: Place): Optional<Place> {
+        val optHUser = authService.getCurrentHouseholdUser(householdId)
+        if (optHUser.isPresent.not())
+            return Optional.empty<Place>()
+        return Optional.of(repository.save(place.also { it.household = optHUser.get().household}))
     }
 
-    fun deletePlace(placeId: Long) {
+    fun deletePlace(householdId: UUID,placeId: Long) {//TODO householdUser
         repository.deleteById(placeId)
     }
 
-    fun getPlaces(): List<Place> {//TODO householdUser
-        return repository.findAll()
+    fun getPlaces(householdId: UUID): List<Place> {
+        val optHUser = authService.getCurrentHouseholdUser(householdId)
+       return if (optHUser.isPresent.not())
+           listOf()
+        else
+            repository.findAllByHouseholdId(householdId)
     }
 
     fun getPlace(placeId: Long): Optional<Place> {
@@ -49,7 +57,7 @@ class PlaceService(
         }
     }
 
-    fun getPlacesWithReceipts(householdId: UUID): List<Place> {//TODO householdUser unused
+    /*fun getPlacesWithReceipts(householdId: UUID): List<Place> {//TODO householdUser unused
         val householdUser = authService.getCurrentHouseholdUser(householdId)
         val receipts = receiptService.getReceiptsByHousehold(householdId)
         val places = HashSet<Place>()
@@ -61,7 +69,7 @@ class PlaceService(
             }
         }
         return places.toList()
-    }
+    }*/
 
 
 }

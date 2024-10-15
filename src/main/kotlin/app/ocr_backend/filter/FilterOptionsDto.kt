@@ -1,8 +1,8 @@
 package app.ocr_backend.filter
 
 data class FilterOptionsDto(
-    val placeNames : MutableList<String>,
-    val receiptNames : MutableList<String>,
+    val placeNames : MutableSet<String>,
+    val receiptNames : MutableSet<String>,
 ) {
-    constructor():this(ArrayList(),ArrayList())
+    constructor():this(mutableSetOf(),mutableSetOf())
 }

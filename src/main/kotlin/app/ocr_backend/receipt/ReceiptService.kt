@@ -20,14 +20,12 @@ class ReceiptService(
     val imageRepository: ImageRepository,
     val ocrEntityRepository: OcrEntityRepository,
     val placeRepository: PlaceRepository,
-    val householdService: HouseholdService,
     val authService: AuthService,
 ) {
     fun saveReceipt(householdId: UUID, receipt: Receipt): Optional<Receipt> {
         val optHUser = authService.getCurrentHouseholdUser(householdId)
         if (optHUser.isPresent.not())
             return Optional.empty<Receipt>()
-        //TODO Saving exisiting item id
         for (item in receipt.items) {
             itemRepository.save(item)
         }

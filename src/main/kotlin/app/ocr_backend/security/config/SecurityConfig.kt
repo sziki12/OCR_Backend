@@ -11,6 +11,7 @@ import com.nimbusds.jose.proc.SecurityContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer
@@ -24,6 +25,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 @Configuration
 @EnableWebSecurity
+@EnableScheduling
 class SecurityConfig(
     val userAuthProvider: UserAuthProvider,
 ) {
@@ -34,7 +36,16 @@ class SecurityConfig(
         "/api/api-docs",
         "/api/api-docs.yaml",
         "/api/swagger-resources/**",
-        "/api/swagger-resources"
+        "/api/swagger-resources",
+    )
+
+    private val pathWhitelistPost = listOf(
+        "/login",
+        "/register",
+        "/salt",
+    )
+    private val pathWhiteListGet = listOf(
+        "/api/invitation/*/accept",
     )
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -50,8 +61,9 @@ class SecurityConfig(
             }
             .authorizeHttpRequests()
             {
-                it.requestMatchers(HttpMethod.GET,*swaggerWhitelist.toTypedArray()).permitAll()
-                it.requestMatchers(HttpMethod.POST, "/login", "/register", "/salt").permitAll()
+                it.requestMatchers(HttpMethod.GET, *swaggerWhitelist.toTypedArray()).permitAll()
+                it.requestMatchers(HttpMethod.GET, *pathWhiteListGet.toTypedArray()).permitAll()
+                it.requestMatchers(HttpMethod.POST, *pathWhitelistPost.toTypedArray()).permitAll()
                 it.anyRequest().authenticated()
             }
             .oauth2ResourceServer {

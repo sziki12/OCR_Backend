@@ -63,6 +63,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
+    // https://mvnrepository.com/artifact/org.eclipse.angus/angus-mail
+    implementation("org.eclipse.angus:angus-mail:2.0.3")
 }
 
 tasks.withType<KotlinCompile> {

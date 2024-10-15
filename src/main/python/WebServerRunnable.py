@@ -262,7 +262,7 @@ class PythonWebServer(BaseHTTPRequestHandler):
 if __name__ == "__main__":      
 
     ### Load the .env file
-    load_dotenv()  
+    load_dotenv("environment_variables.env")
     webServer = HTTPServer((hostName, serverPort), PythonWebServer)
     print("Server started http://%s:%s" % (hostName, serverPort))
     try:

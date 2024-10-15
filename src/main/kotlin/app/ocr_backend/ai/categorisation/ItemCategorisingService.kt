@@ -1,6 +1,7 @@
 package app.ocr_backend.ai.categorisation
 
 import app.ocr_backend.ai.categorisation.backend_dto.CategoriseParams
+import app.ocr_backend.exceptions.ElementNotExists
 import app.ocr_backend.item.ItemService
 import app.ocr_backend.receipt.ReceiptService
 import com.google.gson.Gson
@@ -9,6 +10,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -19,33 +21,38 @@ class ItemCategorisingService(
     val itemService: ItemService,
 ) {
     private val gson = Gson()
-    private val url = "http://localhost:9090/categorise"
+    @Value("\${python.url}")
+    lateinit var pythonUrl: String
     fun categoriseItems(
         householdId: UUID,
         receiptId: Long,
-        categorise_model: String
+        categoriseModel: String
     ) {
-        val optReceipt = receiptService.getReceipt(householdId, receiptId)
-        if (!optReceipt.isPresent)
-            return //TODO Throw error
-        val receipt = optReceipt.get()
-        val itemIds = HashMap<String, Long>()
+        val receipt = receiptService.getReceipt(householdId, receiptId)
+            .orElseThrow { ElementNotExists.fromReceipt(householdId, receiptId) }
+        val itemIds = HashMap<String, MutableList<Long>>()
         val itemNames = mutableListOf<String>()
         for (item in receipt.items) {
             if (item.category == Category.Undefined) {
                 val currentItemName = item.name.lowercase()
                 itemNames.add(currentItemName)
-                itemIds[currentItemName] = item.id
+                if (itemIds[currentItemName] != null) {
+                    itemIds[currentItemName]?.add(item.id)
+                } else {
+                    itemIds[currentItemName] = mutableListOf(item.id)
+                }
             }
         }
 
         try {
 
-            val response = sendCategorizeRequest(CategoriseParams(
-                categorise_model = categorise_model,
-                items = stringListToColumnSeparatedString(itemNames),
-                categories = stringListToColumnSeparatedString(Category.getValidCategories().map { it.name })
-            ))
+            val response = sendCategorizeRequest(
+                CategoriseParams(
+                    categorise_model = categoriseModel,
+                    items = stringListToColumnSeparatedString(itemNames),
+                    categories = stringListToColumnSeparatedString(Category.getValidCategories().map { it.name })
+                )
+            )
             for (category in Category.getValidCategories()) {
                 when (category) {
                     Category.Clothing -> response.Clothing?.let { setEveryCategoryInReceipt(itemIds, it, category) }
@@ -57,6 +64,7 @@ class ItemCategorisingService(
                             category
                         )
                     }
+
                     Category.Household -> response.Household?.let { setEveryCategoryInReceipt(itemIds, it, category) }
                     Category.Housing -> response.Housing?.let { setEveryCategoryInReceipt(itemIds, it, category) }
                     Category.Personal -> response.Personal?.let { setEveryCategoryInReceipt(itemIds, it, category) }
@@ -68,32 +76,19 @@ class ItemCategorisingService(
         } catch (e: Exception) {
             println("Failed to Process Categorisation response")
         }
-        /*val uncategorizedItems = getUncategorizedItems(itemIds, itemNames)
-        if (uncategorizedItems.isNotEmpty() && numberOfRuns < maxRetryCount) {
-            println("Restarting Categorisation Process")
-            println("Uncategorized Items: $uncategorizedItems")
-            categoriseItems(householdId, receipt.id, uncategorizedItems, numberOfRuns + 1)
-        }*/
     }
 
-
-    /*private fun getUncategorizedItems(itemIds: HashMap<String, Long>, itemNames: List<String>): MutableList<String> {
-        val list = ArrayList<String>()
+    private fun setEveryCategoryInReceipt(
+        itemIdMap: HashMap<String, MutableList<Long>>,
+        itemNames: List<String>,
+        category: Category
+    ) {
         for (name in itemNames) {
-            val optItem = itemIds[name]?.let { itemService.getItem(it) }
-            if (optItem?.isPresent == true) {
-                val item = optItem.get()
-                if (item.category == Category.Undefined) {
-                    list.add(item.name)
+            itemIdMap[name]?.let { itemIds ->
+                for (itemId in itemIds) {
+                    setItemCategory(itemId, category)
                 }
             }
-        }
-        return list
-    }*/
-
-    private fun setEveryCategoryInReceipt(itemId: HashMap<String, Long>, itemNames: List<String>, category: Category) {
-        for (name in itemNames) {
-            itemId[name]?.let { setItemCategory(it, category) }
         }
     }
 
@@ -108,7 +103,7 @@ class ItemCategorisingService(
 
     private fun sendCategorizeRequest(categoriseParams: CategoriseParams): CategoriesDTO {
         val jsoType = "application/json".toMediaType()
-
+        val url = "$pythonUrl/categorise"
         val client = OkHttpClient.Builder()
             .connectTimeout(300, TimeUnit.SECONDS)
             .writeTimeout(300, TimeUnit.SECONDS)
@@ -131,10 +126,10 @@ class ItemCategorisingService(
         return gson.fromJson(responseBody, CategoriesDTO::class.java)
     }
 
-    private fun stringListToColumnSeparatedString(input: List<String>): String{
+    private fun stringListToColumnSeparatedString(input: List<String>): String {
         val stringBuilder = StringBuilder()
-        input.forEach{stringBuilder.append("$it,")}
-        stringBuilder.substring(0,stringBuilder.length-1)
+        input.forEach { stringBuilder.append("$it,") }
+        stringBuilder.substring(0, stringBuilder.length - 1)
         return stringBuilder.toString()
     }
 }

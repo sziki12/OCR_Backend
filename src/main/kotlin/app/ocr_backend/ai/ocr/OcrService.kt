@@ -9,6 +9,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,7 +21,8 @@ import kotlin.io.path.pathString
 class OcrService {
 
     //private val execPythonPath = PathHandler.getOcrStartDir().pathString+"${File.separator}OcrRunnable.py"
-    private val url = "http://localhost:9090/ocr/process"
+    @Value("\${python.url}")
+    lateinit var pythonUrl: String
 
     private val imagePath = PathHandler.getImageDir().pathString
 
@@ -65,6 +67,7 @@ class OcrService {
 
     private fun sendOcrRequest(imageName: String, ocrParams: OcrParams): ReceiptOcrResponse {
         val jsoType = "application/json".toMediaType()
+        val url = "$pythonUrl/ocr/process"
 
         val client = OkHttpClient.Builder()
             .connectTimeout(300, TimeUnit.SECONDS)

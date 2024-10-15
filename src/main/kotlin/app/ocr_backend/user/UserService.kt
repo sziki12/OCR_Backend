@@ -56,4 +56,8 @@ class UserService(
     fun findByEmail(email:String): Optional<User> {
         return repository.findByEmail(email)
     }
+
+    fun findById(userId: Long): Optional<User> {
+        return repository.findById(userId)
+    }
 }

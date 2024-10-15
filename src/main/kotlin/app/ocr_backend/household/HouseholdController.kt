@@ -1,23 +1,38 @@
 package app.ocr_backend.household
 
+import app.ocr_backend.exceptions.ElementNotExists
 import app.ocr_backend.security.auth.AuthService
+import app.ocr_backend.user.UserService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/api/household")
 @CrossOrigin
 class HouseholdController(
     private val householdService: HouseholdService,
-    private val authService: AuthService,) {
+    private val authService: AuthService,
+) {
     @GetMapping
-    fun getHouseholds(): ResponseEntity<List<Household>>{
+    fun getHouseholds(): ResponseEntity<List<Household>> {
         val user = authService.getCurrentUser()
-        if(user.isPresent.not())
-            ResponseEntity.notFound()
-        return ResponseEntity.ok(householdService.getHouseholdsByUser(user.get()))
+        return if (user.isPresent.not())
+            ResponseEntity.notFound().build()
+        else
+            ResponseEntity.ok(householdService.getHouseholdsByUser(user.get()))
+    }
+
+    @PostMapping("{householdId}/invite/{email}")
+    fun sendHouseholdInvite(@PathVariable email: String, @PathVariable householdId: UUID): ResponseEntity<Unit> {
+        return try {
+            householdService.sendInvitationEmail(householdId, email)
+            ResponseEntity.ok().build()
+        } catch (e: NoSuchElementException) {
+            ResponseEntity.status(HttpStatus.CONFLICT).build()
+        } catch (e: ElementNotExists) {
+            ResponseEntity.notFound().build()
+        }
     }
 }

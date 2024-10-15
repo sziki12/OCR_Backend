@@ -29,14 +29,14 @@ class PlaceController(
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/create")
     fun createPlace(@RequestBody createRequest: PlaceCreateRequest, @PathVariable householdId: UUID): PlaceResponse {
-        return placeService.savePlace(createRequest.toPlace()).toResponse()//TODO householdId
+        return placeService.savePlace(householdId, createRequest.toPlace()).get().toResponse()
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/update")
     fun updatePlace(@RequestBody updatedPlace: ReceiptResponsePlace, @PathVariable householdId: UUID): PlaceResponse {
         val receiptPlaces = receiptService.getReceiptsByPlace(householdId,updatedPlace.id)
-        return placeService.savePlace(updatedPlace.toPlace(receiptPlaces)).toResponse()
+        return placeService.savePlace(householdId, updatedPlace.toPlace(receiptPlaces)).get().toResponse()
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -66,6 +66,6 @@ class PlaceController(
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     fun getPlaces(@PathVariable householdId: UUID): List<PlaceResponse> {
-        return placeService.getPlaces().map { it.toResponse() }//TODO householdId
+        return placeService.getPlaces(householdId).map { it.toResponse() }
     }
 }

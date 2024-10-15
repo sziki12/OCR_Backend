@@ -1,5 +1,6 @@
 package app.ocr_backend.filter
 
+import app.ocr_backend.place.PlaceService
 import app.ocr_backend.receipt.ReceiptService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -10,6 +11,7 @@ import java.util.*
 @CrossOrigin
 class OptionsController(
     private val receiptService: ReceiptService,
+    private val placeService: PlaceService,
 ) {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/filter")
@@ -17,12 +19,16 @@ class OptionsController(
         val filterDto = FilterOptionsDto()
         receiptService.getReceiptsByHousehold(householdId).forEach()
         {
-            filterDto.receiptNames.add(it.name)
+            if (it.name.isNotEmpty()) {
+                filterDto.receiptNames.add(it.name)
+            }
         }
 
-        receiptService.getReceiptsByHousehold(householdId).forEach()
+        placeService.getPlaces(householdId).forEach()
         {
-            filterDto.placeNames.add(it.name)
+            if (it.name.isNotEmpty()) {
+                filterDto.placeNames.add(it.name)
+            }
         }
         return filterDto
     }
