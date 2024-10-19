@@ -34,6 +34,9 @@ class PythonWebServer(BaseHTTPRequestHandler):
         if self.path == "/process":
             self.process_request()    
 
+        if self.path == "/ocr/composite/process":
+            self.composite_ocr_and_process_request()
+
         if self.path == "/categorise":
             self.categorise_request() 
 
@@ -44,7 +47,7 @@ class PythonWebServer(BaseHTTPRequestHandler):
         #Process Image with Ocr model
         ocr_response = self.execute_ocr_request()
         response_json = json.dumps({
-            "receipt_text": cr_response.receipt_text
+            "receipt_text": ocr_response.receipt_text
         })  
         self.send_response_json(200,response_json)  
 
@@ -54,7 +57,7 @@ class PythonWebServer(BaseHTTPRequestHandler):
     def process_request(self):
         receipt_text = self.args["receipt_text"]
         ocr_response = OcrResposne(receipt_text, None, None)
-        ocr_response = self.execute_data_extraction(ocr_response)
+        ocr_response = self.execute_data_extraction(receipt_text)
         #Construct response
         response_json = json.dumps({
             "processed_receipt": json.loads(ocr_response.processed_text),
@@ -66,12 +69,16 @@ class PythonWebServer(BaseHTTPRequestHandler):
     
     """
     def ocr_and_process_request(self):
-        #Process Image with Ocr model
-        ocr_response = self.execute_ocr_request()
+        if(self.args["parse_model"]==self.args["ocr_type"]):
+            #Process Image with Ocr model
+            ocr_response = self.execute_combined_ocr_and_process_request()
+        else:    
+            #Process Image with Ocr model
+            ocr_response = self.execute_ocr_request()
         
         #Process extracted text with Llm
         if(ocr_response.response_json == None):
-            ocr_response = self.execute_data_extraction(ocr_response)
+            ocr_response = self.execute_data_extraction(ocr_response.receipt_text)
             #Construct response
             response_json = json.dumps({
                 "processed_receipt": json.loads(ocr_response.processed_text),
@@ -80,7 +87,22 @@ class PythonWebServer(BaseHTTPRequestHandler):
         else:
             response_json = ocr_response.response_json 
 
-        self.send_response_json(200,response_json)     
+        self.send_response_json(200,response_json)   
+
+
+    """
+    
+    """
+    def composite_ocr_and_process_request(self):
+        ocr_response = self.execute_composite_ocr_and_process_request()
+        if(ocr_response.response_json == None):
+            response_json = json.dumps({
+                "processed_receipt": json.loads(ocr_response.processed_text),
+                "receipt_text": ocr_response.receipt_text
+            })
+        else:
+            response_json = ocr_response.response_json 
+        self.send_response_json(200,response_json)
 
     """
     
@@ -118,6 +140,10 @@ class PythonWebServer(BaseHTTPRequestHandler):
         except:
             pass
         try:
+            self.args["composite_parse_model"] = parsed_body.composite_parse_model.lower()
+        except:
+            pass
+        try:
             self.args["items"] = parsed_body.items
         except:
             pass
@@ -146,12 +172,9 @@ class PythonWebServer(BaseHTTPRequestHandler):
     """
     def execute_ocr_request(self):
         self.check_params(["path","image","ocr_type"])
-
-        image_path = self.args["path"]+"/"+self.args["image"]
         ocr_type = self.args["ocr_type"]
+        image_path = self.args["path"]+"/"+self.args["image"]
         receipt_text = None
-        response_json = None
-
         match ocr_type:
             case "tesseract":
                 ocr = TesseractOcrProcessor(self.args)
@@ -161,28 +184,81 @@ class PythonWebServer(BaseHTTPRequestHandler):
                 receipt_text = ocr.read_receipt_with_paddle()
             case "mistral":
                 processor = MistralReceiptProcessor()
-                response_json = processor.process_from_image(image_path)
+                response_obj = processor.ocr_image(image_path)
+                receipt_text = json.loads(json.dumps(response_obj))
             case "gemini":
                 processor = GeminiReceiptProcessor()
-                response_json = processor.process_from_image(image_path)
+                response_obj = processor.ocr_image(image_path)
+                receipt_text = json.loads(json.dumps(response_obj))
             case "llava":
                 processor = LlavaReceiptProcessor()
-                response_json = processor.process_from_image(image_path)
+                response_obj = processor.ocr_image(image_path)
+                receipt_text = json.loads(json.dumps(response_obj))
             case _:
                     self.send_response_json(401,json.dumps({
                         "ocr_type":"Doesn't match any available model"
                     }))              
 
-        return OcrResposne(receipt_text, None, response_json)  
+        return OcrResposne(receipt_text, None, None)
 
+    """
+    Llm used for ocr and text processing
+    """
+    def execute_combined_ocr_and_process_request(self):
+        self.check_params(["path","image","ocr_type","parse_model"])
+        ocr_type = self.args["ocr_type"]
+        image_path = self.args["path"]+"/"+self.args["image"]
+        response_json = None
+        match ocr_type:
+            case "mistral":
+                processor = MistralReceiptProcessor()
+                response_obj = processor.process_from_image(image_path)
+                response_json = json.loads(json.dumps(response_obj))
+            case "gemini":
+                processor = GeminiReceiptProcessor()
+                response_obj = processor.process_from_image(image_path)
+                response_json = json.loads(json.dumps(response_obj))
+            case "llava":
+                processor = LlavaReceiptProcessor()
+                response_obj = processor.process_from_image(image_path)
+                response_json = json.loads(json.dumps(response_obj))
+            case _:
+                    self.send_response_json(401,json.dumps({
+                        "ocr_type":"Doesn't match any available model"
+                    }))              
+
+        return OcrResposne(None, None, response_json)  
+
+    """
+    
+    """
+    def execute_composite_ocr_and_process_request(self):
+        separator = "\n---\n"
+        composite_text  = self.execute_composite_ocr(separator)
+        ocrResponse = self.execute_data_extraction(composite_text,True,separator)
+        return ocrResponse
+
+    def execute_composite_ocr(self,separator:str):
+        model_list = ["tesseract","paddle","mistral","gemini"]#,"llava"
+        composite_text = ""
+        for model in model_list:
+            self.args["ocr_type"] = model
+            print("MODEL: "+model)
+            ocr_resposne = self.execute_ocr_request()
+            composite_text+=ocr_resposne.receipt_text+separator
+        return composite_text    
 
     """
 
     """
-    def execute_data_extraction(self, ocr_response):
-        self.check_params(["parse_model"])
-
-        parse_model = self.args["parse_model"]
+    def execute_data_extraction(self, text : str, isComposite = False, separator = None):
+        ocr_response = OcrResposne()
+        if (isComposite):
+            self.check_params(["composite_parse_model"])
+            parse_model = self.args["composite_parse_model"]
+        else:
+            self.check_params(["parse_model"])    
+            parse_model = self.args["parse_model"]
         if("gpt" in parse_model):
             processor = ChatGptReceiptProcessor(parse_model)
         elif("llama" in parse_model):
@@ -205,9 +281,14 @@ class PythonWebServer(BaseHTTPRequestHandler):
                     self.send_response_json(401,json.dumps({
                         "parse_model":"Doesn't match any available model"
                     })) 
-                    return   
-        processed_text = processor.process(ocr_response.receipt_text)
-        ocr_response.processed_text = processed_text
+                    return
+        if(isComposite):
+            response_json = processor.process_composite(separator, text)
+            ocr_response.response_json = response_json
+        else:
+            processed_text = processor.process(text)   
+            ocr_response.processed_text = processed_text
+            ocr_response.receipt_text = text
         return ocr_response
 
     """
@@ -243,19 +324,28 @@ class PythonWebServer(BaseHTTPRequestHandler):
         return categorised_items
     
 
-    def send_response_json(self,code,response_json):
+    def send_response_json(self,code:int,response_json:str):
         self.send_response(code)
         self.send_header("Content-type", "text/json")
         self.end_headers() 
         self.wfile.write(bytes(response_json, 'utf-8'))
 
-    def check_params(self, params):
+    def check_params(self, params:list[str]):
         for param in params:
-            if(self.args[param] == None):
-                self.send_response_json(401,json.dumps({
-            param : "Not provided"
-            }) )
-            return    
+            try:
+                if(self.args[param] == None):
+                    self.send_response_json(401,json.dumps({
+                param : "Not provided"
+                }) )
+                return
+            except:    
+                if(self.args[param] == None):
+                    self.send_response_json(401,json.dumps({
+                param : "Not provided"
+                }) )
+                return
+            
+                
 
        
 
