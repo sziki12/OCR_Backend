@@ -6,6 +6,7 @@ from PIL import Image,ImageFont,ImageDraw
 from Ocr.Rect.OcrDocument import OcrDocument
 import Ocr.ImageProcessing as ip
 from Ocr.Debug.Debugger import Debugger
+import numpy as np
 
 class PaddleOcrProcessor:
     def __init__(self,args):
@@ -70,7 +71,9 @@ class PaddleOcrProcessor:
         results = ocr.ocr(image, cls=True)
 
         result = results[0]
-        
+        print("---")
+        print(result)
+        print("---")
         boxes = [line[0] for line in result]
         sorted_boxes = boxes.copy()
         sorted_boxes.sort()

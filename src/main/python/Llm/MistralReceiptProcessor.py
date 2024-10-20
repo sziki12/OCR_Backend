@@ -8,18 +8,23 @@ class MistralReceiptProcessor(LlmBase):
         self.client = Mistral(api_key=self.api_key)
         
     def process(self,receipt_text):
+        print("Prompt: "+super().get_process_prompt(receipt_text))
         return self.text_request(super().get_process_prompt(receipt_text))
     
     def process_composite(self,separator,composite_text):
+        print("Prompt: "+super().get_process_from_composite_prompt(separator,composite_text))
         return self.text_request(super().get_process_from_composite_prompt(separator,composite_text))
     
     def categorise(self, items, categories):
+        print("Prompt: "+super().get_categorise_prompt(items,categories))
         return self.text_request(super().get_categorise_prompt(items,categories))
     
     def ocr_image(self,image_path):
+        print("Prompt: "+super().get_ocr_image_prompt())
         return self.image_request(image_path,super().get_ocr_image_prompt())
     
     def process_from_image(self, image_path):
+        print("Prompt: "+super().get_process_from_image_prompt())
         return self.image_request(image_path,super().get_process_from_image_prompt())
     
 
