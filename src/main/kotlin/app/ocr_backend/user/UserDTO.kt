@@ -1,11 +1,11 @@
 package app.ocr_backend.user
 
-import app.ocr_backend.user.User
+import app.ocr_backend.security.dto.TokenDto
 
 data class UserDTO (
     val name:String,
     val email:String,
-    var token:String,
+    var tokens:TokenDto,
     var salt:String,
 )
 {
@@ -13,10 +13,10 @@ data class UserDTO (
         return User(
             name,
             email,
-            token,
+            "",
             salt
         )
     }
 
-    constructor(user: User):this(user.name, user.email,"",user.salt)
+    constructor(user: User):this(user.name, user.email,TokenDto(),user.salt)
 }

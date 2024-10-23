@@ -1,40 +1,63 @@
 package app.ocr_backend.security.auth
 
 
-import app.ocr_backend.security.config.RsaKeyProperties
 import app.ocr_backend.user.User
-import com.nimbusds.jose.jwk.JWKSet
-import com.nimbusds.jose.jwk.RSAKey
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet
-import com.nimbusds.jose.jwk.source.JWKSource
-import com.nimbusds.jose.proc.SecurityContext
-import org.springframework.context.annotation.Bean
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.GrantedAuthority
+import com.auth0.jwt.exceptions.TokenExpiredException
 import org.springframework.security.oauth2.jwt.*
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.stream.Collectors
 
 @Service
 class TokenService(
     private val encoder: JwtEncoder,
+    private val decoder: JwtDecoder,
 ) {
-    //authentication: Authentication
     fun generateToken(user: User): String {
         val now = Instant.now()
         val scope = user.householdUsers.map { it.household.id }
-        /*authentication.authorities.stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(" "))*/
         val claims = JwtClaimsSet.builder()
             .issuer("self")
             .issuedAt(now)
-            .expiresAt(now.plus(1, ChronoUnit.HOURS))
+            .expiresAt(now.plus(30,ChronoUnit.SECONDS))
+            //.expiresAt(now.plus(5, ChronoUnit.MINUTES))
             .subject(user.email)
-            .claim("scope", scope)
+            .claim("households", scope)
             .build()
         return encoder.encode(JwtEncoderParameters.from(claims)).tokenValue
+    }
+
+    fun generateRefreshToken(user:User):String{
+        val now = Instant.now()
+        val claims = JwtClaimsSet.builder()
+            .issuer("self")
+            .issuedAt(now)
+            .expiresAt(now.plus(2,ChronoUnit.MINUTES))
+            //.expiresAt(now.plus(6, ChronoUnit.HOURS))
+            .subject(user.email)
+            .claim("user_id", user.id)
+            .build()
+        return encoder.encode(JwtEncoderParameters.from(claims)).tokenValue
+    }
+
+    fun decodeToken(token:String):Jwt{
+        val decoded = decoder.decode(token)
+        return decoded
+    }
+    fun decodeAndValidate(token:String):Jwt{
+        val decoded = decoder.decode(token)
+        if(decoded.expiresAt?.isBefore(Instant.now()) == true){
+            throw TokenExpiredException(token,decoded.expiresAt)
+        }
+        return decoded
+    }
+
+    fun validateTokenExpiration(token:String):Boolean{
+        try{
+            val decodedToken = decoder.decode(token)
+            return decodedToken.expiresAt?.isBefore(Instant.now()) == true
+        }catch (e:Exception){
+            return false
+        }
     }
 }

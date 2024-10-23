@@ -19,14 +19,16 @@ class JwtAuthFilter(private val userAuthProvider:UserAuthProvider):OncePerReques
             val elements = it.split(" ")
             if(elements.size == 2 &&elements[0] == "Bearer")
             {
+                val token = elements[1]
                 try {
-                    SecurityContextHolder.getContext().authentication = userAuthProvider.validateToken(elements[1])
+                    SecurityContextHolder.getContext().authentication = userAuthProvider.validateToken(token)
                 }
                 catch (e:RuntimeException)
                 {
-                    val optUser = userAuthProvider.getUserByToken(elements[1])
+                    val optUser = userAuthProvider.getUserByToken(token)
                     SecurityContextHolder.clearContext()
-                    System.err.println("Token expired for user: ${if(optUser.isPresent)optUser.get().toString() else "Unknown"}")
+
+                    System.err.println("Token $token expired for user: ${if(optUser.isPresent)optUser.get().id else "Unknown"}")
                 }
             }
         }

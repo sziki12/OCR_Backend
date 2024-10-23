@@ -6,5 +6,4 @@ class ChartRequestDTO(
     val from:LocalDate?,
     val to:LocalDate?,
     val type:String
-) {
-}
+)

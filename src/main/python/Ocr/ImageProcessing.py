@@ -45,6 +45,7 @@ class BaseImageProcessor:
         return cv2.Canny(image, 100, 200)
 
     #skew correction
+    #TODO Fix deskew
     def deskew(self, image,orientation, max_skew=10):
         (height, width) = image.shape[:2]
 
