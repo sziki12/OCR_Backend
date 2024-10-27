@@ -2,6 +2,8 @@ import google.generativeai as genai
 import pathlib
 from Llm.LlmBase import LlmBase
 import os
+import uuid
+import cv2
 
 class GeminiReceiptProcessor(LlmBase):
     def __init__(self) -> None:
@@ -17,17 +19,28 @@ class GeminiReceiptProcessor(LlmBase):
     def categorise(self, items, categorires):
         return self.text_request(super().get_categorise_prompt(items, categorires))
     
-    def ocr_image(self,image_path):
-        return self.image_request(image_path,super().get_ocr_image_prompt())
+    def ocr_image(self,image):
+        return self.image_request(image,super().get_ocr_image_prompt())
     
-    def process_from_image(self, image_path):
-        return self.image_request(image_path, super().get_process_from_image_prompt())
+    def process_from_image(self, image):
+        return self.image_request(image, super().get_process_from_image_prompt())
     
 
-    def image_request(self,image_path,prompt):
+    def image_request(self,image,prompt):
+        image = super().resize_image_if_needed(image)
+        image_name = str(uuid.uuid4())+".jpg"
+        cwd = os.getcwd()
+        temp_path = os.path.join(cwd,"Temp")
+        if not os.path.exists(temp_path):
+            os.makedirs(temp_path)
+        image_path = os.path.join(temp_path,image_name)    
+        cv2.imwrite(image_path,image)
+        
         media = pathlib.Path(image_path)
         myfile = genai.upload_file(media)
 
+        #os.remove(image_path)
+        
         model = genai.GenerativeModel("gemini-1.5-flash")
         result = model.generate_content(
             [myfile, "\n\n", prompt]

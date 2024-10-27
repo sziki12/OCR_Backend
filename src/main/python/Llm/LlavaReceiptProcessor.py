@@ -14,11 +14,11 @@ class LlavaReceiptProcessor(LlmBase):
     def categorise(self, items, categories):
         return self.text_request(super().get_categorise_prompt(items,categories))
     
-    def ocr_image(self,image_path):
-        return self.image_request(image_path,super().get_ocr_image_prompt())
+    def ocr_image(self,image):
+        return self.image_request(image,super().get_ocr_image_prompt())
     
-    def process_from_image(self, image_path):
-        return self.image_request(image_path,super().get_process_from_image_prompt())
+    def process_from_image(self, image):
+        return self.image_request(image,super().get_process_from_image_prompt())
     
     def text_request(self,prompt):
 
@@ -31,8 +31,9 @@ class LlavaReceiptProcessor(LlmBase):
         reply = response['message']['content']
         return super().parse_json(reply)
     
-    def image_request(self,image_path,prompt):
-        base64_image = super().encode_image(image_path)
+    def image_request(self,image,prompt):
+        image = super().resize_image_if_needed(image)
+        base64_image = super().encode_image(image)
         response = ollama.chat(model='llava:13b', messages=[
         {
             'role': 'user',

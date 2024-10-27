@@ -23,7 +23,7 @@ class TesseractOcrProcessor:
         processed_image = original.copy()
         if cnts is not None:
             processed_image = self.advanced_image_processor.fourPointTransform(processed_image, ratio, cnts)
-        processed_image = self.base_image_processor.deskew(processed_image, self.args["orientation"])   
+        processed_image = self.base_image_processor.deskewByText(processed_image, self.args["orientation"])   
             
         return processed_image  
                 

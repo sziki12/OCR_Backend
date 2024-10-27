@@ -19,17 +19,18 @@ class MistralReceiptProcessor(LlmBase):
         print("Prompt: "+super().get_categorise_prompt(items,categories))
         return self.text_request(super().get_categorise_prompt(items,categories))
     
-    def ocr_image(self,image_path):
+    def ocr_image(self,image):
         print("Prompt: "+super().get_ocr_image_prompt())
-        return self.image_request(image_path,super().get_ocr_image_prompt())
+        return self.image_request(image,super().get_ocr_image_prompt())
     
-    def process_from_image(self, image_path):
+    def process_from_image(self, image):
         print("Prompt: "+super().get_process_from_image_prompt())
-        return self.image_request(image_path,super().get_process_from_image_prompt())
+        return self.image_request(image,super().get_process_from_image_prompt())
     
 
-    def image_request(self,image_path,prompt):
-        base64_image = super().encode_image(image_path)
+    def image_request(self,image,prompt):
+        image = super().resize_image_if_needed(image)
+        base64_image = super().encode_image(image)
         chat_response = self.client.chat.complete(
             model= "pixtral-12b-2409",
             messages = [

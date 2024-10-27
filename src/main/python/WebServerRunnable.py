@@ -1,7 +1,7 @@
 
 from torch import Tensor
 from dotenv import load_dotenv
-import os
+import cv2
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from types import SimpleNamespace
@@ -174,30 +174,36 @@ class PythonWebServer(BaseHTTPRequestHandler):
         self.check_params(["path","image","ocr_type"])
         ocr_type = self.args["ocr_type"]
         image_path = self.args["path"]+"/"+self.args["image"]
+        image = cv2.imread(image_path)
         receipt_text = None
-        match ocr_type:
-            case "tesseract":
-                ocr = TesseractOcrProcessor(self.args)
-                receipt_text = ocr.read_receipt_with_tesseract() 
-            case "paddle":	    
-                ocr = PaddleOcrProcessor(self.args)
-                receipt_text = ocr.read_receipt_with_paddle()
-            case "mistral":
-                processor = MistralReceiptProcessor()
-                response_obj = processor.ocr_image(image_path)
-                receipt_text = json.loads(json.dumps(response_obj))
-            case "gemini":
-                processor = GeminiReceiptProcessor()
-                response_obj = processor.ocr_image(image_path)
-                receipt_text = json.loads(json.dumps(response_obj))
-            case "llava":
-                processor = LlavaReceiptProcessor()
-                response_obj = processor.ocr_image(image_path)
-                receipt_text = json.loads(json.dumps(response_obj))
-            case _:
-                    self.send_response_json(401,json.dumps({
-                        "ocr_type":"Doesn't match any available model"
-                    }))              
+        if("gpt" in ocr_type):
+            processor = ChatGptReceiptProcessor(ocr_type)
+            response_obj =  processor.ocr_image(image) 
+            receipt_text = json.loads(json.dumps(response_obj))
+        else:    
+            match ocr_type:
+                case "tesseract":
+                    ocr = TesseractOcrProcessor(self.args)#TODO Replace args with image, debug
+                    receipt_text = ocr.read_receipt_with_tesseract() 
+                case "paddle":	    
+                    ocr = PaddleOcrProcessor(self.args)
+                    receipt_text = ocr.read_receipt_with_paddle()
+                case "mistral":
+                    processor = MistralReceiptProcessor()
+                    response_obj = processor.ocr_image(image)
+                    receipt_text = json.loads(json.dumps(response_obj))
+                case "gemini":
+                    processor = GeminiReceiptProcessor()
+                    response_obj = processor.ocr_image(image)
+                    receipt_text = json.loads(json.dumps(response_obj))
+                case "llava":
+                    processor = LlavaReceiptProcessor()
+                    response_obj = processor.ocr_image(image)
+                    receipt_text = json.loads(json.dumps(response_obj))
+                case _:
+                        self.send_response_json(401,json.dumps({
+                            "ocr_type":"Doesn't match any available model"
+                        }))              
 
         return OcrResposne(receipt_text, None, None)
 
@@ -208,19 +214,20 @@ class PythonWebServer(BaseHTTPRequestHandler):
         self.check_params(["path","image","ocr_type","parse_model"])
         ocr_type = self.args["ocr_type"]
         image_path = self.args["path"]+"/"+self.args["image"]
+        image = cv2.imread(image_path)
         response_json = None
         match ocr_type:
             case "mistral":
                 processor = MistralReceiptProcessor()
-                response_obj = processor.process_from_image(image_path)
+                response_obj = processor.process_from_image(image)
                 response_json = json.loads(json.dumps(response_obj))
             case "gemini":
                 processor = GeminiReceiptProcessor()
-                response_obj = processor.process_from_image(image_path)
+                response_obj = processor.process_from_image(image)
                 response_json = json.loads(json.dumps(response_obj))
             case "llava":
                 processor = LlavaReceiptProcessor()
-                response_obj = processor.process_from_image(image_path)
+                response_obj = processor.process_from_image(image)
                 response_json = json.loads(json.dumps(response_obj))
             case _:
                     self.send_response_json(401,json.dumps({
