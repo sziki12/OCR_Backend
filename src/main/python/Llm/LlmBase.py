@@ -16,7 +16,7 @@ class LlmBase:
         return "Please extract the text "+self.languages_and_document_type()+" image as receipt_text."
     
     def get_process_from_composite_prompt(self,separator,receipt_texts):
-        return "You will reive a receipt extracted by multiple Ocr model separated by "+ separator +" characters. You have to combine these to recreate the original receipt, return it as receipt_text. "+self.process_receipt_base()+" "+self.languages_and_document_type()+" as receipt_text. "+self.process_receipt_constraints()+" The texts are:\n"+receipt_texts
+        return "You will reive a receipt extracted by multiple Ocr model separated by "+ separator +" characters. You have to combine these to recreate the original receipt, return it as receipt_text. "+self.process_receipt_base()+" "+self.languages_and_document_type()+" as processed_receipt. "+self.process_receipt_constraints()+" The texts are:\n"+receipt_texts
     
     def get_categorise_prompt(self, items, categories):    
         return "Please categorize the following items into their respective categories and respond is json. The keys sould be the categories and the values the list of the associated items. Each item should belong to only one category it is most suitable in. There might be categories without any item. Use only the provided categories and items, which are separated by commas.\nCategories: {categories}\nItems to categorize: {items}".format(categories=categories,items=items)
@@ -56,14 +56,15 @@ class LlmBase:
         return json
     
     def resize_image_if_needed(self,image):
+        ideal_size = 2000
         h, w = image.shape[:2]
         h_ratio = w/h
         w_ratio = h/w
-        if(h > 3000 and h_ratio <= 1):
-            image = cv2.resize(image, (round(3000*h_ratio), 3000))
+        if(h > ideal_size and h_ratio <= 1):
+            image = cv2.resize(image, (round(ideal_size*h_ratio), ideal_size))
             
-        elif(w > 3000 and w_ratio <= 1):
-            image = cv2.resize(image, (3000, round(3000*w_ratio)))
+        elif(w > ideal_size and w_ratio <= 1):
+            image = cv2.resize(image, (ideal_size, round(ideal_size*w_ratio)))
         return image
 
     def process_receipt_base(self):
@@ -72,7 +73,7 @@ class LlmBase:
     def languages_and_document_type(self):
         return "from the following hungarian or english receipt"
     def process_receipt_constraints(self):
-        return "Respond in json. If an item's cost is unknown make it 0 else return only the number. If it's quantity is unknown make it 1. If a string is not found make it empty. Be cautious the receipt might contain the payment method with the paid money without change." 
+        return "Respond in json. If an item's cost is unknown make it 0 else return only the number. If it's quantity is unknown make it 1. If a string can be corrected do it. If a string is not found make it empty. Be cautious the receipt might contain the payment method with the paid money without change." 
 
         """You will reive a receipt extracted by multiple Ocr model separated by --- characters. 
         You have to combine these to recreate the original receipt and extract the store address, store name as store_name, total cost as total_cost, date of purchase as date_of_purchase in date format and for all purchased items the quantity, name and price in the purchased_items list from the following hungarian or english receipt and respond in json. 

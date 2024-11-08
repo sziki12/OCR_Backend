@@ -5,7 +5,9 @@ import cv2
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from types import SimpleNamespace
+import imutils
 
+from Ocr.ImageProcessing import AdvancedImageProcessor, Debugger
 from Ocr.TesseractOcrProcessor import TesseractOcrProcessor
 from Ocr.PaddleOcrProcessor import PaddleOcrProcessor
 from Llm.MistralReceiptProcessor import MistralReceiptProcessor
@@ -166,6 +168,18 @@ class PythonWebServer(BaseHTTPRequestHandler):
 
         print("ARGS:\n"+str(self.args)+"\n")  
 
+
+    def temp_image_processing(self, image):
+        resized = imutils.resize(image.copy(), width=2000)
+        processor = AdvancedImageProcessor(self.args)
+        cnts = processor.edgeDetection(resized)
+        ratio = image.shape[1] / float(resized.shape[1])
+        processed_image = image.copy()
+        print(cnts)
+        if cnts is not None:
+            processed_image = processor.fourPointTransform(processed_image, ratio, cnts)
+        processed_image = processor.base_image_processor.deskewByText(processed_image, self.args["orientation"])
+        return processed_image
     
     """
     
@@ -175,30 +189,31 @@ class PythonWebServer(BaseHTTPRequestHandler):
         ocr_type = self.args["ocr_type"]
         image_path = self.args["path"]+"/"+self.args["image"]
         image = cv2.imread(image_path)
+        processed_image = self.temp_image_processing(image)
         receipt_text = None
         if("gpt" in ocr_type):
             processor = ChatGptReceiptProcessor(ocr_type)
-            response_obj =  processor.ocr_image(image) 
+            response_obj =  processor.ocr_image(processed_image) 
             receipt_text = json.loads(json.dumps(response_obj))
         else:    
             match ocr_type:
                 case "tesseract":
                     ocr = TesseractOcrProcessor(self.args)#TODO Replace args with image, debug
-                    receipt_text = ocr.read_receipt_with_tesseract() 
+                    receipt_text = ocr.read_receipt_with_tesseract(processed_image) 
                 case "paddle":	    
                     ocr = PaddleOcrProcessor(self.args)
-                    receipt_text = ocr.read_receipt_with_paddle()
+                    receipt_text = ocr.read_receipt_with_paddle(processed_image)
                 case "mistral":
                     processor = MistralReceiptProcessor()
-                    response_obj = processor.ocr_image(image)
+                    response_obj = processor.ocr_image(processed_image)
                     receipt_text = json.loads(json.dumps(response_obj))
                 case "gemini":
                     processor = GeminiReceiptProcessor()
-                    response_obj = processor.ocr_image(image)
+                    response_obj = processor.ocr_image(processed_image)
                     receipt_text = json.loads(json.dumps(response_obj))
                 case "llava":
                     processor = LlavaReceiptProcessor()
-                    response_obj = processor.ocr_image(image)
+                    response_obj = processor.ocr_image(processed_image)
                     receipt_text = json.loads(json.dumps(response_obj))
                 case _:
                         self.send_response_json(401,json.dumps({
@@ -216,23 +231,28 @@ class PythonWebServer(BaseHTTPRequestHandler):
         image_path = self.args["path"]+"/"+self.args["image"]
         image = cv2.imread(image_path)
         response_json = None
-        match ocr_type:
-            case "mistral":
-                processor = MistralReceiptProcessor()
-                response_obj = processor.process_from_image(image)
-                response_json = json.loads(json.dumps(response_obj))
-            case "gemini":
-                processor = GeminiReceiptProcessor()
-                response_obj = processor.process_from_image(image)
-                response_json = json.loads(json.dumps(response_obj))
-            case "llava":
-                processor = LlavaReceiptProcessor()
-                response_obj = processor.process_from_image(image)
-                response_json = json.loads(json.dumps(response_obj))
-            case _:
-                    self.send_response_json(401,json.dumps({
-                        "ocr_type":"Doesn't match any available model"
-                    }))              
+        if("gpt" in ocr_type):
+            processor = ChatGptReceiptProcessor(ocr_type)
+            response_obj = processor.process_from_image(image)
+            response_json = json.loads(json.dumps(response_obj))
+        else:    
+            match ocr_type:
+                case "mistral":
+                    processor = MistralReceiptProcessor()
+                    response_obj = processor.process_from_image(image)
+                    response_json = json.loads(json.dumps(response_obj))
+                case "gemini":
+                    processor = GeminiReceiptProcessor()
+                    response_obj = processor.process_from_image(image)
+                    response_json = json.loads(json.dumps(response_obj))
+                case "llava":
+                    processor = LlavaReceiptProcessor()
+                    response_obj = processor.process_from_image(image)
+                    response_json = json.loads(json.dumps(response_obj))
+                case _:
+                        self.send_response_json(401,json.dumps({
+                            "ocr_type":"Doesn't match any available model"
+                        }))              
 
         return OcrResposne(None, None, response_json)  
 
@@ -246,7 +266,7 @@ class PythonWebServer(BaseHTTPRequestHandler):
         return ocrResponse
 
     def execute_composite_ocr(self,separator:str):
-        model_list = ["tesseract","paddle","mistral","gemini"]#,"llava"
+        model_list = ["tesseract","paddle","mistral","gemini","gpt-4o","gpt-4o-mini"]#,"llava"
         composite_text = ""
         for model in model_list:
             self.args["ocr_type"] = model
@@ -320,6 +340,8 @@ class PythonWebServer(BaseHTTPRequestHandler):
                     processor = GeminiReceiptProcessor()
                 case "llava":
                     processor = LlavaReceiptProcessor()     
+                case "t5":
+                    processor = T5ReceiptProcessor()      
                 case "gorilla":
                     pass
                 case _:

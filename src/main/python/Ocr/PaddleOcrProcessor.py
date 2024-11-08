@@ -7,6 +7,8 @@ from Ocr.Rect.OcrDocument import OcrDocument
 import Ocr.ImageProcessing as ip
 from Ocr.Debug.Debugger import Debugger
 import numpy as np
+import os
+import uuid
 
 class PaddleOcrProcessor:
     def __init__(self,args):
@@ -18,20 +20,19 @@ class PaddleOcrProcessor:
     """ 
     Must have for paddle ocr for consistency, some images (where the fourPointTransform is walid option) are ocr-ed after rotated 270 degres if the fourPointTransform is not called.
     """
-    def preprocess_and_load_image(self, image_path):
-        original = cv2.imread(image_path)
-        resized = imutils.resize(original.copy(), width=1000)
+    def preprocess_and_load_image(self, image):
+        resized = imutils.resize(image.copy(), width=3000)
 
         self.debugger.debug_image("resized", resized)
 
-        cnts = self.advanced_image_processor.edgeDetection(resized)
+        """cnts = self.advanced_image_processor.edgeDetection(resized)
         ratio = original.shape[1] / float(resized.shape[1])
         processed_image = original.copy()
         if cnts is not None:
             processed_image = self.advanced_image_processor.fourPointTransform(processed_image, ratio, cnts)
-        processed_image = self.base_image_processor.deskewByText(processed_image, self.args["orientation"])   
+        processed_image = self.base_image_processor.deskewByText(processed_image, self.args["orientation"])"""   
             
-        return processed_image
+        return resized#processed_image
     '''
     Returns the width and height of a bouinding box as touple
     '''
@@ -61,13 +62,12 @@ class PaddleOcrProcessor:
         # Save result
         image.save(image_name+"-result.jpg")
 		
-    def read_receipt_with_paddle(self):
+    def read_receipt_with_paddle(self,image):
         # Paddleocr supports Chinese, English, French, German, Korean and Japanese.
         # You can set the parameter `lang` as `ch`, `en`, `fr`, `german`, `korean`, `japan`
         # to switch the language model in order.
         ocr = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False) #, use_gpu=True   need to run only once to download and load model into memory
-        image_path = self.args["path"]+"/"+self.args["image"]
-        image = self.preprocess_and_load_image(image_path)
+        image = self.preprocess_and_load_image(image)
         results = ocr.ocr(image, cls=True)
 
         result = results[0]
@@ -84,6 +84,12 @@ class PaddleOcrProcessor:
         receipt_text = document.get_text()
 
         if self.args["debug"] > 0:
+            image_name = str(uuid.uuid4())+".jpg"
+            cwd = os.getcwd()
+            temp_path = os.path.join(cwd,"Temp")
+            if not os.path.exists(temp_path):
+                os.makedirs(temp_path)
+            image_path = os.path.join(temp_path,image_name)
             self.save_processed_image(image_path, self.args["image"], results)
 
         return receipt_text

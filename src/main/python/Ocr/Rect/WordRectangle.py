@@ -32,8 +32,11 @@ class WordRectangle:
         self.shape = tuple(abs(i) / 2 for i in  tuple(np.subtract(self.right_top, self.left_bot)))
         
         #Selected based on accuracy heuristics
-        self.x_range =  50
-        self.y_range =  50
+        #self.x_range =  50
+        #self.y_range =  50
+
+        self.x_range =  self.shape[0] * 0.9
+        self.y_range =  self.shape[1] * 0.9
 
         self.text = text
         self.probability = probability

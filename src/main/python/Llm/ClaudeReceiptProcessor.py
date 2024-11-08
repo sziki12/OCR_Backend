@@ -19,8 +19,7 @@ class ClaudeReceiptProcessor(LlmBase):
 
         message = client.messages.create(
             model="claude-3-5-sonnet-20240620",
-            max_tokens=1000,
-            temperature=0,
+            max_tokens=5000,
             #system="You are a world-class poet. Respond only with short poems.",
             messages=[
                 {

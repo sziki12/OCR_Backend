@@ -6,12 +6,12 @@ class LlamaReceiptProcessor(LlmBase):
         super().__init__()
         match model:
             case "llama3.1":
-                model_name = 'llama3.1:8b'
+                model_name = 'llama3.1:latest'
         self.model =  model_name       
 
     def text_request(self,prompt):
 
-        response = ollama.chat(model='llama3.1:8b', messages=[
+        response = ollama.chat(model=self.model, messages=[
         {
             'role': 'user',
             'content': prompt,

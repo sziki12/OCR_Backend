@@ -250,8 +250,8 @@ class AdvancedImageProcessor:
         blurred = cv2.GaussianBlur(gray, (5, 5,), 0)
         edged = cv2.Canny(blurred, 75, 200)
 
-        self.debugger.debug_image("Input", resized_image)
-        self.debugger.debug_image("Edged", edged)
+        self.debugger.debug_image(" edgeDetectionInput", resized_image)
+        self.debugger.debug_image(" edgeDetection Edged", edged)
             
         cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
             cv2.CHAIN_APPROX_SIMPLE)
@@ -271,7 +271,7 @@ class AdvancedImageProcessor:
     def findReceiptContour(self, cnts,minArea):
         receiptCnt = None
         for c in cnts:
-            epsilon = 0.02 * cv2.arcLength(c, True)
+            epsilon = 0.05 * cv2.arcLength(c, True)
             approx = cv2.approxPolyDP(c, epsilon, True)
             cntArea = cv2.contourArea(c)
             if len(approx) == 4 and cntArea > minArea:
