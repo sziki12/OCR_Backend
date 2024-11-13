@@ -1,9 +1,8 @@
-package app.ocr_backend.invitation
+package app.ocr_backend.household.invitation
 
 import app.ocr_backend.exceptions.ElementNotExists
 import app.ocr_backend.household.HouseholdService
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*

@@ -1,4 +1,4 @@
-package app.ocr_backend.misc
+package app.ocr_backend.legacy
 
 import java.io.BufferedReader
 

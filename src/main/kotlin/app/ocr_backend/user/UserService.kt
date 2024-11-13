@@ -1,6 +1,13 @@
 package app.ocr_backend.user
+import app.ocr_backend.email.EmailService
+import app.ocr_backend.exceptions.ElementNotExists
 import app.ocr_backend.security.dto.CredentialsDto
 import app.ocr_backend.security.dto.SignUpDto
+import app.ocr_backend.user.registration_confirmation.RegistrationConfirmation
+import app.ocr_backend.user.registration_confirmation.RegistrationConfirmationRepository
+import jakarta.persistence.EntityNotFoundException
+import jakarta.transaction.Transactional
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -10,8 +17,13 @@ import java.util.*
 @Service
 class UserService(
     val repository: UserRepository,
+    val registrationConfirmationRepository:RegistrationConfirmationRepository,
     val passwordEncoder: PasswordEncoder,
+    val emailService: EmailService,
 ) {
+
+    @Value("\${server.url}")
+    lateinit var serverUrl:String
 
     fun registerUser(signUpDto: SignUpDto): User
     {
@@ -41,6 +53,27 @@ class UserService(
 
         throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid Password")
 
+    }
+
+    @Transactional
+    fun confirmEmail(confirmationId: UUID){
+
+        val confirmation = registrationConfirmationRepository.findById(confirmationId)
+            .orElseThrow{ ElementNotExists.fromRegistrationConfirmation(confirmationId) }
+        val user = this.findById(confirmation.registeredUserId)
+            .orElseThrow { ElementNotExists.fromUser(confirmation.registeredUserId) }
+        user.isEmailConfirmed = true
+        repository.save(user)
+        registrationConfirmationRepository.deleteAllByRegisteredUserId(user.id)
+    }
+
+    fun sendEmailConfirmation(email:String){
+        val user = repository.findByEmail(email).orElseThrow{ElementNotExists.fromUser(email)}
+        var confirmation = RegistrationConfirmation(user.id)
+        confirmation = registrationConfirmationRepository.save(confirmation)
+        val confirmUrl = "$serverUrl/api/confirmation/${confirmation.id}"
+        val content = "To finis your registration please confirm your email address using this link:\n${confirmUrl}"
+        emailService.sendEmail(email,"Email Confirmation",content)
     }
 
     fun updateUser()

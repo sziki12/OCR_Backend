@@ -4,13 +4,11 @@ import app.ocr_backend.email.EmailService
 import app.ocr_backend.exceptions.ElementNotExists
 import app.ocr_backend.household.household_user.HouseholdUser
 import app.ocr_backend.household.household_user.HouseholdUserRepository
-import app.ocr_backend.invitation.HouseholdInvitationRepository
-import app.ocr_backend.invitation.HouseholdInvitationService
+import app.ocr_backend.household.invitation.HouseholdInvitationService
 import app.ocr_backend.security.auth.AuthService
 import app.ocr_backend.user.User
 import app.ocr_backend.user.UserService
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -45,6 +43,12 @@ class HouseholdService(
         }
         householdUser = addHouseholdUserToHousehold(householdUser,household)
         return householdUser.household
+    }
+
+    fun updateHouseholdName(householdId: UUID,name: String): Household {
+        val hUser = authService.getCurrentHouseholdUser(householdId).orElseThrow{ElementNotExists.fromHousehold(householdId)}
+        val household = hUser.household
+        return householdRepository.save(household.also { it.name=name })
     }
 
     fun getHouseholdsByUser(user: User):List<Household>{

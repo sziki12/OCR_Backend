@@ -3,7 +3,7 @@ package app.ocr_backend.security.auth
 import app.ocr_backend.household.HouseholdService
 import app.ocr_backend.security.dto.*
 import app.ocr_backend.security.refresh_token.RefreshTokenService
-import app.ocr_backend.user.UserDTO
+import app.ocr_backend.user.dto.UserDTO
 import app.ocr_backend.user.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -17,7 +17,6 @@ class AuthController(
     private val tokenService: TokenService,
     private val refreshTokenService:RefreshTokenService,
     private val householdService: HouseholdService,
-    private val authService: AuthService,
     ) {
 
     @PostMapping("/login")
@@ -25,6 +24,10 @@ class AuthController(
     {
         println("CREDENTIALS $credentials")
         val user = userService.loginUser(credentials)
+        if(user.isEmailConfirmed.not()){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build()
+        }
+
         val refreshToken = tokenService.generateRefreshToken(user)
         val userDto = UserDTO(user).also {
             it.tokens.authToken = tokenService.generateToken(user)
@@ -47,6 +50,7 @@ class AuthController(
             it.tokens.authToken = tokenService.generateToken(user)
             it.tokens.refreshToken = refreshToken
         }
+        userService.sendEmailConfirmation(signUpDto.email)
         refreshTokenService.saveRefreshToken(refreshToken,user)
         println("REGISTER $userDto")
         return ResponseEntity.ok().body(userDto)
@@ -69,14 +73,13 @@ class AuthController(
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/refresh")
     fun useRefreshToken(@RequestBody refreshTokenDto: RefreshTokenDto): ResponseEntity<TokenDto> {
-        try {
+        return try {
             println("CALL useRefreshToken")
             val dto = userAuthProvider.useRefreshToken(refreshTokenDto.refreshToken)
-            return ResponseEntity.ok().body(dto)
-        }
-        catch(e:Exception){
+            ResponseEntity.ok().body(dto)
+        } catch(e:Exception){
             System.err.println("${e.cause} Token Error: ${e.message}")
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build()
+            ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build()
         }
     }
 }

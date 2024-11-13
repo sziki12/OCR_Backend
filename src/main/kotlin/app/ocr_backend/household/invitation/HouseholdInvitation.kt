@@ -1,7 +1,5 @@
-package app.ocr_backend.invitation
+package app.ocr_backend.household.invitation
 
-import app.ocr_backend.household.Household
-import app.ocr_backend.user.User
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id

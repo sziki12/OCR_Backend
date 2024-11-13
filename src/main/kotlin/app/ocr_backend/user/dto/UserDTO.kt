@@ -1,6 +1,7 @@
-package app.ocr_backend.user
+package app.ocr_backend.user.dto
 
 import app.ocr_backend.security.dto.TokenDto
+import app.ocr_backend.user.User
 
 data class UserDTO (
     val name:String,

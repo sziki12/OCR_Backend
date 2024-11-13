@@ -1,5 +1,7 @@
 package app.ocr_backend.security.auth
 
+import app.ocr_backend.exceptions.ElementNotExists
+import app.ocr_backend.exceptions.NotAdminException
 import app.ocr_backend.household.HouseholdRepository
 import app.ocr_backend.household.HouseholdService
 import app.ocr_backend.household.household_user.HouseholdUser
@@ -32,5 +34,14 @@ class AuthService(
             return householdUserService.getHouseholdUser(currentUser.get(), householdId)
         }
         return Optional.empty()
+    }
+
+    /**
+     * Throws exception if not. Can throw ElementNotExists and NotAdminException Exceptions
+     */
+    fun checkUserIsAdmin(householdId: UUID){
+        val hUser = getCurrentHouseholdUser(householdId).orElseThrow { ElementNotExists.fromHousehold(householdId) }
+        if(hUser.isAdmin.not())
+            throw NotAdminException.fromUser(hUser.user,householdId)
     }
 }

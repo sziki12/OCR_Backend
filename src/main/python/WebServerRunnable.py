@@ -266,7 +266,7 @@ class PythonWebServer(BaseHTTPRequestHandler):
         return ocrResponse
 
     def execute_composite_ocr(self,separator:str):
-        model_list = ["tesseract","paddle","mistral","gemini","gpt-4o","gpt-4o-mini"]#,"llava"
+        model_list = ["tesseract","paddle","mistral","gemini","gpt-4o","gpt-4o-mini"]
         composite_text = ""
         for model in model_list:
             self.args["ocr_type"] = model

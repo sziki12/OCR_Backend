@@ -36,6 +36,8 @@ class SecurityConfig(
     )
     private val pathWhiteListGet = listOf(
         "/api/invitation/*/accept",
+        "/api/confirmation/*",
+        "/api/confirmation/request/*",
     )
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {

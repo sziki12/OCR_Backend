@@ -20,5 +20,13 @@ class ElementNotExists(override val message:String): Exception() {
         fun fromHouseholdInvitation(invitationId:UUID): ElementNotExists {
             return ElementNotExists("HouseholdInvitation with id: $invitationId not found")
         }
+
+        fun fromRegistrationConfirmation(confirmationId:UUID): ElementNotExists {
+            return ElementNotExists("RegistrationConfirmation with id: $confirmationId not found")
+        }
+
+        fun fromHousehold(householdID:UUID): ElementNotExists {
+            return ElementNotExists("Household with id: $householdID not found")
+        }
     }
 }

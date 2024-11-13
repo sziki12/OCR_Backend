@@ -1,4 +1,4 @@
-package app.ocr_backend.invitation
+package app.ocr_backend.household.invitation
 
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
