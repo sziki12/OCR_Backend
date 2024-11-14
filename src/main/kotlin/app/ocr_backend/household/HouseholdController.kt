@@ -1,6 +1,7 @@
 package app.ocr_backend.household
 
 import app.ocr_backend.exceptions.ElementNotExists
+import app.ocr_backend.exceptions.EmailNotSent
 import app.ocr_backend.exceptions.NotAdminException
 import app.ocr_backend.household.dto.HouseholdUserDto
 import app.ocr_backend.household.dto.HouseholdUsersDto
@@ -32,14 +33,15 @@ class HouseholdController(
     fun getHouseholdUsers(@PathVariable householdId: UUID): ResponseEntity<HouseholdUsersDto> {
         return try {
             val hUser =
-                authService.getCurrentHouseholdUser(householdId).orElseThrow { ElementNotExists.fromHousehold(householdId) }
+                authService.getCurrentHouseholdUser(householdId)
+                    .orElseThrow { ElementNotExists.fromHousehold(householdId) }
             val household =
-                householdService.getHouseholdById(householdId).orElseThrow { ElementNotExists.fromHousehold(householdId) }
-            val otherUsers = household.householdUsers.filter { it.id!=hUser.id }
+                householdService.getHouseholdById(householdId)
+                    .orElseThrow { ElementNotExists.fromHousehold(householdId) }
+            val otherUsers = household.householdUsers.filter { it.id != hUser.id }
             val response = HouseholdUsersDto(currentUser = hUser.toDto(), otherUsers = otherUsers.toDto())
             ResponseEntity.ok(response)
-        }
-        catch (e:ElementNotExists){
+        } catch (e: ElementNotExists) {
             ResponseEntity.notFound().build()
         }
     }
@@ -57,6 +59,8 @@ class HouseholdController(
             ResponseEntity.notFound().build()
         } catch (e: NotAdminException) {
             ResponseEntity.notFound().build()
+        } catch (e: EmailNotSent) {
+            ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build()
         }
     }
 

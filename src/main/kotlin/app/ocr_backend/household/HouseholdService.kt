@@ -2,6 +2,7 @@ package app.ocr_backend.household
 
 import app.ocr_backend.email.EmailService
 import app.ocr_backend.exceptions.ElementNotExists
+import app.ocr_backend.exceptions.EmailNotSent
 import app.ocr_backend.household.household_user.HouseholdUser
 import app.ocr_backend.household.household_user.HouseholdUserRepository
 import app.ocr_backend.household.invitation.HouseholdInvitationService
@@ -23,7 +24,7 @@ class HouseholdService(
 ) {
 
     @Value("\${server.url}")
-    lateinit var serverUrl:String
+    lateinit var serverUrl: String
 
     fun isUserInHousehold(user: User, household: Household): Boolean {
         val householdUsers = user.householdUsers
@@ -41,17 +42,18 @@ class HouseholdService(
             it.household = household
             it.user = user
         }
-        householdUser = addHouseholdUserToHousehold(householdUser,household)
+        householdUser = addHouseholdUserToHousehold(householdUser, household)
         return householdUser.household
     }
 
-    fun updateHouseholdName(householdId: UUID,name: String): Household {
-        val hUser = authService.getCurrentHouseholdUser(householdId).orElseThrow{ElementNotExists.fromHousehold(householdId)}
+    fun updateHouseholdName(householdId: UUID, name: String): Household {
+        val hUser =
+            authService.getCurrentHouseholdUser(householdId).orElseThrow { ElementNotExists.fromHousehold(householdId) }
         val household = hUser.household
-        return householdRepository.save(household.also { it.name=name })
+        return householdRepository.save(household.also { it.name = name })
     }
 
-    fun getHouseholdsByUser(user: User):List<Household>{
+    fun getHouseholdsByUser(user: User): List<Household> {
         return user.householdUsers.map { it.household }
     }
 
@@ -59,20 +61,25 @@ class HouseholdService(
         return householdRepository.findById(householdId)
     }
 
-    fun sendInvitationEmail(householdId: UUID, targetEmail:String){
+    fun sendInvitationEmail(householdId: UUID, targetEmail: String) {
         val household = this.getHouseholdById(householdId).get()
         val sender = authService.getCurrentUser().get()
-        val invitedUser = userService.findByEmail(targetEmail).orElseThrow{ElementNotExists.fromUser(targetEmail)}
-        val invitation = householdInvitationService.createInvitation(sender,invitedUser,household)
+        if (sender.email == targetEmail || household.householdUsers.map { it.user.email }.contains(targetEmail)) {
+            throw EmailNotSent.fromInvitation()
+        }
+        val invitedUser = userService.findByEmail(targetEmail).orElseThrow { ElementNotExists.fromUser(targetEmail) }
+        val invitation = householdInvitationService.createInvitation(sender, invitedUser, household)
 
         val joinUrl = "$serverUrl/api/invitation/${invitation.id}/accept"
         val subject = "Household Invitation"
-        val content = "You have been invited to join a household by user: ${sender.name} email: ${sender.email} Please click on this link if you would like to join the ${household.name} household $joinUrl"
-        emailService.sendEmail(targetEmail,subject,content)
+        val content =
+            "You have been invited to join a household by user: ${sender.name} email: ${sender.email} Please click on this link if you would like to join the ${household.name} household $joinUrl"
+        emailService.sendEmail(targetEmail, subject, content)
     }
 
-    fun acceptInvitation(invitationId: UUID){
-        val invitation = householdInvitationService.findById(invitationId).orElseThrow{ElementNotExists.fromHouseholdInvitation(invitationId)}
+    fun acceptInvitation(invitationId: UUID) {
+        val invitation = householdInvitationService.findById(invitationId)
+            .orElseThrow { ElementNotExists.fromHouseholdInvitation(invitationId) }
         val invitedUser = userService.findById(invitation.invitedUserId).get()
         val household = householdRepository.findById(invitation.householdId).get()
 
@@ -80,12 +87,12 @@ class HouseholdService(
             it.household = household
             it.user = invitedUser
         }
-        addHouseholdUserToHousehold(newHouseholdUser,household)
+        addHouseholdUserToHousehold(newHouseholdUser, household)
         householdInvitationService.deleteById(invitationId)
     }
 
-    private fun addHouseholdUserToHousehold(householdUser: HouseholdUser, household:Household): HouseholdUser {
-        householdRepository.save(household.also{ it.householdUsers.add(householdUser)})
+    private fun addHouseholdUserToHousehold(householdUser: HouseholdUser, household: Household): HouseholdUser {
+        householdRepository.save(household.also { it.householdUsers.add(householdUser) })
         return householdUserRepository.save(householdUser)
     }
 }

@@ -40,7 +40,7 @@ class AuthController(
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/register")
-    fun register(@RequestBody signUpDto: SignUpDto):ResponseEntity<UserDTO>
+    fun register(@RequestBody signUpDto: SignUpDto):ResponseEntity<Unit>//UserDTO
     {
         var user = userService.registerUser(signUpDto)
         val household = householdService.createHouseholdByUser(user,"My Household")
@@ -53,7 +53,7 @@ class AuthController(
         userService.sendEmailConfirmation(signUpDto.email)
         refreshTokenService.saveRefreshToken(refreshToken,user)
         println("REGISTER $userDto")
-        return ResponseEntity.ok().body(userDto)
+        return ResponseEntity.ok().build()
     }
 
     @ResponseStatus(HttpStatus.OK)
