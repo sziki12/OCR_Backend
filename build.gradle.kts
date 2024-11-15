@@ -30,8 +30,8 @@ dependencies {
 
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    runtimeOnly("org.postgresql:postgresql")
-    //implementation("org.postgresql:postgresql")
+    //runtimeOnly("org.postgresql:postgresql")
+    implementation("org.postgresql:postgresql")
 
     // https://mvnrepository.com/artifact/org.springframework/spring-web
     implementation("org.springframework:spring-web:6.1.4")
