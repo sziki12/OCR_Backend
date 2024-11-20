@@ -82,8 +82,10 @@ class PythonWebServer(BaseHTTPRequestHandler):
         if(ocr_response.response_json == None):
             ocr_response = self.execute_data_extraction(ocr_response.receipt_text)
             #Construct response
+            ocr_response_json  = json.loads(ocr_response.processed_text)
+            print(ocr_response_json["processed_receipt"])
             response_json = json.dumps({
-                "processed_receipt": json.loads(ocr_response.processed_text),
+                "processed_receipt": ocr_response_json["processed_receipt"],
                 "receipt_text": ocr_response.receipt_text
             })  
         else:

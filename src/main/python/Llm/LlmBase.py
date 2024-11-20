@@ -7,16 +7,16 @@ class LlmBase:
         pass
 
     def get_process_prompt(self,receiptText):
-        return self.process_receipt_base()+" "+self.languages_and_document_type()+"."+self.process_receipt_constraints()+"  The text is:\n"+receiptText
+        return self.process_sturcture()+" "+self.text_correction_prompt()+" "+self.process_receipt_base()+" "+self.languages_and_document_type()+"."+self.process_receipt_constraints()+"  The text is:\n"+receiptText
     
     def get_process_from_image_prompt(self):
-        return self.process_receipt_base()+" "+self.languages_and_document_type()+" image as processed_receipt. Also return the extracted text as receipt_text. "+self.process_receipt_constraints() 
+        return self.process_from_image_sturcture()+" "+self.text_correction_prompt()+" "+self.process_receipt_base()+" "+self.languages_and_document_type()+" image as processed_receipt. Also return the extracted text as receipt_text. "+self.process_receipt_constraints() 
     
     def get_ocr_image_prompt(self):
-        return "Please extract the text "+self.languages_and_document_type()+" image as receipt_text."
+        return self.extract_sturcture()+" "+self.text_correction_prompt()+" "+"Please extract the text "+self.languages_and_document_type()+" image as receipt_text."
     
     def get_process_from_composite_prompt(self,separator,receipt_texts):
-        return "You will reive a receipt extracted by multiple Ocr model separated by "+ separator +" characters. You have to combine these to recreate the original receipt, return it as receipt_text. "+self.process_receipt_base()+" "+self.languages_and_document_type()+" as processed_receipt. "+self.process_receipt_constraints()+" The texts are:\n"+receipt_texts
+        return self.process_from_image_sturcture()+" "+self.text_correction_prompt()+" "+"You will reive a receipt extracted by multiple Ocr model separated by "+ separator +" characters. You have to combine these to recreate the original receipt, return it as receipt_text. "+self.process_receipt_base()+" "+self.languages_and_document_type()+" as processed_receipt. "+self.process_receipt_constraints()+" The texts are:\n"+receipt_texts
     
     def get_categorise_prompt(self, items, categories):    
         return "Please categorize the following items into their respective categories and respond is json. The keys sould be the categories and the values the list of the associated items. Each item should belong to only one category it is most suitable in. There might be categories without any item. Use only the provided categories and items, which are separated by commas.\nCategories: {categories}\nItems to categorize: {items}".format(categories=categories,items=items)
@@ -73,7 +73,20 @@ class LlmBase:
     def languages_and_document_type(self):
         return "from the following hungarian or english receipt"
     def process_receipt_constraints(self):
-        return "Respond in json. If an item's cost is unknown make it 0 else return only the number. If it's quantity is unknown make it 1. If a string can be corrected do it. If a string is not found make it empty. Be cautious the receipt might contain the payment method with the paid money without change." 
+        return "If an item's cost is unknown make it 0 else return only the number. If it's quantity is unknown make it 1. If a string can be corrected do it. If a string is not found make it empty. Be cautious the receipt might contain the payment method with the paid money without change." 
+
+    def process_sturcture(self):
+        return "Respond in json with an object that has a property named processed_receipt."
+    
+    def extract_sturcture(self):
+        return "Respond in json with an object that has a property named receipt_text."
+    
+    def process_from_image_sturcture(self):
+        return "Respond in json with an object that has a property named receipt_text and processed_receipt."
+    
+    def text_correction_prompt(self):
+        return "Please correct the incorrectly spelled words in all returned text while being cautious of the context."
+    
 
         """You will reive a receipt extracted by multiple Ocr model separated by --- characters. 
         You have to combine these to recreate the original receipt and extract the store address, store name as store_name, total cost as total_cost, date of purchase as date_of_purchase in date format and for all purchased items the quantity, name and price in the purchased_items list from the following hungarian or english receipt and respond in json. 
