@@ -1,44 +1,54 @@
 package app.ocr_backend.ai.ocr
 
 import app.ocr_backend.ai.ocr.backend_dto.OcrParams
-import app.ocr_backend.receipt.Receipt
-import app.ocr_backend.db_service.DBService
-import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
 import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
+import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
+import app.ocr_backend.ai.ocr.ocr_entity.OcrEntityService
 import app.ocr_backend.item.Item
+import app.ocr_backend.item.ItemService
+import app.ocr_backend.receipt.Receipt
+import app.ocr_backend.receipt.ReceiptService
+import app.ocr_backend.receipt_image.ImageService
 import app.ocr_backend.util.PathHandler
-import com.google.gson.Gson
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.util.*
 import kotlin.io.path.pathString
 
 
 @Service
 class ImageProcessingService(
     val ocrService: OcrService,
+    val imageService: ImageService,
+    val receiptService: ReceiptService,
+    val ocrEntityService: OcrEntityService,
+    val itemService: ItemService,
     //val llamaService: LlamaService,
-    val service: DBService
 ) {
-    fun processImage(image: MultipartFile, ocrParams: OcrParams): OcrResponse? {
-        val optReceipt = service.saveReceipt(Receipt().also { it.isPending = true })
+    fun processImage(householdId: UUID, image: MultipartFile, ocrParams: OcrParams): OcrResponse? {
+        val optReceipt = receiptService.saveReceipt(householdId, Receipt().also { it.isPending = true })
         return if (optReceipt.isPresent) {
             val newReceipt = optReceipt.get()
-            val fileName = service.generateImageName(newReceipt, image)
+            val fileName = imageService.generateImageName(newReceipt, image)
             val file = File(PathHandler.getImageDir().pathString + File.separator + fileName)
 
             image.transferTo(file)
 
             val ocrOutput = ocrService.processImage(fileName, ocrParams, newReceipt.id)
 
-            parseResponse(newReceipt, ocrOutput)
+            parseResponse(householdId, newReceipt, ocrOutput)
 
-            service.saveOcrEntity(newReceipt.id, OcrEntity.fromOcrResponse(ocrOutput, newReceipt.dateOfPurchase))
-            service.saveImage(newReceipt.id, fileName)
+            receiptService.saveAndAssignOcrEntity(
+                householdId,
+                newReceipt.id,
+                OcrEntity.fromOcrResponse(ocrOutput, newReceipt.dateOfPurchase)
+            )
+            imageService.saveImage(newReceipt, fileName)
 
-            service.updateReceipt(newReceipt.also {
+            receiptService.updateReceipt(householdId, newReceipt.also {
                 it.isPending = false
             })
             ocrOutput
@@ -47,25 +57,17 @@ class ImageProcessingService(
         }
     }
 
-    /*
-          ocrOutput.extractedOcrResponse?.let { extractedReceipt ->
-                val itemsToAdd =  mutableListOf<Item>()
-                service.updateReceipt(newReceipt.also {newReceipt->
-                    newReceipt.items = itemsToAdd
-                    newReceipt.dateOfPurchase = extractedReceipt.date_of_purchase
-                })
-            }
-     */
-
-    private fun parseResponse(newReceipt: Receipt, ocrOutput: OcrResponse) {
+    private fun parseResponse(householdId: UUID, newReceipt: Receipt, ocrOutput: OcrResponse) {
         ocrOutput.processedReceipt.let {
+            newReceipt.name = it.store_name ?: "Unknown ${newReceipt.id}"
             var parsedItemCost = 0
             for (item in it.toItemList()) {
                 parsedItemCost += item.totalCost
-                service.saveItem(newReceipt.id, item)
+                itemService.saveItem(householdId, newReceipt.id, item)
             }
             if (parsedItemCost != it.total_cost) {
-                service.saveItem(
+                itemService.saveItem(
+                    householdId,
                     newReceipt.id,
                     Item(name = "Parse Correction", quantity = 1, totalCost = it.total_cost - parsedItemCost)
                 )
@@ -77,7 +79,6 @@ class ImageProcessingService(
             println("DATE: $processedDate")
             date = LocalDate.ofInstant(processedDate.toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
         }
-
         newReceipt.dateOfPurchase = date
     }
 }

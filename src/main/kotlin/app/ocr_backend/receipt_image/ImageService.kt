@@ -9,7 +9,7 @@ import java.util.*
 import kotlin.io.path.pathString
 
 @Service
-class ImageService(private val imageRepository: ImageDBRepository) {
+class ImageService(private val imageRepository: ImageRepository) {
 
     fun getImages(receiptId:Long): List<ReceiptImage> {
         return imageRepository.getByReceiptId(receiptId)

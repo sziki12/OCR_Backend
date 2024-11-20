@@ -1,30 +1,12 @@
 package app.ocr_backend.db_service
 
-import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
 import app.ocr_backend.ai.ocr.ocr_entity.OcrEntityService
-import app.ocr_backend.statistic.ChartRequestDTO
-import app.ocr_backend.statistic.ItemCategoryData
-import app.ocr_backend.ai.ocr.frontend_dto.OcrResponse
-import app.ocr_backend.statistic.PieChartDTO
-import app.ocr_backend.item.Item
 import app.ocr_backend.item.ItemService
-import app.ocr_backend.place.Place
 import app.ocr_backend.place.PlaceService
-import app.ocr_backend.receipt.Receipt
 import app.ocr_backend.receipt.ReceiptService
 import app.ocr_backend.receipt_image.ImageService
-import app.ocr_backend.receipt_image.ReceiptImage
-import app.ocr_backend.user.User
 import app.ocr_backend.user.UserService
-import enumeration.Category
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.multipart.MultipartFile
-import java.time.LocalDate
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 @Service
 class DBService(
@@ -37,7 +19,7 @@ class DBService(
 ) {
 
     //ITEM
-    fun createNewItem(receiptId: Long): Optional<Item> {
+    /*fun createNewItem(receiptId: Long): Optional<Item> {
         val receipt = receiptService.getReceipt(receiptId)
         return if(receipt.isPresent)
              Optional.of(itemService.createNewItem(receipt.get()))
@@ -62,11 +44,11 @@ class DBService(
     fun deleteItem(itemId:Long)
     {
         itemService.deleteItem(itemId)
-    }
+    }*/
 
     //RECEIPT
 
-    fun saveReceipt(receipt: Receipt): Optional<Receipt> {
+    /*fun saveReceipt(receipt: Receipt): Optional<Receipt> {
         val optUser = getCurrentUser()
         if(optUser.isPresent)
         {
@@ -130,10 +112,10 @@ class DBService(
             optUser.get().receipts
         else
             listOf()
-    }
+    }*/
 
     //IMAGE
-    fun getImages(receiptId:Long): List<ReceiptImage> {
+    /*fun getImages(receiptId:Long): List<ReceiptImage> {
         return imageService.getImages(receiptId)
     }
 
@@ -152,16 +134,11 @@ class DBService(
     fun generateImageName(receipt: Receipt, image: MultipartFile):String
     {
         return imageService.generateImageName(receipt,image)
-    }
-
-    private fun getCurrentUser(): Optional<User> {
-        val actualUserName = SecurityContextHolder.getContext().authentication.principal.toString()
-        return userService.findByUserName(actualUserName)
-    }
+    }*/
 
     //PLACE
-
-    fun savePlace(place: Place): Optional<Place> {
+    //TODO fix savePlace
+    /*fun savePlace(place: Place): Optional<Place> {
         val optUser = getCurrentUser()
         if(optUser.isPresent)
         {
@@ -201,6 +178,7 @@ class DBService(
         }
     }
 
+    //TODO fix validatePlace
     fun validatePlace(placeId: Long)
     {
         val optUser = getCurrentUser()
@@ -249,11 +227,11 @@ class DBService(
             }
             placeService.deletePlace(partId)
         }
-    }
+    }*/
 
     //OcrEntity
 
-    fun saveOcrEntity(receiptId:Long,entity: OcrEntity)
+    /*fun saveAndAssignOcrEntity(receiptId:Long,entity: OcrEntity)
     {
         val optReceipt = receiptService.getReceipt(receiptId)
         if(optReceipt.isPresent)
@@ -281,20 +259,9 @@ class DBService(
 
     fun getOcrEntity(entityId:Long): Optional<OcrEntity> {
         return ocrEntityService.getOcrEntity(entityId)
-    }
+    }*/
 
-    fun getOcrResponse(receiptId:Long): Optional<OcrResponse> {
-        val optReceipt = receiptService.getReceipt(receiptId)
-        if(optReceipt.isPresent)
-        {
-            optReceipt.get().ocrEntity?.let {
-                return Optional.of(it.toOcrResponse())
-            }
-        }
-        return Optional.empty()
-    }
-
-    fun getPieChartData(request:ChartRequestDTO): PieChartDTO
+    /*fun getPieChartData(request:ChartRequestDTO): PieChartDTO
     {
         val categories = Category.getValidCategoryNames()
         val receipts = getAllReceipt()
@@ -323,5 +290,5 @@ class DBService(
             }
         }
         return PieChartDTO(categoryData)
-    }
+    }*/
 }

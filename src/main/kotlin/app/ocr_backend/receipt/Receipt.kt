@@ -1,10 +1,10 @@
 package app.ocr_backend.receipt
 
 import app.ocr_backend.ai.ocr.ocr_entity.OcrEntity
+import app.ocr_backend.household.Household
 import app.ocr_backend.item.Item
 import app.ocr_backend.place.Place
 import app.ocr_backend.receipt_image.ReceiptImage
-import app.ocr_backend.user.User
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.time.LocalDate
@@ -32,8 +32,8 @@ data class Receipt(
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="user_id")
-    lateinit var user: User
+    @JoinColumn(name="household_id")
+    lateinit var household: Household
 
     @JsonIgnore
     @ManyToOne
@@ -56,17 +56,6 @@ data class Receipt(
         }
 
     constructor():this(LocalDate.now(),"")
-    constructor(receiptId:Long,receiptData: ReceiptDTO):this(receiptData)
-    {
-        this.id = receiptId
-    }
-
-    constructor(receiptData: ReceiptDTO):
-            this(receiptData.dateOfPurchase,receiptData.name)
-    {
-        this.items = receiptData.toItemsArray()
-    }
-
     override fun equals(other: Any?): Boolean {
 
         val otherReceipt = other as? Receipt

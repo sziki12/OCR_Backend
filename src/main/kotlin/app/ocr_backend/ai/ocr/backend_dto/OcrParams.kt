@@ -6,5 +6,4 @@ data class OcrParams(
     val ocr_type:String,
     val orientation:String,
     val parse_model:String,
-    val openai_api_key:String
 )

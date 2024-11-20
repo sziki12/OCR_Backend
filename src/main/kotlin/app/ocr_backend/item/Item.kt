@@ -25,21 +25,6 @@ data class Item(
 
     var category:Category = Category.Undefined
 
-    constructor(itemId:Long,itemData: ItemDTO): this(itemData)
-    {
-        this.id = itemId
-    }
-
-    constructor(itemData: ItemDTO):
-            this(itemData.name,itemData.quantity,itemData.totalCost)
-    {
-        this.category = Category.parse(itemData.category)
-        itemData.id?.let {
-            this.id = it
-        }
-        //println(this.category)
-    }
-
     override fun equals(other: Any?): Boolean {
 
         val otherItem = other as? Item
@@ -54,7 +39,7 @@ data class Item(
         var result = name.hashCode()
         result = 31 * result + quantity
         result = 31 * result + totalCost
-        result = 31 * result + (id?.hashCode() ?: 0)
+        result = 31 * result + (id.hashCode() ?: 0)
         return result
     }
 

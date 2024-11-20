@@ -1,53 +1,54 @@
 package app.ocr_backend.receipt
 
-import app.ocr_backend.statistic.ChartRequestDTO
-import app.ocr_backend.db_service.DBService
-import com.google.gson.Gson
+import app.ocr_backend.household.HouseholdService
+import app.ocr_backend.receipt.dto.CreateReceiptRequest
+import app.ocr_backend.receipt.dto.ReceiptResponse
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
+import java.util.*
 
 @RestController
-@RequestMapping("/api/receipt")
+@RequestMapping("/api/household/{householdId}")
 @CrossOrigin
-class ReceiptController(private val service: DBService) {
+class ReceiptController(
+    private val receiptService: ReceiptService,
+    private val householdService: HouseholdService,
+) {
 
-    val gson = Gson()
-    @GetMapping("")
-    fun getAllReceipts(): List<Receipt> = service.getAllReceipt()
-
-    @GetMapping("/{receiptId}")
-    fun getReceiptById(@PathVariable receiptId: Long): Receipt = service.getReceipt(receiptId).orElseThrow{
-        ResponseStatusException(HttpStatus.NOT_FOUND,"Receipt with the $receiptId Id not exists")
+    @GetMapping("/receipt")
+    fun getAllReceipts(@PathVariable householdId: UUID): List<ReceiptResponse> {
+        return receiptService.getReceiptsByHousehold(householdId).map { it.toResponse() }
     }
+
+    @GetMapping("receipt/{receiptId}")
+    fun getReceiptById(@PathVariable receiptId: Long, @PathVariable householdId: UUID): ReceiptResponse =
+        receiptService.getReceipt(householdId, receiptId).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Receipt with the $receiptId Id not exists")
+        }.toResponse()
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("")
-    fun createReceipt(@RequestBody receiptData: ReceiptDTO)
-    {
-        service.saveReceipt(Receipt(receiptData))
+    @PostMapping("receipt")
+    fun createReceipt(@RequestBody createRequest: CreateReceiptRequest, @PathVariable householdId: UUID) {
+        receiptService.saveReceipt(householdId, createRequest.toReceipt())
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{receiptId}")
-    fun deleteReceipt(@PathVariable receiptId: Long)
-    {
-        service.deleteReceipt(receiptId)
+    @DeleteMapping("receipt/{receiptId}")
+    fun deleteReceipt(@PathVariable receiptId: Long, @PathVariable householdId: UUID) {
+        receiptService.deleteReceipt(householdId, receiptId)
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PutMapping("/{receiptId}")
-    fun updateReceipt(@PathVariable receiptId: Long, @RequestBody receiptData: ReceiptDTO)
-    {
-        service.updateReceipt(Receipt(receiptId,receiptData))
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping("/chart")
-    fun getReceiptsChartData(@RequestBody request: ChartRequestDTO): ResponseEntity<String> {
-        val chartData = service.getPieChartData(request)
-        val json = gson.toJson(chartData)
-        return ResponseEntity.ok().body(json)
+    @PutMapping("receipt")
+    fun updateReceipt(
+        @RequestBody receiptData: ReceiptResponse,
+        @PathVariable householdId: UUID
+    ) {
+        println("------updateReceipt-----")
+        println(receiptData)
+        val receipts = receiptService.getReceiptsByPlace(householdId, receiptData.place?.id ?: -1)
+        val household = householdService.getHouseholdById(householdId)
+        receiptService.updateReceipt(householdId, receiptData.toReceipt(household.get(), receipts))
     }
 }

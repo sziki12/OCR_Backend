@@ -1,37 +1,28 @@
 package app.ocr_backend.user
 
-import app.ocr_backend.place.Place
-import app.ocr_backend.receipt.Receipt
+import app.ocr_backend.household.household_user.HouseholdUser
+import app.ocr_backend.security.refresh_token.RefreshToken
 import jakarta.persistence.*
 
 @Entity
 @Table(name = "App_User")
 data class User(
-    @Column(name="user_name")
-    var userName:String,
-    var password:String,
-    var salt:String
-    )
-{
-    @Column(name="user_id")
+    @Column(name = "name")
+    var name: String,
+    var email: String,
+    var password: String,
+    var salt: String
+) {
+    @Column(name = "user_id")
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    val id:Long = -1
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = -1
 
     @OneToMany(mappedBy = "user")
-    lateinit var receipts:MutableList<Receipt>
+    var refreshTokens: MutableList<RefreshToken> = mutableListOf()
 
     @OneToMany(mappedBy = "user")
-    var places:MutableList<Place> = mutableListOf()
+    var householdUsers: MutableList<HouseholdUser> = mutableListOf()
 
-    @Column(name = "is_admin")
-    var isAdmin = false
-
-    override fun toString(): String {
-        return "User(id: $id, userName: $userName isAdmin: $isAdmin)"
-    }
-
-    fun toDetailedString(): String {
-        return "User(id: $id, userName: $userName isAdmin: $isAdmin, places: $places, receipts: $receipts)"
-    }
+    var isEmailConfirmed: Boolean = false
 }

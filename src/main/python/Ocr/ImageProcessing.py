@@ -45,7 +45,8 @@ class BaseImageProcessor:
         return cv2.Canny(image, 100, 200)
 
     #skew correction
-    def deskew(self, image,orientation, max_skew=10):
+    #TODO Fix deskew
+    def deskewByLine(self, image,orientation, max_skew=10):
         (height, width) = image.shape[:2]
 
         # Create a grayscale image and denoise it
@@ -98,6 +99,50 @@ class BaseImageProcessor:
 
         self.debugger.debug_image("Rotated",image)
         return image
+
+
+    def deskewByText(self,image,misc):
+        gray = self.get_grayscale(image)
+        gray = cv2.GaussianBlur(gray, (9, 9), 0)
+
+        self.debugger.debug_image("gray",gray)
+
+        resized_height = 480
+        percent = resized_height / len(image)
+        resized_width = int(percent * len(image[0]))
+        gray = cv2.resize(gray,(resized_width,resized_height))
+
+        gray = cv2.bitwise_not(gray)
+        thresh = self.thresholding(gray)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 5))
+        dilate = cv2.dilate(thresh, kernel)
+        
+        contours, hierarchy = cv2.findContours(dilate, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+        angles = []
+        for contour in contours:
+            minAreaRect = cv2.minAreaRect(contour)
+            angle = minAreaRect[-1]
+            if angle != 90.0 and angle != -0.0: #filter out 0 and 90
+                angles.append(angle)
+
+        angles.sort()
+        mid_angle = angles[int(len(angles)/2)]    
+
+
+        if mid_angle > 45: #anti-clockwise
+            mid_angle = -(90 - mid_angle)
+        height = image.shape[0]
+        width = image.shape[1]
+        m = cv2.getRotationMatrix2D((width / 2, height / 2), mid_angle, 1)
+        deskewed = cv2.warpAffine(image, m, (width, height), borderValue=(255,255,255))
+
+        self.debugger.debug_image("inverse gray",gray)
+        self.debugger.debug_image("bitwise_not",gray)
+        self.debugger.debug_image("thresh",thresh)
+        self.debugger.debug_image("dilate",dilate)
+        self.debugger.debug_image("deskewed",deskewed)
+        return deskewed
 
     #template matching
     def match_template(self, image, template):
@@ -205,8 +250,8 @@ class AdvancedImageProcessor:
         blurred = cv2.GaussianBlur(gray, (5, 5,), 0)
         edged = cv2.Canny(blurred, 75, 200)
 
-        self.debugger.debug_image("Input", resized_image)
-        self.debugger.debug_image("Edged", edged)
+        self.debugger.debug_image(" edgeDetectionInput", resized_image)
+        self.debugger.debug_image(" edgeDetection Edged", edged)
             
         cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
             cv2.CHAIN_APPROX_SIMPLE)
@@ -226,7 +271,7 @@ class AdvancedImageProcessor:
     def findReceiptContour(self, cnts,minArea):
         receiptCnt = None
         for c in cnts:
-            epsilon = 0.02 * cv2.arcLength(c, True)
+            epsilon = 0.05 * cv2.arcLength(c, True)
             approx = cv2.approxPolyDP(c, epsilon, True)
             cntArea = cv2.contourArea(c)
             if len(approx) == 4 and cntArea > minArea:

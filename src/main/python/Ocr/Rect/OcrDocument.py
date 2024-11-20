@@ -4,20 +4,12 @@ from Ocr.Rect.OcrRow import OcrRow
 class OcrDocument:
     def __init__(self, boxes, texts, probabilities):
         self.rows = []
-        self.words = []
+        self.words:list[WordRectangle] = []
 
         for i in range(len(boxes)):
             self.words.insert(0, WordRectangle(boxes[i], texts[i], probabilities[i]))
 
-        self.order_words_in_rows()
-
-    """ def max_row_height(self):
-        max_heigh = 0
-        for i in range(0, len(self.words)):
-            if(self.words[i].shape[1] > max_heigh):
-                max_heigh = self.words[i].shape[1]
-
-        return max_heigh  """       
+        self.order_words_in_rows()   
 
     def order_words_in_rows(self):
         for word in self.words:
@@ -44,7 +36,8 @@ class OcrDocument:
                         #print(word.text+ " BELOW "+self.rows[row_index].get_text())
                 if has_row == False:
                      self.rows.insert(0, OcrRow(word))  
-                #TODO Fix duplicated entity error, word order and word row prediction      
+                #TODO Fix duplicated entity error, word order and word row prediction
+        print(self.get_text())               
 
     def get_text(self):
         text = ""
