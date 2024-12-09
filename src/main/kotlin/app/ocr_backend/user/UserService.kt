@@ -27,8 +27,8 @@ class UserService(
 
     fun registerUser(signUpDto: SignUpDto): User
     {
-        val existingUSer = repository.findByEmail(signUpDto.email)
-        if(existingUSer.isPresent)
+        val existingUser = repository.findByEmail(signUpDto.email)
+        if(existingUser.isPresent)
         {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST,"User Already Exists")
         }
@@ -74,16 +74,6 @@ class UserService(
         val confirmUrl = "$serverUrl/api/confirmation/${confirmation.id}"
         val content = "To finis your registration please confirm your email address using this link:\n${confirmUrl}"
         emailService.sendEmail(email,"Email Confirmation",content)
-    }
-
-    fun updateUser()
-    {
-
-    }
-
-    fun deleteUser()
-    {
-
     }
 
     fun findByEmail(email:String): Optional<User> {

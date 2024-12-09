@@ -48,7 +48,6 @@ class HouseholdController(
 
     @PostMapping("/{householdId}/invite/{email}")
     fun sendHouseholdInvite(@PathVariable email: String, @PathVariable householdId: UUID): ResponseEntity<Unit> {
-        //TODO Only invite when not self or not already in household
         return try {
             authService.checkUserIsAdmin(householdId)
             householdService.sendInvitationEmail(householdId, email)

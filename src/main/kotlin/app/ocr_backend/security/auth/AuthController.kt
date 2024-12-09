@@ -42,17 +42,9 @@ class AuthController(
     @PostMapping("/register")
     fun register(@RequestBody signUpDto: SignUpDto):ResponseEntity<Unit>//UserDTO
     {
-        var user = userService.registerUser(signUpDto)
-        val household = householdService.createHouseholdByUser(user,"My Household")
-        val refreshToken = tokenService.generateRefreshToken(user)
-        user = user.also { it.householdUsers.add(household.householdUsers.single()) }
-        val userDto = UserDTO(user).also {
-            it.tokens.authToken = tokenService.generateToken(user)
-            it.tokens.refreshToken = refreshToken
-        }
+        val user = userService.registerUser(signUpDto)
+        householdService.createHouseholdByUser(user,"My Household")
         userService.sendEmailConfirmation(signUpDto.email)
-        refreshTokenService.saveRefreshToken(refreshToken,user)
-        println("REGISTER $userDto")
         return ResponseEntity.ok().build()
     }
 

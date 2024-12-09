@@ -24,9 +24,7 @@ class ImageProcessingService(
     val ocrService: OcrService,
     val imageService: ImageService,
     val receiptService: ReceiptService,
-    val ocrEntityService: OcrEntityService,
     val itemService: ItemService,
-    //val llamaService: LlamaService,
 ) {
     fun processImage(householdId: UUID, image: MultipartFile, ocrParams: OcrParams): OcrResponse? {
         val optReceipt = receiptService.saveReceipt(householdId, Receipt().also { it.isPending = true })
